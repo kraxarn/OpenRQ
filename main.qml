@@ -15,6 +15,6 @@ ApplicationWindow {
 		anchors.verticalCenter: parent.verticalCenter
 		anchors.horizontalCenter: parent.horizontalCenter
 		font.pointSize: 16
-		text: ":)"
+        text: ":) Merge Conflict :( "
 	}
 }
