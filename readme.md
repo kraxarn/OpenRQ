@@ -19,6 +19,7 @@
 * C++ source files use the .cpp extension and C++ headers use the .h extension.
 * Always use `#pragma once` as include guard.
 * Keep everything under namespace `orq`.
+* Only use `auto` when the type is already specified elsewhere in the statement.
 
 ## Directories
 * `codeStyle`: Coding styles for C++ and QML, **do not modify**.
