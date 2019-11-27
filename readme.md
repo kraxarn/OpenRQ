@@ -11,6 +11,7 @@
 * File names should always match the name of the class and **only one class per file**.
 * **No third-party libraries are allowed**, with the exception of any Qt 5.12 libraries.
 * Always make sure the files are in the **correct folders**.
+* **Always** use the Qt libraries **instead of** the C++ standard library when possible.
 
 ## Code Style
 * Classes uses pascal case (`ClassName`).
@@ -20,6 +21,7 @@
 * Always use `#pragma once` as include guard.
 * Keep everything under namespace `orq`.
 * Only use `auto` when the type is already specified elsewhere in the statement.
+* No `using namespace` allowed.
 
 ## Directories
 * `codeStyle`: Coding styles for C++ and QML, **do not modify**.
