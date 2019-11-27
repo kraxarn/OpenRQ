@@ -28,10 +28,10 @@ There are two main branches
 * `stable`: Where all changes gets merged to, **do not modify or push to**.
 
 ## How to Push
-First, add your modified files:
-`git add <file>`
-Then, add your comment of what you have done:
-`git commit -m "<comment>"`
-Then, push your changes, if you get a merge conflict, you broke the rules.
-`git push`
-Make sure your changes were pushed to **master**.
+* First, add your modified files:
+* `git add <file>`
+* Then, add your comment of what you have done:
+* `git commit -m "<comment>"`
+* Then, push your changes, if you get a merge conflict, you broke the rules:
+* `git push`
+* Make sure your changes were pushed to **master**.
