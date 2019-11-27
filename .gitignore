@@ -81,3 +81,6 @@ compile_commands.json
 
 # Ignore directory with builds
 build/
+
+# Ignore macOS temporary files
+.DS_Store
