@@ -5,11 +5,11 @@
 
 
 
-namespace Layer
+namespace orq
 {
 
-	class Version;
-	class Item;
+	class Version{};
+	class Item{};
 
 
 	class Layer

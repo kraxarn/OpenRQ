@@ -1,9 +1,7 @@
-#include "Layer.h"
+#include "include/Layer.h"
 
-namespace Layer
+namespace orq
 {
-
-
 
 	Layer::Layer()
 	{
@@ -16,33 +14,30 @@ namespace Layer
 	}
 
 
-
 	bool Layer::saveChanges()
 	{
 		bool success = false;
-
-
-
 		return success;
 	}
 
 	bool Layer::compare(Version version)
 	{ //argument type? - version
 
-		bool i = false;
-		return i;
+
+		bool success = false;
+		return success;
 	}
 
 	bool Layer::createItem()
 	{
-		bool i = false;
-		return i;
+		bool success = false;
+		return success;
 	}
 
 	bool Layer::deleteItem()
 	{ //argument int - ID
-		bool i = false;
-		return i;
+		bool success = false;
+		return success;
 	}
 
 }
