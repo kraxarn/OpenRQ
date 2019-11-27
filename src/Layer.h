@@ -3,10 +3,14 @@
 
 #include <QString>
 
+namespace Layer
+{
+using namespace std;
 class Layer
 {
 public:
 	Layer();
+	~Layer();
 	bool saveChanges();
 	bool compare(); //argument type? - version
 	bool createItem();
@@ -18,4 +22,5 @@ private:
 	int id;
 };
 
+}
 #endif // LAYER_H
