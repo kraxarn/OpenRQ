@@ -1,22 +1,25 @@
-#ifndef LAYER_H //#ifdef if macro is declared
-#define LAYER_H
+#pragma once
 
 #include <QString>
-#include <stdlib.h>
 #include <QVector>
+
 
 
 namespace Layer
 {
-	using namespace std;
+
+	class Version;
+	class Item;
+
 
 	class Layer
 	{
 		public:
 			Layer();
 			~Layer();
+			Item root;
 			bool saveChanges();
-			bool compare(); //argument type? - version
+			bool compare(Version version); //argument type? - version
 			bool createItem();
 			bool deleteItem(); //argument int - ID
 			QString tag;
@@ -27,4 +30,4 @@ namespace Layer
 	};
 
 }
-#endif // LAYER_H
+

@@ -2,7 +2,8 @@
 
 namespace Layer
 {
-	using namespace std;
+
+
 
 	Layer::Layer()
 	{
@@ -18,12 +19,16 @@ namespace Layer
 
 	bool Layer::saveChanges()
 	{
-		bool i = false;
-		return i;
+		bool success = false;
+
+
+
+		return success;
 	}
 
-	bool Layer::compare()
+	bool Layer::compare(Version version)
 	{ //argument type? - version
+
 		bool i = false;
 		return i;
 	}
