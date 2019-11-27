@@ -8,32 +8,13 @@ ApplicationWindow {
 	visible: true
 	width: 1024
 	height: 768
-    title: qsTr("Hello World ")
+	title: qsTr("OpenRQ")
 	Material.theme: Material.System
 
 	Label {
 		anchors.verticalCenter: parent.verticalCenter
 		anchors.horizontalCenter: parent.horizontalCenter
-<<<<<<< HEAD
-
-        font.pointSize: 20
-        text: ":) Merge Conflict :( william 2 olzhas "
-=======
-<<<<<<< HEAD
-        font.pointSize: 20
-        text: ":) Merge Conflict :( william 2 "
-
-=======
->>>>>>> ca349e59e4d423a5295701fa569b29e1fe092ac9
 		font.pointSize: 20
-		text: ":) Merge Conflict :( william 2 matko "
->>>>>>> e965f62b535e51d0956c9159daad6d80a4c2f604
+        text: "please dont touch me"
 	}
-
- CheckBox {
-	 id: checkBox
-	 x: 424
-	 y: 453
-	 text: qsTr("Check Box")
- }
 }
