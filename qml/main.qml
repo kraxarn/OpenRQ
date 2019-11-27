@@ -6,15 +6,15 @@ import QtQuick.Controls.Material 2.12
 
 ApplicationWindow {
 	visible: true
-	width: 640
-	height: 480
-    title: qsTr("Hello World")
+	width: 1024
+	height: 768
+	title: qsTr("OpenRQ")
 	Material.theme: Material.System
 
 	Label {
 		anchors.verticalCenter: parent.verticalCenter
 		anchors.horizontalCenter: parent.horizontalCenter
-        font.pointSize: 20
-        text: ":) Merge Conflict :( "
+		font.pointSize: 20
+		text: "please dont touch me"
 	}
 }
