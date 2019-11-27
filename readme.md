@@ -9,6 +9,7 @@
 * **Do not** push your code if it **does not compile**.
 * **Always** make sure you have pulled the latest changes **before pushing**.
 * File names should always match the name of the class and **only one class per file**.
+* **No third-party libraries are allowed**, with the exception of any Qt 5.12 libraries.
 
 ## Code Style
 * Classes uses pascal case (`ClassName`).
