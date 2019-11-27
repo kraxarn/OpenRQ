@@ -24,8 +24,12 @@ namespace orq
 			bool deleteItem(); //argument int - ID
 			QString tag;
 			bool shown;
+			QString tagVersion;
 
-		private:
+			QString getTagVersion() const;
+			void setTagVersion(const QString &value);
+
+	private:
 			int id;
 	};
 
