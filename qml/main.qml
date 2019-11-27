@@ -34,13 +34,9 @@ ApplicationWindow {
 >>>>>>> 6735678d1569ebe550cca63db222448f0f074fc6
 		font.pointSize: 20
 <<<<<<< HEAD
-<<<<<<< HEAD
 		text: ":) Merge Conflict :( william 2 "
 =======
         text: "please dont touch me"
 >>>>>>> 6735678d1569ebe550cca63db222448f0f074fc6
-=======
-		text: "please dont touch me"
->>>>>>> 8763b56dac78562445213fa4416b0bdfc62ab8da
 	}
 }
