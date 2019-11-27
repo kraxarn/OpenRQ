@@ -9,6 +9,7 @@
 * **Do not** push your code if it **does not compile**.
 * **Always** make sure you have pulled the latest changes **before pushing**.
 * File names should always match the name of the class and **only one class per file**.
+* **No third-party libraries are allowed**, with the exception of any Qt 5.12 libraries.
 
 ## Code Style
 * Classes uses pascal case (`ClassName`).
@@ -21,3 +22,19 @@
 * `include`: Headers, .h files.
 * `qml`: QtQuick layout files, .qml files.
 * `src`: C++ source files, .cpp files.
+
+## Branches
+There are two main branches
+* `master`: The main development branch for most developers.
+* `stable`: Where all changes gets merged to, **do not modify or push to**.
+
+## How to Push
+* First, pull the latest changes:
+* `git pull`
+* Add your modified files:
+* `git add <file>`
+* Add your comment of what you have done:
+* `git commit -m "<comment>"`
+* Push your changes, if you get a merge conflict, you broke the rules:
+* `git push`
+* Make sure your changes were pushed to **master**.
