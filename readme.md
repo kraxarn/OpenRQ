@@ -21,3 +21,17 @@
 * `include`: Headers, .h files.
 * `qml`: QtQuick layout files, .qml files.
 * `src`: C++ source files, .cpp files.
+
+## Branches
+There are two main branches
+* `master`: The main development branch for most developers.
+* `stable`: Where all changes gets merged to, **do not modify or push to**.
+
+## How to Push
+First, add your modified files:
+`git add <file>`
+Then, add your comment of what you have done:
+`git commit -m "<comment>"`
+Then, push your changes, if you get a merge conflict, you broke the rules.
+`git push`
+Make sure your changes were pushed to **master**.
