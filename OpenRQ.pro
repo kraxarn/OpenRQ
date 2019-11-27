@@ -1,4 +1,4 @@
-QT += quick quickcontrols2 sql
+QT += quick quickcontrols2 multimedia multimediawidgets sql
 
 CONFIG += c++11
 
