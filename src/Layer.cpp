@@ -40,4 +40,14 @@ namespace orq
 		return success;
 	}
 
+	QString Layer::getTagVersion() const
+	{
+		return tagVersion;
+	}
+
+	void Layer::setTagVersion(const QString &value)
+	{
+		tagVersion = value;
+	}
+
 }
