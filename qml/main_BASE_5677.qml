@@ -8,14 +8,13 @@ ApplicationWindow {
 	visible: true
 	width: 640
 	height: 480
-    title: qsTr("Hello World ")
+    title: qsTr("Hello World")
 	Material.theme: Material.System
 
 	Label {
 		anchors.verticalCenter: parent.verticalCenter
 		anchors.horizontalCenter: parent.horizontalCenter
         font.pointSize: 20
-        text: ":) Merge Conflict :( william 2 "
-
+        text: ":) Merge Conflict :( "
 	}
 }
