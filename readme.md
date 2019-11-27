@@ -10,12 +10,15 @@
 * **Always** make sure you have pulled the latest changes **before pushing**.
 * File names should always match the name of the class and **only one class per file**.
 * **No third-party libraries are allowed**, with the exception of any Qt 5.12 libraries.
+* Always make sure the files are in the **correct folders**.
 
 ## Code Style
 * Classes uses pascal case (`ClassName`).
 * **All** Variables and methods use dromedary case (`variableName`).
 * Brackets are **always** on a new line in C++, but **never** on a new line in QML.
 * C++ source files use the .cpp extension and C++ headers use the .h extension.
+* Always use `#pragma once` as include guard.
+* Keep everything under namespace `orq`.
 
 ## Directories
 * `codeStyle`: Coding styles for C++ and QML, **do not modify**.
