@@ -35,6 +35,8 @@ There are two main branches
 * `git add <file>`
 * Add your comment of what you have done:
 * `git commit -m "<comment>"`
+* Make sure again you have the latest version
+* `git pull`
 * Push your changes, if you get a merge conflict, you broke the rules:
 * `git push`
 * Make sure your changes were pushed to **master**.
