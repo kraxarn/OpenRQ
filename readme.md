@@ -15,3 +15,9 @@
 * **All** Variables and methods use dromedary case (`variableName`).
 * Brackets are **always** on a new line in C++, but **never** on a new line in QML.
 * C++ source files use the .cpp extension and C++ headers use the .h extension.
+
+## Directories
+* `codeStyle`: Coding styles for C++ and QML, **do not modify**.
+* `include`: Headers, .h files.
+* `qml`: QtQuick layout files, .qml files.
+* `src`: C++ source files, .cpp files.
