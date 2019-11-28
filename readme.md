@@ -25,6 +25,7 @@
 * No `using namespace` allowed.
 * Use matching aliases for your QML resources.
 * Never leave more than one lines empty.
+* `///` comment for **every method** as documentation.
 
 ## Directories
 * `codeStyle`: Coding styles for C++ and QML, **do not modify**.
