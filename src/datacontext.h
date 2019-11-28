@@ -4,6 +4,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QFileInfo>
+#include <QtDebug>
 
 class DataContext
 {

@@ -10,13 +10,18 @@ DataContext::DataContext(QString path)
 	}
 	// Create database as SQLite database
 	database = QSqlDatabase::addDatabase("QSQLITE");
-	// Check if file exists in path
-	if (QFile(path).exists())
+	// Check if file already existed
+	bool fileExists = QFile(path).exists();
+	// Open file
+	database.setDatabaseName(path);
+	// Create file and open it
+	database.open();
+	// Create if it didn't exist
+	if (!fileExists)
 	{
-		// Just open database
-		database.setDatabaseName(path);
-		return;
+		create();
 	}
+
 }
 
 DataContext::~DataContext()
