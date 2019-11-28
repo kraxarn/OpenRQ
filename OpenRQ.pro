@@ -29,9 +29,13 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 # All source files
 SOURCES += \
+    src/datacontext.cpp \
     src/layer.cpp \
-    src/main.cpp
+    src/main.cpp \
+    src/project.cpp
 
 # All header files
 HEADERS += \
-    src/layer.h
+    src/datacontext.h \
+    src/layer.h \
+    src/project.h
