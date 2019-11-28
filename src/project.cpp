@@ -2,6 +2,10 @@
 
 Project::Project(QString path)
 {
+	// Append .orq if needed
+	if (!path.endsWith(".orq"))
+		path += ".orq";
+	// Create database
 	data = new DataContext(path);
 }
 
