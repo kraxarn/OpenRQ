@@ -16,12 +16,16 @@
 ## Code Style
 * Classes uses pascal case (`ClassName`).
 * **All** Variables and methods use dromedary case (`variableName`).
+* File names should be the **same as the class name**, but in **all lower case** (`classname.cpp`)
 * Brackets are **always** on a new line in C++, but **never** on a new line in QML.
 * C++ source files use the .cpp extension and C++ headers use the .h extension.
 * Always use `#pragma once` as include guard.
 * Keep everything under namespace `orq`.
 * Only use `auto` when the type is already specified elsewhere in the statement.
 * No `using namespace` allowed.
+* Use matching aliases for your QML resources.
+* Never leave more than one lines empty.
+* `///` comment for **every method** as documentation.
 
 ## Directories
 * `codeStyle`: Coding styles for C++ and QML, **do not modify**.
@@ -41,8 +45,8 @@ There are two main branches
 * `git add <file>`
 * Add your comment of what you have done:
 * `git commit -m "<comment>"`
-* Make sure again you have the latest version
+* Make sure, again, that you have the latest version:
 * `git pull`
 * Push your changes, if you get a merge conflict, you broke the rules:
 * `git push`
-* Make sure your changes were pushed to **master**.
+* Make sure your changes were pushed to the **master** branch.

@@ -2,6 +2,8 @@
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
 
+#include "project.h"
+
 int main(int argc, char *argv[])
 {
 	// Enable high-dpi scaling
@@ -13,9 +15,11 @@ int main(int argc, char *argv[])
 	// Set QtQuick style
 	QQuickStyle::setStyle("Material");
 
+	auto p = Project("ORQ");
+
 	// Load main engine
 	QQmlApplicationEngine engine;
-	const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
+	const QUrl url(QStringLiteral("qrc:main"));
 	QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
 					 &app, [url](QObject *obj, const QUrl &objUrl) {
 		if (!obj && url == objUrl)

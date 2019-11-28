@@ -3,8 +3,6 @@
 #include <QString>
 #include <QVector>
 
-
-
 namespace orq
 {
 
