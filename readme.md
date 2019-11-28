@@ -16,6 +16,7 @@
 ## Code Style
 * Classes uses pascal case (`ClassName`).
 * **All** Variables and methods use dromedary case (`variableName`).
+* File names should be the **same as the class name**, but in **all lower case** (`classname.cpp`)
 * Brackets are **always** on a new line in C++, but **never** on a new line in QML.
 * C++ source files use the .cpp extension and C++ headers use the .h extension.
 * Always use `#pragma once` as include guard.
