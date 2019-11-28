@@ -23,6 +23,8 @@
 * Keep everything under namespace `orq`.
 * Only use `auto` when the type is already specified elsewhere in the statement.
 * No `using namespace` allowed.
+* Use matching aliases for your QML resources.
+* Never leave more than one lines empty.
 
 ## Directories
 * `codeStyle`: Coding styles for C++ and QML, **do not modify**.
