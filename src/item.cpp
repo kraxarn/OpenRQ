@@ -6,27 +6,23 @@ namespace orq
 {
 	Item::Item()
 	{
+		// Set default values
+		shown = true;
     }
 
 	bool Item::saveChanges()
-	{
+	{	
 		bool success = false;
 		return success;
 	}
 
-	bool Item::compare(Item item)
-	{
-		bool success = false;
-		return success;
-	}
-
-    QVector<Item> Item: getChildren()
+    QVector<Item> Item::getChildren()
 	{
         auto vector = QVector<Item>();
         return vector;
 	}
 
-	Item Item ::getParent()
+	Item Item::getParent()
 	{
         auto item = Item();
 		return item;
@@ -37,10 +33,4 @@ namespace orq
 		bool success = false;
 		return success;
 	}
-
-	bool Item:: edit()
-	{
-        bool success = false;
-        return success;
-    }
 }

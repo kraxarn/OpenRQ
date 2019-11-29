@@ -2,25 +2,31 @@
 
 #include <QString>
 #include <QVector>
+#include <QByteArray>
+#include <QCryptographicHash>
 
 namespace orq
 {
 	class Item
 	{
     public:
-        Item();
-        ~Item();
-        QString Description;
-        bool shown;
-        bool saveChanges();
-        QVector<Item> getChildren();
-        Item getParent();
-        bool setParent(Item item);
-        bool edit();
-        bool compare(Item item);
-        //QVector<Label> getLabels();
+		Item();
 
-	private:
-        int id;
+		int id;
+		
+		QString description;
+
+		bool shown;
+
+		bool saveChanges();
+
+		QVector<Item> getChildren();
+
+		Item getParent();
+
+		bool setParent(Item item);
+
+		/// Get the MD5 hash for the item
+		virtual QByteArray getHash();
 	};
 }
