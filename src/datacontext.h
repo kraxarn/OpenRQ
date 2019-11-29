@@ -6,25 +6,28 @@
 #include <QFileInfo>
 #include <QtDebug>
 
-class DataContext
+namespace orq
 {
-public:
-	/// Try to open/create project file
-	DataContext(QString path);
+	class DataContext
+	{
+	public:
+		/// Try to open/create project file
+		DataContext(QString path);
 
-	/// Close connection to database
-	~DataContext();
+		/// Close connection to database
+		~DataContext();
 
-	/// Check if database is open
-	bool isOpen();
+		/// Check if database is open
+		bool isOpen();
 
-	/// Get path to current database
-	QString getCurrentPath();
+		/// Get path to current database
+		QString getCurrentPath();
 
-private:
-	/// Private connection to database
-	QSqlDatabase database;
+	private:
+		/// Private connection to database
+		QSqlDatabase database;
 
-	/// Creates database, tables and insert stuff into Info
-	bool create(QString projectName);
-};
+		/// Creates database, tables and insert stuff into Info
+		bool create(QString projectName);
+	};
+}

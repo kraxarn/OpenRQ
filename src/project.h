@@ -3,20 +3,27 @@
 #include <QGuiApplication>
 
 #include "datacontext.h"
+#include "itemtype.h"
 
-class Project
+namespace orq
 {
-public:
-	/// Open a new project
-	Project(QString path);
+	class Project
+	{
+	public:
+		/// Open a new project
+		Project(QString path);
 
-	/// Close project
-	~Project();
+		/// Close project
+		~Project();
 
-private:
-	/// Project/database has been opened
-	bool open;
+	private:
+		/// Project/database has been opened
+		bool open;
 
-	/// Data context for data access
-	DataContext *data;
-};
+		/// Data context for data access
+		DataContext *data;
+		
+		/// Hash table with <id, <itemType, itemId>>
+		QHash<int, QPair<ItemType, int>> *versions;
+	};
+}
