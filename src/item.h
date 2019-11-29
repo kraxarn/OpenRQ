@@ -27,6 +27,6 @@ namespace orq
 		bool setParent(Item item);
 
 		/// Get the MD5 hash for the item
-		virtual QByteArray getHash();
+		//QByteArray getHash();
 	};
 }
