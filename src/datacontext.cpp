@@ -86,6 +86,7 @@ namespace orq
 			"	id integer primary key,"
 			"   version integer,"
 			"	item integer,"
+			"	itemV integer default 1,"
 			"	type integer,"
 			"	foreign key (version) references Projects(id)"
 			")"))
@@ -167,5 +168,74 @@ namespace orq
 	bool DataContext::isOpen()
 	{
 		return database.isOpen();
+	}
+
+	bool DataContext::updateItem(Item item, int projectVersion)
+	{
+		// Get item type
+		auto type = TypeRequirement; //typeid(item) == typeid(Requirement) ? TypeRequirement : TypeSolution;
+
+		// Prepare query
+		QSqlQuery query(database);
+
+		// Check if already pending version
+		query.prepare("select * from ItemVersions where version = :version and item = :item");
+		query.bindValue(":version", projectVersion);
+		query.bindValue(":item", item.id);
+		query.exec();
+
+		// If we already have a pending version, just update values
+		if (type == TypeRequirement)
+		{
+			// TODO: Temporary C style cast
+			auto req = (Requirement*) &item;
+
+			query.prepare("update Requirements "
+				"set description = :description, rationale = :rationale, fitCriterion = :fitCriterion");
+			query.bindValue(":description", req->description);
+			query.bindValue(":rationale", req->rationale);
+			query.bindValue(":fitCriterion", req->fitCriterion);
+
+			// Execute
+			return query.exec();
+		}
+
+		// Check if it already exists
+		
+		query.prepare("select * from :table where id = :id");
+		query.bindValue(":table", type == TypeRequirement ? "Requirements" : "Solutions");
+		query.bindValue(":id", item.id);
+		query.exec();
+
+		// Prepare new version
+		int newId = 0;
+		if (type == TypeRequirement)
+		{
+			// TODO: Temporary C style cast
+			auto req = (Requirement*) &item;
+
+			if (req == nullptr || req != nullptr)
+				qFatal("error: requirement should be a requirement but is not");
+
+			query.prepare("insert into Requirements "
+				"(description, rationale, fitCriterion) "
+				"values (:description, :rationale, :fitCriterion)");
+			query.bindValue(":description", req->description);
+			query.bindValue(":rationale", req->rationale);
+			query.bindValue(":fitCriterion", req->fitCriterion);
+			query.exec();
+
+			// Fetch id for newly added requirement
+			query.exec("select * from Requirements order by id desc");
+			query.next();
+			auto latest = Requirement(query);
+			newId = latest.id;
+		}
+		else
+		{
+			// ...
+		}
+
+		return false;
 	}
 }

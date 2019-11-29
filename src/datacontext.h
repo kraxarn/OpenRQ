@@ -6,6 +6,11 @@
 #include <QFileInfo>
 #include <QtDebug>
 
+#include "item.h"
+#include "requirement.h"
+#include "solution.h"
+#include "itemtype.h"
+
 namespace orq
 {
 	class DataContext
@@ -22,6 +27,9 @@ namespace orq
 
 		/// Get path to current database
 		QString getCurrentPath();
+
+		bool updateItem(Item item, int projectVersion);
+		
 
 	private:
 		/// Private connection to database
