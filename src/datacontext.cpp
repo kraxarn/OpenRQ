@@ -58,11 +58,11 @@ bool DataContext::create(QString projectName)
 		"	foreign key(label) references Labels(id)"
 		")"))
 	{
-        qCritical() << "database error: failed to create Solution table";
+        qCritical() << "database error: failed to create Solutions table";
 		return false;
 	}
 	
-		// Create Info project
+	// Create Projects table
 	if (!query.exec(
 		"create table Projects ("
         "	id integer primary key,"
@@ -70,7 +70,7 @@ bool DataContext::create(QString projectName)
 		"	created integer default current_timestamp"
 		")"))
 	{
-        qCritical() << "database error: failed to create Info projects table";
+        qCritical() << "database error: failed to create Projects table";
 		return false;
 	}
 	
@@ -88,6 +88,7 @@ bool DataContext::create(QString projectName)
 		return false;
 	}
 
+	// Create Requirements table
 	if (!query.exec(
 		"create table Requirements ("
         "	id integer primary key,"
@@ -104,7 +105,7 @@ bool DataContext::create(QString projectName)
 		return false;
 	}
 
-		// Create Info LableItem
+	// Create LabelItems LableItem
 	if (!query.exec(
 		"create table LabelItems ("
         "	id integer primary key,"
@@ -132,7 +133,7 @@ bool DataContext::create(QString projectName)
 		return false;
 	}
 	
-	//Create Label table
+	// Create Labels table
 	if (!query.exec(
 			"create table Labels ("
             "	id integer primary key,"
@@ -140,7 +141,7 @@ bool DataContext::create(QString projectName)
 			"	color integer"
 			")"))
 	{
-        qCritical() << "database error: failed to create Label table";
+        qCritical() << "database error: failed to create Labels table";
 		return false;
 	}
 

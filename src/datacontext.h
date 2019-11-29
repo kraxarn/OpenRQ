@@ -12,6 +12,7 @@ public:
 	/// Try to open/create project file
 	DataContext(QString path);
 
+	/// Close connection to database
 	~DataContext();
 
 	/// Check if database is open
@@ -24,6 +25,6 @@ private:
 	/// Private connection to database
 	QSqlDatabase database;
 
-	/// Try to create a new database
+	/// Creates database, tables and insert stuff into Info
 	bool create(QString projectName);
 };
