@@ -8,29 +8,25 @@ namespace orq
 	{
 		// Set default values
 		shown = true;
-    }
+	}
 
 	bool Item::saveChanges()
-	{	
-		bool success = false;
-		return success;
+	{
+		return false;
 	}
 
     QVector<Item> Item::getChildren()
 	{
-        auto vector = QVector<Item>();
-        return vector;
+		return QVector<Item>();
 	}
 
 	Item Item::getParent()
 	{
-        auto item = Item();
-		return item;
+		return Item();
 	}
 
 	bool Item::setParent(Item item)
 	{
-		bool success = false;
-		return success;
+		return false;
 	}
 }
