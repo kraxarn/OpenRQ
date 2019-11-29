@@ -19,9 +19,13 @@ DataContext::DataContext(QString path)
 	// Create if it didn't exist
 	if (!fileExists)
 	{
-		create();
+			QString fileName = QFileInfo(path).fileName();
+			if (fileName.contains("."))
+				fileName = fileName.right(fileName.lastIndexOf("."));
+			
+			create(fileName);
+		}
 	}
-}
 
 DataContext::~DataContext()
 {
