@@ -30,8 +30,11 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 # All source files
 SOURCES += \
     src/datacontext.cpp \
+<<<<<<< HEAD
     src/item.cpp \
     src/layer.cpp \
+=======
+>>>>>>> f8cbaccbb473a684c964ca071a1e88f650a24db1
     src/main.cpp \
     src/project.cpp \
     src/requirement.cpp \
@@ -40,8 +43,12 @@ SOURCES += \
 # All header files
 HEADERS += \
     src/datacontext.h \
+<<<<<<< HEAD
     src/item.h \
     src/layer.h \
     src/project.h \
     src/requirement.h \
     src/solution.h
+=======
+    src/project.h
+>>>>>>> f8cbaccbb473a684c964ca071a1e88f650a24db1
