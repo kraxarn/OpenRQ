@@ -21,7 +21,6 @@ DataContext::DataContext(QString path)
 	{
 		create();
 	}
-
 }
 
 DataContext::~DataContext()
@@ -37,8 +36,8 @@ bool DataContext::create()
 	// Create Info table
 	if (!query.exec(
 		"create table Info ("
-		"	id integer primary key default 0,"
-		"	version integer default 0,"
+        "	id integer primary key,"
+        "	version integer default 1,"
 		"	name text,"
 		"	created integer default current_timestamp"
 		")"))
@@ -50,7 +49,7 @@ bool DataContext::create()
 	// Create Solutions table
 	if (!query.exec(
 		"create table Solutions ("
-		"	id integer primary key autoincrement,"
+        "	id integer primary key,"
 		"	parent integer,"
 		"	label integer,"
 		"	description text,"
@@ -66,7 +65,7 @@ bool DataContext::create()
 		// Create Info project
 	if (!query.exec(
 		"create table Projects ("
-		"	id integer primary key default 0,"
+        "	id integer primary key,"
 		"	name text,"
 		"	created integer default current_timestamp"
 		")"))
@@ -78,7 +77,7 @@ bool DataContext::create()
 	// Create ItemVersions table
 	if (!query.exec(
 		"create table ItemVersions ("
-        "	id integer primary key autoincrement,"
+        "	id integer primary key,"
         "   version integer,"
 		"	item integer,"
 		"	type integer,"
@@ -91,7 +90,7 @@ bool DataContext::create()
 
 	if (!query.exec(
 		"create table Requirements ("
-		"	id integer primary key autoincrement,"
+        "	id integer primary key,"
 		"	parent integer,"
 		"	label integer,"
 		"	description text,"
@@ -108,7 +107,7 @@ bool DataContext::create()
 		// Create Info LableItem
 	if (!query.exec(
 		"create table LabelItems ("
-		"	id integer primary key default 0,"
+        "	id integer primary key,"
         "	label integer,"
 		"	item integer,"
 		"	type integer,"
@@ -119,11 +118,10 @@ bool DataContext::create()
 		return false;
 	}
 
-	
 	// Create Media table
 	if (!query.exec(
 		"create table Media ("
-		"	id integer primary key default 0,"
+        "	id integer primary key,"
 		"	parent int not null,"
 		"	format text default 'webp',"
 		"	data blob,"
@@ -135,14 +133,20 @@ bool DataContext::create()
 	}
 	
 	//Create Label table
-		if(!query.exec(
+	if (!query.exec(
 			"create table Labels ("
-			"	id integer primary key default 0,"
+            "	id integer primary key,"
 			"	tag text,"
 			"	color integer"
 			")"))
 	{
         qCritical() << "database error: failed to create Label table";
+		return false;
+	}
+
+    if (!query.exec("insert into Info (name) values ('Default Project')"))
+	{
+		qCritical() << "database error: failed to insert into Info table";
 		return false;
 	}
 
