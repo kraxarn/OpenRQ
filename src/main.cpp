@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 	// Set QtQuick style
 	QQuickStyle::setStyle("Material");
 
-	auto p = Project("ORQ");
+	auto p = orq::Project("ORQ");
 
 	// Load main engine
 	QQmlApplicationEngine engine;
