@@ -1,6 +1,6 @@
 #include "solution.h"
 #include "item.h"
-#include "media.h"
+//#include "media.h"
 
 namespace orq
 {
@@ -18,10 +18,10 @@ namespace orq
 	}
 
 
-	QVector<Media> Solution::getMedia()
-	{
-		QVector<Media> *media = new QVector<Media>();
-		return *media;
-	}
+	//QVector<Media> Solution::getMedia()
+	//{
+		//QVector<Media> *media = new QVector<Media>();
+		//return *media;
+	//}
 
 }

@@ -1,6 +1,6 @@
 #include "item.h"
 #include <QVector>
-#include "label.h"
+//#include "label.h"
 
 namespace orq
 {
@@ -53,11 +53,11 @@ namespace orq
 	return success;
 	}
 
-	QVector<Label> Item:: getLabels()
+/*	QVector<Label> Item:: getLabels()
 	{
 		QVector<Label> *label = new QVector<Label>();
 		return *label;
-	}
+	}*/
 
 }
 

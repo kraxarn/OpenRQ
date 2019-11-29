@@ -2,7 +2,7 @@
 
 #include <QString>
 #include <QVector>
-#include "label.h"
+//#include "label.h"
 
 namespace orq
 {
@@ -20,7 +20,7 @@ namespace orq
 			bool setParent(Item item);
 			bool edit();
 			bool compare(Item item);
-			QVector<Label> getLabels();
+			//QVector<Label> getLabels();
 
 	private:
 			int id;

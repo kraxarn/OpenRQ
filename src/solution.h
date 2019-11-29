@@ -5,7 +5,7 @@
 #include <QString>
 #include <QVector>
 #include "src/item.h"
-#include  "media.h"
+//#include  "media.h"
 
 namespace orq
 {
@@ -16,7 +16,7 @@ namespace orq
 			~Solution();
 			QString linkName;
 			QString linkColor;
-			QVector<Media> getMedia();
+	//		QVector<Media> getMedia();
 	};
 
 }
