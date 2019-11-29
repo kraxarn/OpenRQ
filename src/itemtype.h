@@ -1,6 +1,11 @@
-enum ItemType
+#pragma once
+
+namespace orq
 {
-	Requirement,
-	Solution,
-	Link
-};
+	enum ItemType
+	{
+		TypeRequirement,
+		TypeSolution,
+		TypeLink
+	};
+}
