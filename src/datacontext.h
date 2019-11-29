@@ -25,5 +25,5 @@ private:
 	QSqlDatabase database;
 
 	/// Try to create a new database
-	bool create();
+	bool create(QString projectName);
 };

@@ -29,7 +29,7 @@ DataContext::~DataContext()
 	database.close();
 }
 
-bool DataContext::create()
+bool DataContext::create(QString projectName)
 {
 	QSqlQuery query(database);
 
@@ -144,7 +144,10 @@ bool DataContext::create()
 		return false;
 	}
 
-    if (!query.exec("insert into Info (name) values ('Default Project')"))
+	// Insert Info table
+	query.prepare("insert into Info (name) values (:name)");
+	query.bindValue(":name", projectName);
+    if (!query.exec())
 	{
 		qCritical() << "database error: failed to insert into Info table";
 		return false;
