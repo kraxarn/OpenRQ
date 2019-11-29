@@ -134,3 +134,9 @@ $RECYCLE.BIN/
 
 # Ignore directory with builds
 build/
+
+# Ignore built binary
+OpenRQ
+
+# Ignore project files
+*.orq

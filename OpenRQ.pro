@@ -1,6 +1,6 @@
 QT += quick quickcontrols2 multimedia multimediawidgets sql
 
-CONFIG += c++11
+CONFIG += c++17
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -30,12 +30,17 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 # All source files
 SOURCES += \
     src/datacontext.cpp \
-    src/layer.cpp \
+    src/item.cpp \
     src/main.cpp \
-    src/project.cpp
+    src/project.cpp \
+    src/requirement.cpp \
+    src/solution.cpp
 
 # All header files
 HEADERS += \
     src/datacontext.h \
-    src/layer.h \
+    src/item.h \
+    src/project.h \
+    src/requirement.h \
+    src/solution.h \
     src/project.h

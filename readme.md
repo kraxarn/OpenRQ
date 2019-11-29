@@ -29,9 +29,8 @@
 
 ## Directories
 * `codeStyle`: Coding styles for C++ and QML, **do not modify**.
-* `include`: Headers, .h files.
 * `qml`: QtQuick layout files, .qml files.
-* `src`: C++ source files, .cpp files.
+* `src`: C++ source and header files, .cpp/.h files.
 
 ## Branches
 There are two main branches
