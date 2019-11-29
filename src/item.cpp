@@ -1,20 +1,12 @@
-#include "item.h"
 #include <QVector>
-//#include "label.h"
+
+#include "item.h"
 
 namespace orq
 {
-
 	Item::Item()
 	{
-
-	}
-
-	Item::~Item()
-	{
-
-	}
-
+    }
 
 	bool Item::saveChanges()
 	{
@@ -24,20 +16,19 @@ namespace orq
 
 	bool Item::compare(Item item)
 	{
-
 		bool success = false;
 		return success;
 	}
 
-	QVector<Item> Item:: getChildren()
+    QVector<Item> Item: getChildren()
 	{
-		QVector<Item> *vector = new QVector<Item>();
-		return *vector;
+        auto vector = QVector<Item>();
+        return vector;
 	}
 
 	Item Item ::getParent()
 	{
-		Item item = Item();
+        auto item = Item();
 		return item;
 	}
 
@@ -49,15 +40,7 @@ namespace orq
 
 	bool Item:: edit()
 	{
-	bool success = false;
-	return success;
-	}
-
-/*	QVector<Label> Item:: getLabels()
-	{
-		QVector<Label> *label = new QVector<Label>();
-		return *label;
-	}*/
-
+        bool success = false;
+        return success;
+    }
 }
-
