@@ -2,7 +2,6 @@
 
 namespace orq
 {
-
 	Requirement::Requirement()
 	{
 
@@ -12,6 +11,4 @@ namespace orq
 	{
 
 	}
-
-
 }
