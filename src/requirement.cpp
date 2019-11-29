@@ -16,9 +16,12 @@ namespace orq
 	{
 		// Compute hash for combined data
 		QCryptographicHash hash(QCryptographicHash::Md5);
-		hash.addData(description.toUtf8());
-		hash.addData(QByteArray().append(shown));
 		hash.addData(QByteArray().append(id));
+		hash.addData(QByteArray().append(shown));
+		hash.addData(description.toUtf8());
+		hash.addData(rationale.toUtf8());
+		hash.addData(fitCriterion.toUtf8());
+		
 		return hash.result();
 	}
 }
