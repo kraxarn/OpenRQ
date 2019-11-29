@@ -11,5 +11,10 @@ namespace orq
 	Solution::~Solution()
 	{
 
-    }
+	}
+
+	QByteArray Solution::getHash()
+	{
+		return QByteArray();
+	}
 }
