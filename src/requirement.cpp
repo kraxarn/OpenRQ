@@ -7,6 +7,11 @@ namespace orq
 
 	}
 
+	Requirement::Requirement(QSqlQuery query)
+	{
+
+	}
+
 	Requirement::~Requirement()
 	{
 
