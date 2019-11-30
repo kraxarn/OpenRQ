@@ -32,7 +32,6 @@ namespace orq
 		/// Update or create an item
 		bool updateItem(Item &item, int projectVersion);
 		
-
 	private:
 		/// Private connection to database
 		QSqlDatabase database;
