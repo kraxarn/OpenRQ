@@ -23,6 +23,9 @@ namespace orq
 		/// Close database and delete any objects
 		~DataContext();
 
+		/// Close the database, call after deconstructing
+		static void close();
+
 		/// Check if database is open
 		bool isOpen();
 

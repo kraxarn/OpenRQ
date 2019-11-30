@@ -19,6 +19,8 @@ namespace orq
 	{
 		// Close database when destroying object
 		delete data;
+		// Close database connections
+		DataContext::close();
 		// Delete vector of versions
 		delete versions;
 	}

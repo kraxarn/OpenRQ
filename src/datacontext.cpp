@@ -31,15 +31,18 @@ namespace orq
 
 	DataContext::~DataContext()
 	{
+		// Close connection
+		database.close();
+	}
+
+	void DataContext::close()
+	{
 		// Remove all database connections
-		for (auto &connection : database.connectionNames())
+		for (auto &connection : QSqlDatabase::connectionNames())
 		{
 			qDebug() << "debug: removing database connection:" << connection;
-			database.removeDatabase(connection);
+			QSqlDatabase::removeDatabase(connection);
 		}
-
-		// Finally close connection
-		database.close();
 	}
 
 	bool DataContext::create(QString projectName)
