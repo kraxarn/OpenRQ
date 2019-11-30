@@ -10,14 +10,17 @@ namespace orq
 			qCritical("error: sqlite is not available");
 			return;
 		}
+
 		// Create database as SQLite database
 		database = QSqlDatabase::addDatabase("QSQLITE");
+
 		// Check if file already existed
 		bool fileExists = QFile(path).exists();
+
 		// Open file
 		database.setDatabaseName(path);
-		// Create file and open it
 		database.open();
+
 		// Create if it didn't exist
 		if (!fileExists)
 		{
