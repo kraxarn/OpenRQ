@@ -3,6 +3,7 @@ import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls.Material 2.12
+import QtQuick.Shapes 1.12
 
 ApplicationWindow {
 	id: window
@@ -66,17 +67,79 @@ ApplicationWindow {
 			}
 		}
 
-		// Temporary label
-		Label {
-			// Center vertically and horizontally in parent (Page)
-			anchors.verticalCenter: parent.verticalCenter
-			anchors.horizontalCenter: parent.horizontalCenter
-			// Set larget font
-			font.pointSize: 20
-			// Align center in multiple lines
-			horizontalAlignment: Text.AlignHCenter
-			// Set text to show
-			text: "Welcome!\nNo project opened"
+		// Main content
+		Item {
+			anchors.fill: parent
+			// Requirement card
+			Pane {
+				id: cardRequirement
+				width: 200
+				height: 100
+				anchors.top: parent.top
+				anchors.topMargin: 32
+				anchors.horizontalCenter: parent.horizontalCenter
+				Material.elevation: 6
+				Label {
+					width: parent.width
+					text: "Requirements should\nrequire a requirement"
+				}
+			}
+			// Left solution card
+			Pane {
+				id: cardSolution1
+				width: 200
+				height: 100
+				anchors.top: cardRequirement.bottom
+				anchors.topMargin: 64
+				x: parent.width / 2 - width - 64
+				Material.elevation: 6
+				Label {
+					text: "Solution should solve\nthe requirements"
+				}
+			}
+			// Right solution card
+			Pane {
+				id: cardSolution2
+				width: 200
+				height: 100
+				anchors.top: cardRequirement.bottom
+				anchors.topMargin: 64
+				x: parent.width / 2 + 64
+				Material.elevation: 6
+				Label {
+					text: "Requirements can be solved\nin different ways"
+				}
+			}
+			// Requirement -> Solution1
+			Shape {
+				opacity: 0.25
+				ShapePath {
+					strokeColor: "#9e9e9e"
+					strokeWidth: 2
+					capStyle: ShapePath.RoundCap
+					startX: (cardRequirement.x + cardRequirement.width / 2) - 4
+					startY: cardRequirement.y + cardRequirement.height
+					PathLine {
+						x: cardSolution1.x + cardSolution1.width / 2
+						y: cardSolution1.y
+					}
+				}
+			}
+			// Requirement -> Solution2
+			Shape {
+				opacity: 0.25
+				ShapePath {
+					strokeColor: "#9e9e9e"
+					strokeWidth: 2
+					capStyle: ShapePath.RoundCap
+					startX: (cardRequirement.x + cardRequirement.width / 2) + 4
+					startY: cardRequirement.y + cardRequirement.height
+					PathLine {
+						x: cardSolution2.x + cardSolution1.width / 2
+						y: cardSolution2.y
+					}
+				}
+			}
 		}
 	}
 }
