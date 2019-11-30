@@ -15,6 +15,6 @@ ApplicationWindow {
 		anchors.verticalCenter: parent.verticalCenter
 		anchors.horizontalCenter: parent.horizontalCenter
 		font.pointSize: 20
-        text: "please dont touch me, yes i will"
+		text: "OpenRQ-Preview"
 	}
 }
