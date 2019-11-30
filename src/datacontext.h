@@ -28,7 +28,7 @@ namespace orq
 		/// Get path to current database
 		QString getCurrentPath();
 
-		bool updateItem(Item item, int projectVersion);
+		bool updateItem(Item &item, int projectVersion);
 		
 
 	private:

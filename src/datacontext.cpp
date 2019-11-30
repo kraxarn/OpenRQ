@@ -170,10 +170,10 @@ namespace orq
 		return database.isOpen();
 	}
 
-	bool DataContext::updateItem(Item item, int projectVersion)
+	bool DataContext::updateItem(Item &item, int projectVersion)
 	{
 		// Get item type
-		auto type = TypeRequirement; //typeid(item) == typeid(Requirement) ? TypeRequirement : TypeSolution;
+		auto type = typeid(item) == typeid(Requirement) ? TypeRequirement : TypeSolution;
 
 		// Prepare query
 		QSqlQuery query(database);
@@ -188,13 +188,13 @@ namespace orq
 		if (type == TypeRequirement)
 		{
 			// TODO: Temporary C style cast
-			auto req = (Requirement*) &item;
+			auto req = dynamic_cast<Requirement&>(item);
 
 			query.prepare("update Requirements "
 				"set description = :description, rationale = :rationale, fitCriterion = :fitCriterion");
-			query.bindValue(":description", req->description);
-			query.bindValue(":rationale", req->rationale);
-			query.bindValue(":fitCriterion", req->fitCriterion);
+			query.bindValue(":description", req.description);
+			query.bindValue(":rationale", req.rationale);
+			query.bindValue(":fitCriterion", req.fitCriterion);
 
 			// Execute
 			return query.exec();
@@ -212,17 +212,14 @@ namespace orq
 		if (type == TypeRequirement)
 		{
 			// TODO: Temporary C style cast
-			auto req = (Requirement*) &item;
-
-			if (req == nullptr || req != nullptr)
-				qFatal("error: requirement should be a requirement but is not");
+			auto req = dynamic_cast<Requirement&>(item);
 
 			query.prepare("insert into Requirements "
 				"(description, rationale, fitCriterion) "
 				"values (:description, :rationale, :fitCriterion)");
-			query.bindValue(":description", req->description);
-			query.bindValue(":rationale", req->rationale);
-			query.bindValue(":fitCriterion", req->fitCriterion);
+			query.bindValue(":description", req.description);
+			query.bindValue(":rationale", req.rationale);
+			query.bindValue(":fitCriterion", req.fitCriterion);
 			query.exec();
 
 			// Fetch id for newly added requirement
