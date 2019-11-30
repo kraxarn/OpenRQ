@@ -26,7 +26,7 @@ namespace orq
 		{
 			QString fileName = QFileInfo(path).fileName();
 			if (fileName.contains("."))
-				fileName = fileName.right(fileName.lastIndexOf("."));
+				fileName = fileName.left(fileName.lastIndexOf("."));
 			
 			create(fileName);
 		}
