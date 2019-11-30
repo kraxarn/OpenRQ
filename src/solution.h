@@ -18,8 +18,5 @@ namespace orq
 
 		/// Color of the link to parent, used when validating
 		QString linkColor;
-
-		/// Item::getHash()
-		QByteArray getHash();
 	};
 }

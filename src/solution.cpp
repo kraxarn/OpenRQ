@@ -7,9 +7,4 @@ namespace orq
 	{
 
 	}
-
-	QByteArray Solution::getHash()
-	{
-		return QByteArray();
-	}
 }
