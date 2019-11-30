@@ -7,18 +7,19 @@
 
 namespace orq
 {
-	class Solution:Item
+	class Solution : public Item
 	{
 	public:
+		/// Create a new empty solution
 		Solution();
 
-		~Solution();
-
+		/// Name of link to parent/requirement
 		QString linkName;
 
+		/// Color of the link to parent, used when validating
 		QString linkColor;
 
+		/// Item::getHash()
 		QByteArray getHash();
 	};
-
 }
