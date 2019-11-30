@@ -69,77 +69,75 @@ ApplicationWindow {
 
 		// Main content
 		Item {
+			id: content
 			anchors.fill: parent
-			// Requirement card
-			Pane {
-				id: cardRequirement
-				width: 200
-				height: 100
-				anchors.top: parent.top
-				anchors.topMargin: 32
-				anchors.horizontalCenter: parent.horizontalCenter
-				Material.elevation: 6
-				Label {
-					width: parent.width
-					text: "Requirements should\nrequire a requirement"
-				}
+			// Create a new card
+			function createCard(properties, textContent)
+			{
+				const componentString =
+					("import QtQuick.Controls 2.12\n" +
+					 "import QtQuick.Controls.Material 2.12\n" +
+					 "Pane {\n" +
+					 "	width: 200\n" +
+					 "	height: 100\n" +
+					 "	%2\n" +
+					 "	Material.elevation: 6\n" +
+					 "	Label { text: \"%3\"\n }\n }"
+					).arg(properties).arg(textContent)
+
+				return Qt.createQmlObject(componentString, content, "dynamicCard")
 			}
-			// Left solution card
-			Pane {
-				id: cardSolution1
-				width: 200
-				height: 100
-				anchors.top: cardRequirement.bottom
-				anchors.topMargin: 64
-				x: parent.width / 2 - width - 64
-				Material.elevation: 6
-				Label {
-					text: "Solutions should solve\nthe requirements"
-				}
+			function createLink(from, to, offset)
+			{
+				const componentString =
+					"import QtQuick 2.12\n" +
+					"import QtQuick.Shapes 1.12\n" +
+					"Shape {\n" +
+					"	opacity: 0.5\n" +
+					"	ShapePath {\n" +
+					"		strokeColor: \"#424242\"\n" +
+					"		strokeWidth: 2\n" +
+					"		startX: (%1 + %2 / 2) + %3\n".arg(from.x).arg(from.width).arg(offset) +
+					"		startY: %1 + %2\n".arg(from.y).arg(from.height) +
+					"		PathLine {\n" +
+					"			x: %1 + %2 / 2\n".arg(to.x).arg(to.width) +
+					"			y: %1\n".arg(to.y) +
+					"		}\n" +
+					"	}\n" +
+					"}"
+				return Qt.createQmlObject(componentString, content, "dynamicShape")
 			}
-			// Right solution card
-			Pane {
-				id: cardSolution2
-				width: 200
-				height: 100
-				anchors.top: cardRequirement.bottom
-				anchors.topMargin: 64
-				x: parent.width / 2 + 64
-				Material.elevation: 6
-				Label {
-					text: "Requirements can be solved\nin different ways"
-				}
+
+			// Create all cards and links
+			function createItems()
+			{
+				// Requirement card
+				const requirement = createCard(
+					"anchors.top: parent.top; anchors.topMargin: 32; anchors.horizontalCenter: parent.horizontalCenter",
+					"Requirements should\nrequire a requirement"
+				)
+
+				// Left solution card
+				const solution1 = createCard(
+					"anchors.topMargin: 64; x: parent.width / 2 - width - 64",
+					"Solutions should solve\nthe requirements"
+				)
+
+				solution1.anchors.top = requirement.bottom
+
+				// Right solution card
+				const solution2 = createCard(
+					"anchors.top: cardRequirement.bottom; anchors.topMargin: 64; x: parent.width / 2 + 64",
+					"Requirements can be solved\nin different ways"
+				)
+				solution2.anchors.top = requirement.bottom
+
+				// Create links from requirement to solutions
+				createLink(requirement, solution1, -8)
+				createLink(requirement, solution2, 8)
 			}
-			// Requirement -> Solution1
-			Shape {
-				opacity: 0.5
-				ShapePath {
-					strokeColor: "#424242"
-					strokeWidth: 2
-					capStyle: ShapePath.RoundCap
-					startX: (cardRequirement.x + cardRequirement.width / 2) - 4
-					startY: cardRequirement.y + cardRequirement.height
-					PathLine {
-						x: cardSolution1.x + cardSolution1.width / 2
-						y: cardSolution1.y
-					}
-				}
-			}
-			// Requirement -> Solution2
-			Shape {
-				opacity: 0.5
-				ShapePath {
-					strokeColor: "#424242"
-					strokeWidth: 2
-					capStyle: ShapePath.RoundCap
-					startX: (cardRequirement.x + cardRequirement.width / 2) + 4
-					startY: cardRequirement.y + cardRequirement.height
-					PathLine {
-						x: cardSolution2.x + cardSolution1.width / 2
-						y: cardSolution2.y
-					}
-				}
-			}
+			// Start creating cards when ready
+			Component.onCompleted: createItems()
 		}
 	}
 }
