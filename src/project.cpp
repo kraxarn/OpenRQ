@@ -9,6 +9,8 @@ namespace orq
 			path += ".orq";
 		// Create database
 		data = new DataContext(path);
+		// Create versions hash
+		versions = new QHash<int, QPair<ItemType, int>>();
 	}
 
 	Project::~Project()
