@@ -12,9 +12,14 @@ namespace orq
 	public:
 		virtual ~Item() = default;
 
+		/// Item ID
 		int id;
 
+		/// If item (and children) are shown, default true
 		bool shown = true;
+
+		/// Temporary padding after 1 byte bool
+		char padding[3];
 
 		/// Shared item description
 		QString description;
