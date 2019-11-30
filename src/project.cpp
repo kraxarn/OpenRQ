@@ -10,9 +10,6 @@ namespace orq
 
 		// Create database
 		data = new DataContext(path);
-
-		// Create versions hash
-		versions = new QHash<int, QPair<ItemType, int>>();
 	}
 
 	Project::~Project()
@@ -21,7 +18,5 @@ namespace orq
 		delete data;
 		// Close database connections
 		DataContext::close();
-		// Delete vector of versions
-		delete versions;
 	}
 }
