@@ -112,9 +112,9 @@ ApplicationWindow {
 			}
 			// Requirement -> Solution1
 			Shape {
-				opacity: 0.25
+				opacity: 0.5
 				ShapePath {
-					strokeColor: "#9e9e9e"
+					strokeColor: "#424242"
 					strokeWidth: 2
 					capStyle: ShapePath.RoundCap
 					startX: (cardRequirement.x + cardRequirement.width / 2) - 4
@@ -127,9 +127,9 @@ ApplicationWindow {
 			}
 			// Requirement -> Solution2
 			Shape {
-				opacity: 0.25
+				opacity: 0.5
 				ShapePath {
-					strokeColor: "#9e9e9e"
+					strokeColor: "#424242"
 					strokeWidth: 2
 					capStyle: ShapePath.RoundCap
 					startX: (cardRequirement.x + cardRequirement.width / 2) + 4
