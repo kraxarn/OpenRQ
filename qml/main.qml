@@ -94,7 +94,7 @@ ApplicationWindow {
 				x: parent.width / 2 - width - 64
 				Material.elevation: 6
 				Label {
-					text: "Solution should solve\nthe requirements"
+					text: "Solutions should solve\nthe requirements"
 				}
 			}
 			// Right solution card
