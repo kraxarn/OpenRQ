@@ -31,7 +31,14 @@ namespace orq
 
 	DataContext::~DataContext()
 	{
-		// Close database when removing project
+		// Remove all database connections
+		for (auto &connection : database.connectionNames())
+		{
+			qDebug() << "debug: removing database connection:" << connection;
+			database.removeDatabase(connection);
+		}
+
+		// Finally close connection
 		database.close();
 	}
 
