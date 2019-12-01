@@ -157,11 +157,11 @@ namespace orq
 		
 		// Create Labels table
 		if (!query.exec(
-				"create table Labels ("
-				"	id integer primary key,"
-				"	tag text,"
-				"	color integer"
-				")"))
+			"create table Labels ("
+			"	id integer primary key,"
+			"	tag text,"
+			"	color integer"
+			")"))
 		{
 			qCritical() << "database error: failed to create Labels table";
 			return false;
