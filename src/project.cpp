@@ -19,4 +19,9 @@ namespace orq
 		// Close database connections
 		DataContext::close();
 	}
+
+	QHash<int, QPair<ItemType, int>> Project::getVersions()
+	{
+		qFatal("error: Project::getVersions() is not implemented");
+	}
 }
