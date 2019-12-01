@@ -122,7 +122,6 @@ ApplicationWindow {
 					"anchors.topMargin: 64; x: parent.width / 2 - width - 64",
 					"Solutions should solve\nthe requirements"
 				)
-
 				solution1.anchors.top = requirement.bottom
 
 				// Right solution card
