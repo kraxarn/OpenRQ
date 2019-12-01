@@ -16,6 +16,9 @@ namespace orq
 		/// Close project
 		~Project();
 
+		/// Get all existing versions
+		QHash<int, QPair<ItemType, int>> getVersions();
+
 	private:
 		/// Project/database has been opened
 		bool open;

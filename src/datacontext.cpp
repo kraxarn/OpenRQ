@@ -69,6 +69,7 @@ namespace orq
 		if (!query.exec(
 			"create table Solutions ("
 			"	id integer primary key,"
+			"	uid integer,"
 			"	parent integer,"
 			"	label integer,"
 			"	description text,"
@@ -112,6 +113,7 @@ namespace orq
 		if (!query.exec(
 			"create table Requirements ("
 			"	id integer primary key,"
+			"	uid integer,"
 			"	parent integer,"
 			"	label integer,"
 			"	description text,"
@@ -155,11 +157,11 @@ namespace orq
 		
 		// Create Labels table
 		if (!query.exec(
-				"create table Labels ("
-				"	id integer primary key,"
-				"	tag text,"
-				"	color integer"
-				")"))
+			"create table Labels ("
+			"	id integer primary key,"
+			"	tag text,"
+			"	color integer"
+			")"))
 		{
 			qCritical() << "database error: failed to create Labels table";
 			return false;

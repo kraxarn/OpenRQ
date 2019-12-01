@@ -24,7 +24,7 @@ namespace orq
 		/// Shared item description
 		QString description;
 
-		/// Save changes to database and incremeent version
+		/// Save changes to database and increment version
 		virtual bool saveChanges() = 0;
 
 		/// Get all children, probably opposite type
