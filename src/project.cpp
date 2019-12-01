@@ -7,6 +7,7 @@ namespace orq
 		// Append .orq if needed
 		if (!path.endsWith(".orq"))
 			path += ".orq";
+
 		// Create database
 		data = new DataContext(path);
 	}
@@ -15,7 +16,7 @@ namespace orq
 	{
 		// Close database when destroying object
 		delete data;
-		// Delete vector of versions
-		delete versions;
+		// Close database connections
+		DataContext::close();
 	}
 }

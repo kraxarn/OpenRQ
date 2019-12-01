@@ -30,7 +30,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 # All source files
 SOURCES += \
     src/datacontext.cpp \
-    src/item.cpp \
     src/main.cpp \
     src/project.cpp \
     src/requirement.cpp \

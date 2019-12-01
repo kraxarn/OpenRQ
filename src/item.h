@@ -9,24 +9,34 @@ namespace orq
 {
 	class Item
 	{
-    public:
-		Item();
+	public:
+		virtual ~Item() = default;
 
+		/// Item ID
 		int id;
-		
+
+		/// If item (and children) are shown, default true
+		bool shown = true;
+
+		/// Temporary padding after 1 byte bool
+		char padding[3];
+
+		/// Shared item description
 		QString description;
 
-		bool shown;
+		/// Save changes to database and incremeent version
+		virtual bool saveChanges() = 0;
 
-		bool saveChanges();
+		/// Get all children, probably opposite type
+		virtual QVector<Item*> getChildren() = 0;
 
-		QVector<Item> getChildren();
+		/// Get the parent, probably opposite type
+		virtual Item &getParent() = 0;
 
-		Item getParent();
-
-		bool setParent(Item item);
+		/// Set parent, should be opposite type
+		virtual bool setParent(Item &item) = 0;
 
 		/// Get the MD5 hash for the item
-		//QByteArray getHash();
+		virtual QByteArray getHash() = 0;
 	};
 }

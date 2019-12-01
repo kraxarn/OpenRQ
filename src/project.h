@@ -22,8 +22,5 @@ namespace orq
 
 		/// Data context for data access
 		DataContext *data;
-		
-		/// Hash table with <id, <itemType, itemId>>
-		QHash<int, QPair<ItemType, int>> *versions;
 	};
 }

@@ -3,6 +3,7 @@
 #include <QGuiApplication>
 #include <QSqlDatabase>
 #include <QSqlQuery>
+#include <QSqlError>
 #include <QFileInfo>
 #include <QtDebug>
 
@@ -19,8 +20,11 @@ namespace orq
 		/// Try to open/create project file
 		DataContext(QString path);
 
-		/// Close connection to database
+		/// Close database and delete any objects
 		~DataContext();
+
+		/// Close the database, call after deconstructing
+		static void close();
 
 		/// Check if database is open
 		bool isOpen();
@@ -28,9 +32,9 @@ namespace orq
 		/// Get path to current database
 		QString getCurrentPath();
 
-		bool updateItem(Item item, int projectVersion);
+		/// Update or create an item
+		bool updateItem(Item &item, int projectVersion);
 		
-
 	private:
 		/// Private connection to database
 		QSqlDatabase database;
