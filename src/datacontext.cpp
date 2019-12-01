@@ -69,6 +69,7 @@ namespace orq
 		if (!query.exec(
 			"create table Solutions ("
 			"	id integer primary key,"
+			"	uid integer,"
 			"	parent integer,"
 			"	label integer,"
 			"	description text,"
@@ -112,6 +113,7 @@ namespace orq
 		if (!query.exec(
 			"create table Requirements ("
 			"	id integer primary key,"
+			"	uid integer,"
 			"	parent integer,"
 			"	label integer,"
 			"	description text,"
