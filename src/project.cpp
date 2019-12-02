@@ -24,4 +24,9 @@ namespace orq
 	{
 		qFatal("error: Project::getVersions() is not implemented");
 	}
+
+	DataContext& Project::getData()
+	{
+		return *data;
+	}
 }
