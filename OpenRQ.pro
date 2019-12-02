@@ -42,4 +42,5 @@ HEADERS += \
     src/project.h \
     src/requirement.h \
     src/solution.h \
-    src/project.h
+    src/project.h \
+    src/itemtype.h
