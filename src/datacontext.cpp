@@ -172,40 +172,40 @@ namespace orq
 		}
 
 		return false;
-    }
+	}
 
-    /// Check if a specified uid is already taken
-    /// (helper for DataContext::getItemUid()
-    bool uidExists(QSqlQuery query, qint64 uid)
-    {
-        // Prepare union query
-        query.prepare(
-            "select count(*) from "
-            "(select uid from Requirements union "
-            "select uid from Solutions) where uid = :uid"
-        );
-        // Bind uid value
-        query.bindValue(":uid", uid);
-        // Execute the query
-        query.exec();
-        // If the count(*) value is above 0, uid already exists
-        return query.value(0).toInt() > 0;
-    }
+	/// Check if a specified uid is already taken
+	/// (helper for DataContext::getItemUid()
+	bool uidExists(QSqlQuery query, qint64 uid)
+	{
+		// Prepare union query
+		query.prepare(
+			"select count(*) from "
+			"(select uid from Requirements union "
+			"select uid from Solutions) where uid = :uid"
+		);
+		// Bind uid value
+		query.bindValue(":uid", uid);
+		// Execute the query
+		query.exec();
+		// If the count(*) value is above 0, uid already exists
+		return query.value(0).toInt() > 0;
+	}
 
-    qint64 DataContext::getItemUid()
-    {
-        // Id to return later
-        qint64 id;
+	qint64 DataContext::getItemUid()
+	{
+		// Id to return later
+		qint64 id;
 
-        // Prepare the query
-        QSqlQuery query(database);
+		// Prepare the query
+		QSqlQuery query(database);
 
-        // Keep generating a new value until it doesn't exist
-        do
-            id = static_cast<qint64>(QRandomGenerator::global()->generate64());
-        while (uidExists(query, id));
+		// Keep generating a new value until it doesn't exist
+		do
+			id = static_cast<qint64>(QRandomGenerator::global()->generate64());
+		while (uidExists(query, id));
 
-        // Return the new unique value
-        return id;
-    }
+		// Return the new unique value
+		return id;
+	}
 }
