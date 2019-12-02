@@ -48,6 +48,40 @@ namespace orq
 		}
 	}
 
+	/// Testing creating database from JSON data
+	bool DataContext::createFromJson(QString projectName)
+	{
+		// Load file and try to parse
+		QFile file(":/json/tables");
+		if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+		{
+			qCritical() << "error: failed to open json file with table information";
+			return false;
+		}
+		QJsonParseError jsonError;
+		auto json = QJsonDocument::fromJson(file.readAll(), &jsonError);
+
+		// Check if parse failed
+		if (jsonError.error != QJsonParseError::NoError)
+		{
+			qCritical() << "error: failed to parse json:" << jsonError.error;
+			return false;
+		}
+
+		// Prepare query
+		QSqlQuery query(database);
+
+		// Loop through all entries in the json file
+		auto tables = json.object().find("tables")->toArray();
+		qInfo() << "tables found:" << tables.count();
+		for (auto table : tables)
+		{
+			//qInfo() << "found table:" << table;
+		}
+
+		return false;
+	}
+
 	bool DataContext::create(QString projectName)
 	{
 		QSqlQuery query(database);

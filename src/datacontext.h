@@ -7,6 +7,9 @@
 #include <QFileInfo>
 #include <QtDebug>
 #include <QRandomGenerator>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 #include "item.h"
 #include "requirement.h"
@@ -45,5 +48,7 @@ namespace orq
 
 		/// Creates database, tables and insert stuff into Info
 		bool create(QString projectName);
+
+		bool createFromJson(QString projectName);
 	};
 }
