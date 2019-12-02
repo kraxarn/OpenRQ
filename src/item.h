@@ -15,6 +15,9 @@ namespace orq
 		/// Item ID
 		int id;
 
+		/// Unique identifier
+		qint64 uid;
+
 		/// If item (and children) are shown, default true
 		bool shown = true;
 
