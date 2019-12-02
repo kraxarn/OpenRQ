@@ -58,147 +58,36 @@ namespace orq
 			qCritical() << "error: failed to open json file with table information";
 			return false;
 		}
-		QJsonParseError jsonError;
-		auto json = QJsonDocument::fromJson(file.readAll(), &jsonError);
-
-		// Check if parse failed
-		if (jsonError.error != QJsonParseError::NoError)
+		auto json = QJsonDocument::fromJson(file.readAll());
+		if (json.isNull())
 		{
-			qCritical() << "error: failed to parse json:" << jsonError.error;
+			qCritical() << "error: failed to parse json with table information";
 			return false;
 		}
 
 		// Prepare query
 		QSqlQuery query(database);
 
+		// Temporary list to transfer QJsonArray to
+		QStringList list;
+
 		// Loop through all entries in the json file
-		auto tables = json.object().find("tables")->toArray();
-		qInfo() << "tables found:" << tables.count();
-		for (auto table : tables)
+		auto tables = json.object().find("tables")->toObject();
+		for (auto key : tables.keys())
 		{
-			//qInfo() << "found table:" << table;
-		}
+			// Clear from previoud
+			list.clear();
 
-		return false;
-	}
+			// Transfer to QStringList
+			for (auto row : tables[key].toArray())
+				list << row.toString();
 
-	bool DataContext::create(QString projectName)
-	{
-		QSqlQuery query(database);
-
-		// Create Info table
-		if (!query.exec(
-			"create table Info ("
-			"	id integer primary key,"
-			"	version integer default 1,"
-			"	name text,"
-			"	created integer default current_timestamp"
-			")"))
-		{
-			qCritical() << "database error: failed to create Info table";
-			return false;
-		}
-
-		// Create Solutions table
-		if (!query.exec(
-			"create table Solutions ("
-			"	id integer primary key,"
-			"	uid integer,"
-			"	parent integer,"
-			"	label integer,"
-			"	description text,"
-			"	link text,"
-			"	foreign key(parent) references Requirements(id),"
-			"	foreign key(label) references Labels(id)"
-			")"))
-		{
-			qCritical() << "database error: failed to create Solutions table";
-			return false;
-		}
-		
-		// Create Projects table
-		if (!query.exec(
-			"create table Projects ("
-			"	id integer primary key,"
-			"	name text,"
-			"	created integer default current_timestamp"
-			")"))
-		{
-			qCritical() << "database error: failed to create Projects table";
-			return false;
-		}
-		
-		// Create ItemVersions table
-		if (!query.exec(
-			"create table ItemVersions ("
-			"	id integer primary key,"
-			"   version integer,"
-			"	item integer,"
-			"	itemV integer default 1,"
-			"	type integer,"
-			"	foreign key (version) references Projects(id)"
-			")"))
-		{
-			qCritical() << "database error: failed to create ItemVersions table";
-			return false;
-		}
-
-		// Create Requirements table
-		if (!query.exec(
-			"create table Requirements ("
-			"	id integer primary key,"
-			"	uid integer,"
-			"	parent integer,"
-			"	label integer,"
-			"	description text,"
-			"	rationale text,"
-			"	fitCriterion text,"
-			"	foreign key(parent) references Solutions(id),"
-			"	foreign key(label) references Labels(id)"
-			")"))
-		{
-			qCritical() << "database error: failed to create Requirements table";
-			return false;
-		}
-
-		// Create LabelItems LableItem
-		if (!query.exec(
-			"create table LabelItems ("
-			"	id integer primary key,"
-			"	label integer,"
-			"	item integer,"
-			"	type integer,"
-			"	foreign key (label) references Labels(id)"
-			")"))
-		{
-			qCritical() << "database error: failed to create LabelItems table";
-			return false;
-		}
-
-		// Create Media table
-		if (!query.exec(
-			"create table Media ("
-			"	id integer primary key,"
-			"	parent int not null,"
-			"	format text default 'webp',"
-			"	data blob,"
-			"	foreign key(parent) references Solutions(id)"
-			")"))
-		{
-			qCritical() << "database error: failed to create Media table";
-			return false;
-		}
-		
-		// Create Labels table
-		if (!query.exec(
-			"create table Labels ("
-			"	id integer primary key,"
-			"	tag text,"
-			"	color integer"
-			")"))
-		{
-			qCritical() << "database error: failed to create Labels table";
-			return false;
+			// Execute query, if false, return
+			if (!query.exec(QString("create table %1 (%2)").arg(key).arg(list.join(", "))))
+			{
+				qCritical() << "database error: failed to create" << key << "table";
+				return false;
+			}
 		}
 
 		// Insert Info table
