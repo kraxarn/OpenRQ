@@ -76,7 +76,7 @@ namespace orq
 		auto tables = json.object().find("tables")->toObject();
 		for (auto key : tables.keys())
 		{
-			// Clear from previoud
+			// Clear from previous
 			list.clear();
 
 			// Transfer to QStringList
