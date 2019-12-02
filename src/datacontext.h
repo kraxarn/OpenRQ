@@ -48,7 +48,5 @@ namespace orq
 
 		/// Creates database, tables and insert stuff into Info
 		bool create(QString projectName);
-
-		bool createFromJson(QString projectName);
 	};
 }

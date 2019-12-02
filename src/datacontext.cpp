@@ -49,7 +49,7 @@ namespace orq
 	}
 
 	/// Testing creating database from JSON data
-	bool DataContext::createFromJson(QString projectName)
+	bool DataContext::create(QString projectName)
 	{
 		// Load file and try to parse
 		QFile file(":/json/tables");
