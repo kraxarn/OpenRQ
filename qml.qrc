@@ -2,4 +2,7 @@
     <qresource prefix="/">
         <file alias="main">qml/main.qml</file>
     </qresource>
+    <qresource prefix="/json">
+        <file alias="tables">json/tables.json</file>
+    </qresource>
 </RCC>
