@@ -38,6 +38,7 @@ SOURCES += \
 # All header files
 HEADERS += \
     src/datacontext.h \
+    src/filetype.h \
     src/item.h \
     src/project.h \
     src/requirement.h \
