@@ -28,7 +28,8 @@ namespace orq
 			if (fileName.contains("."))
 				fileName = fileName.left(fileName.lastIndexOf("."));
 			
-			create(fileName);
+			if (!create(fileName))
+				qCritical() << "error: failed to create initial database";
 		}
 	}
 
