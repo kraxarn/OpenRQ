@@ -58,6 +58,12 @@
 			"id integer primary key",
 			"tag text",
 			"color integer"
+		],
+		"ValidationRules": [
+			"id integer primary key",
+			"tag text",
+			"enabled integer default 1",
+			"data text"
 		]
-        }
+	}
 }
