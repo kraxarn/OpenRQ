@@ -1,5 +1,5 @@
 {
-        "tables": {
+	"tables": {
 		"Info": [
 			"id integer primary key",
 			"version integer default 1",
