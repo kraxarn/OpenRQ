@@ -6,6 +6,10 @@
 #include <QSqlError>
 #include <QFileInfo>
 #include <QtDebug>
+#include <QRandomGenerator>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 #include "item.h"
 #include "requirement.h"
@@ -34,6 +38,9 @@ namespace orq
 
 		/// Update or create an item
 		bool updateItem(Item &item, int projectVersion);
+
+        /// Generate a new unique identifier for an item
+        qint64 getItemUid();
 		
 	private:
 		/// Private connection to database

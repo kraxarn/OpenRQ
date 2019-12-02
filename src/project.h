@@ -19,6 +19,9 @@ namespace orq
 		/// Get all existing versions
 		QHash<int, QPair<ItemType, int>> getVersions();
 
+		/// Get DataContext instance
+		DataContext &getData();
+
 	private:
 		/// Project/database has been opened
 		bool open;
