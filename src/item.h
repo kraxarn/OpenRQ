@@ -15,14 +15,14 @@ namespace orq
 		/// Item ID
 		int id;
 
-		/// Unique identifier
-		qint64 uid;
-
 		/// If item (and children) are shown, default true
 		bool shown = true;
 
 		/// Temporary padding after 1 byte bool
 		char padding[3];
+
+		/// Unique identifier
+		qint64 uid;
 
 		/// Shared item description
 		QString description;
