@@ -18,10 +18,10 @@ namespace orq
 		Requirement(QSqlQuery query);
 
 		/// Requirement rationale
-		QString rationale;
+		QString rationale = QString();
 
 		/// Requirement fit criterion
-		QString fitCriterion;
+		QString fitCriterion = QString();
 
 		/// Item::saveChanges()
 		bool saveChanges();
