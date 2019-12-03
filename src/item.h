@@ -13,10 +13,7 @@ namespace orq
 		virtual ~Item() = default;
 
 		/// Item ID
-		int id;
-
-		/// Unique identifier
-		qint64 uid;
+		int id = 0;
 
 		/// If item (and children) are shown, default true
 		bool shown = true;
@@ -24,8 +21,11 @@ namespace orq
 		/// Temporary padding after 1 byte bool
 		char padding[3];
 
+		/// Unique identifier
+		qint64 uid = 0;
+
 		/// Shared item description
-		QString description;
+		QString description = QString();
 
 		/// Save changes to database and increment version
 		virtual bool saveChanges() = 0;

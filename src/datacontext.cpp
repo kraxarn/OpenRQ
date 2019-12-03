@@ -130,9 +130,12 @@ namespace orq
 				query.prepare("insert into Requirements (uid, description, rationale, fitCriterion) "
 					"values (:uid, :description, :rationale, :fitCriterion)");
 				query.bindValue(":uid", item.uid);
-				query.bindValue(":description", item.description);
-				query.bindValue(":rationale", req.rationale);
-				query.bindValue(":fitCriterion", req.fitCriterion);
+				query.bindValue(":description",
+								item.description.isNull() ? QVariant(QVariant::String) : item.description);
+				query.bindValue(":rationale",
+								req.rationale.isNull() ? QVariant(QVariant::String) : req.rationale);
+				query.bindValue(":fitCriterion",
+								req.fitCriterion.isNull() ? QVariant(QVariant::String) : req.fitCriterion);
 			}
 			else
 			{
@@ -143,19 +146,34 @@ namespace orq
 			}
 
 			if (!query.exec())
+			{
+				qCritical() << "failed to create item:" << database.lastError().text();
 				return false;
-
+			}
 			query.prepare("select id from Requirements where uid = :uid");
-			query.exec();
+			query.bindValue(":uid", item.uid);
+			if (!query.exec() || !query.first())
+			{
+				qCritical() << "failed to get item id:" << database.lastError().text();
+				return false;
+			}
 			itemId = query.value(0).toInt();
-			
+
 			query.prepare("insert into ItemVersions (version, item, type) values (:version, :item, :type)");
 			query.bindValue(":version", projectVersion);
 			query.bindValue(":item", itemId);
 			query.bindValue(":type", type == TypeRequirement ? "Requirements" : "Solutions");
 
-			return query.exec();
+			if (!query.exec())
+			{
+				qCritical() << "failed to get create item version:" << database.lastError().text();
+				return false;
+			}
+			return true;
 		}
+
+		// The rest of the code is not completed yet
+		return false;
 
 		// Check if already pending version
 		query.prepare("select * from ItemVersions where version = :version and item = :item");
