@@ -149,7 +149,7 @@ namespace orq
 				return false;
 
 			query.prepare("select id from Requirements where uid = :uid");
-			query.exec();
+			query.bindValue(":uid", item.uid);
 			itemId = query.value(0).toInt();
 			
 			query.prepare("insert into ItemVersions (version, item, type) values (:version, :item, :type)");
