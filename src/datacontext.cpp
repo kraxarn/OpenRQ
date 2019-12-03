@@ -130,9 +130,12 @@ namespace orq
 				query.prepare("insert into Requirements (uid, description, rationale, fitCriterion) "
 					"values (:uid, :description, :rationale, :fitCriterion)");
 				query.bindValue(":uid", item.uid);
-				query.bindValue(":description", item.description);
-				query.bindValue(":rationale", req.rationale);
-				query.bindValue(":fitCriterion", req.fitCriterion);
+				query.bindValue(":description",
+								item.description.isNull() ? QVariant(QVariant::String) : item.description);
+				query.bindValue(":rationale",
+								req.rationale.isNull() ? QVariant(QVariant::String) : req.rationale);
+				query.bindValue(":fitCriterion",
+								req.fitCriterion.isNull() ? QVariant(QVariant::String) : req.fitCriterion);
 			}
 			else
 			{
