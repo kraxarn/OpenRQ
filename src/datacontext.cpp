@@ -73,7 +73,7 @@ namespace orq
 		QStringList list;
 
 		// Loop through all entries in the json file
-		auto tables = json.object().find("tables")->toObject();
+		QJsonObject tables = json.object();
 		for (auto key : tables.keys())
 		{
 			// Clear from previous
