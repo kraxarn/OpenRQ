@@ -247,6 +247,7 @@ namespace orq
 		query.bindValue(":uid", uid);
 		// Execute the query
 		query.exec();
+		query.first();
 		// If the count(*) value is above 0, uid already exists
 		return query.value(0).toInt() > 0;
 	}
