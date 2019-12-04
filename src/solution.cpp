@@ -32,8 +32,16 @@ namespace orq
 	bool Solution::saveChanges()
 	{
 		qFatal("error: Solution::saveChange() is not implemented");
-}
+	}
 
+	QByteArray Solution::getHash()
+	{
+		// Compute hash for combined data
+		QCryptographicHash hash(QCryptographicHash::Md5);
+		hash.addData(QByteArray().append(QByteArray().setNum(id)));
+		hash.addData(QByteArray().append(shown));
+		hash.addData(description.toUtf8());
 		
+		return hash.result();
 	}
 }
