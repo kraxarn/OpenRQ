@@ -109,10 +109,16 @@ namespace orq
 		return database.isOpen();
 	}
 
+	/// Get type of item
+	ItemType getItemType(Item &item)
+	{
+		return typeid(item) == typeid(Requirement) ? TypeRequirement : TypeSolution;
+	}
+
 	bool DataContext::updateItem(Item &item, int projectVersion)
 	{
 		// Get item type
-		auto type = typeid(item) == typeid(Requirement) ? TypeRequirement : TypeSolution;
+		auto type = getItemType(item);
 
 		// Prepare query
 		QSqlQuery query(database);
@@ -150,6 +156,7 @@ namespace orq
 				qCritical() << "failed to create item:" << database.lastError().text();
 				return false;
 			}
+
 			query.prepare("select id from Requirements where uid = :uid");
 			query.bindValue(":uid", item.uid);
 			if (!query.exec() || !query.first())
