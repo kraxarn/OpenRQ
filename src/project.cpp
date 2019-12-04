@@ -2,6 +2,9 @@
 
 namespace orq
 {
+	// Define data in this scope
+	DataContext *Project::data;
+
 	Project::Project(QString path)
 	{
 		// Append .orq if needed
@@ -16,6 +19,7 @@ namespace orq
 	{
 		// Close database when destroying object
 		delete data;
+		data = nullptr;
 		// Close database connections
 		DataContext::close();
 	}

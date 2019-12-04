@@ -73,7 +73,7 @@ namespace orq
 		QStringList list;
 
 		// Loop through all entries in the json file
-		auto tables = json.object().find("tables")->toObject();
+		QJsonObject tables = json.object();
 		for (auto key : tables.keys())
 		{
 			// Clear from previous
@@ -109,10 +109,16 @@ namespace orq
 		return database.isOpen();
 	}
 
+	/// Get type of item
+	ItemType getItemType(Item &item)
+	{
+		return typeid(item) == typeid(Requirement) ? TypeRequirement : TypeSolution;
+	}
+
 	bool DataContext::updateItem(Item &item, int projectVersion)
 	{
 		// Get item type
-		auto type = typeid(item) == typeid(Requirement) ? TypeRequirement : TypeSolution;
+		auto type = getItemType(item);
 
 		// Prepare query
 		QSqlQuery query(database);
@@ -150,6 +156,7 @@ namespace orq
 				qCritical() << "failed to create item:" << database.lastError().text();
 				return false;
 			}
+
 			query.prepare("select id from Requirements where uid = :uid");
 			query.bindValue(":uid", item.uid);
 			if (!query.exec() || !query.first())
@@ -233,6 +240,31 @@ namespace orq
 		return false;
 	}
 
+	bool DataContext::addChild(Item &root, Item &child)
+	{
+		QSqlQuery query(database);
+
+		// update Requirements set parent = root.id where id = child.id
+		query.prepare("update :tableName set parent = :parentId where id = :itemId");
+		query.bindValue(":tableName", getItemType(child) == TypeRequirement ? "Requirements" : "Solutions");
+		query.bindValue(":parentId", root.id);
+		query.bindValue(":itemId", child.id);
+
+		return query.exec();
+	}
+
+	bool DataContext::removeChild(Item &root, Item &child)
+	{
+		QSqlQuery query(database);
+		
+		// update Requirements set parent = NULL where id = child.id
+		query.prepare("update :tableName set parent = NULL where id = :itemId");
+		query.bindValue(":tableName", getItemType(child) == TypeRequirement ? "Requirements" : "Solutions");
+		query.bindValue(":itemId", root.id);
+		
+		return query.exec();
+	}
+
 	/// Check if a specified uid is already taken
 	/// (helper for DataContext::getItemUid()
 	bool uidExists(QSqlQuery query, qint64 uid)
@@ -247,6 +279,7 @@ namespace orq
 		query.bindValue(":uid", uid);
 		// Execute the query
 		query.exec();
+		query.first();
 		// If the count(*) value is above 0, uid already exists
 		return query.value(0).toInt() > 0;
 	}

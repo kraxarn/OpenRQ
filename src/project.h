@@ -20,13 +20,13 @@ namespace orq
 		QHash<int, QPair<ItemType, int>> getVersions();
 
 		/// Get DataContext instance
-		DataContext &getData();
-
+		static DataContext& getData();
+		
 	private:
 		/// Project/database has been opened
 		bool open;
 
 		/// Data context for data access
-		DataContext *data;
+		static DataContext *data;
 	};
 }

@@ -26,14 +26,11 @@ namespace orq
 		/// Item::saveChanges()
 		bool saveChanges();
 
-		/// Item::getChildren()
 		QVector<Item*> getChildren();
 
-		/// Item::getParent()
-		Item &getParent();
+		bool addChild(Item &item);
 
-		/// Item::setParent(Item)
-		bool setParent(Item &item);
+		bool removeChild(Item &child);
 
 		/// Item::getHash()
 		QByteArray getHash();

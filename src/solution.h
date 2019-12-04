@@ -2,8 +2,10 @@
 
 #include <QString>
 #include <QVector>
+#include <QSqlQuery>
 
 #include "item.h"
+#include "link.h"
 
 namespace orq
 {
@@ -13,10 +15,20 @@ namespace orq
 		/// Create a new empty solution
 		Solution();
 
-		/// Name of link to parent/requirement
-		QString linkName;
+		/// Create a solution from a SQL query
+		Solution(QSqlQuery query);
+		
+		/// Link info to parent
+		struct Link link;
 
-		/// Color of the link to parent, used when validating
-		QString linkColor;
+		QByteArray getHash();
+
+		bool saveChanges();
+
+		QVector<Item*> getChildren();
+
+		bool addChild(Item &item);
+
+		bool removeChild(Item &child);
 	};
 }

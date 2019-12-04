@@ -41,6 +41,12 @@ namespace orq
 
         /// Generate a new unique identifier for an item
         qint64 getItemUid();
+
+		/// Add child to item
+		bool addChild(Item &root, Item &child);
+
+		/// Remove child from item
+		bool removeChild(Item &root, Item &child);
 		
 	private:
 		/// Private connection to database
