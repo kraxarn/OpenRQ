@@ -16,7 +16,7 @@ namespace orq
 		int id = 0;
 
 		/// Item version
-		int item_version = 0;
+		int version = 0;
 
 		/// If item (and children) are shown, default true
 		bool shown = true;
