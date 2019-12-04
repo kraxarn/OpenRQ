@@ -33,14 +33,14 @@ namespace orq
 		/// Save changes to database and increment version
 		virtual bool saveChanges() = 0;
 
-		/// Get all children, probably opposite type
+		/// Get all children for this item, should be opposite type
 		virtual QVector<Item*> getChildren() = 0;
 
-		/// Get the parent, probably opposite type
-		virtual Item &getParent() = 0;
+		/// Add new child, should be opposite type
+		virtual bool addChild(Item &item) = 0;
 
-		/// Set parent, should be opposite type
-		virtual bool setParent(Item &item) = 0;
+		/// Remove child, should be opposite type
+		virtual bool removeChild(Item &child) = 0;
 
 		/// Get the MD5 hash for the item
 		virtual QByteArray getHash() = 0;

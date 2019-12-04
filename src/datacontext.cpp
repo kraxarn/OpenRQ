@@ -240,6 +240,31 @@ namespace orq
 		return false;
 	}
 
+	bool DataContext::addChild(Item &root, Item &child)
+	{
+		QSqlQuery query(database);
+
+		// update Requirements set parent = root.id where id = child.id
+		query.prepare("update :tableName set parent = :parentId where id = :itemId");
+		query.bindValue(":tableName", getItemType(child) == TypeRequirement ? "Requirements" : "Solutions");
+		query.bindValue(":parentId", root.id);
+		query.bindValue(":itemId", child.id);
+
+		return query.exec();
+	}
+
+	bool DataContext::removeChild(Item &root, Item &child)
+	{
+		QSqlQuery query(database);
+		
+		// update Requirements set parent = NULL where id = child.id
+		query.prepare("update :tableName set parent = NULL where id = :itemId");
+		query.bindValue(":tableName", getItemType(child) == TypeRequirement ? "Requirements" : "Solutions");
+		query.bindValue(":itemId", root.id);
+		
+		return query.exec();
+	}
+
 	/// Check if a specified uid is already taken
 	/// (helper for DataContext::getItemUid()
 	bool uidExists(QSqlQuery query, qint64 uid)

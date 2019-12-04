@@ -22,14 +22,14 @@ namespace orq
 		qFatal("error: Requirement::getChildren() is not implemented");
 	}
 
-	Item& Requirement::getParent()
+	bool Requirement::addChild(Item &item)
 	{
-		qFatal("error: Requirement::getParent() is not implemented");
-	}
 
-	bool Requirement::setParent(Item &item)
+	}
+	
+	bool Requirement::removeChild(Item &child)
 	{
-		qFatal("error: Requirement::setParent(Item&) is not implemented");
+
 	}
 
 	QByteArray Requirement::getHash()

@@ -20,5 +20,15 @@ namespace orq
 		
 		/// Link info to parent
 		struct Link link;
+
+		QByteArray getHash();
+
+		bool saveChanges();
+
+		QVector<Item*> getChildren();
+
+		bool addChild(Item &item);
+
+		bool removeChild(Item &child);
 	};
 }
