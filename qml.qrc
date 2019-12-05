@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file alias="main">qml/main.qml</file>
+        <file>qml/main.js</file>
     </qresource>
     <qresource prefix="/json">
         <file alias="tables">json/tables.json</file>
