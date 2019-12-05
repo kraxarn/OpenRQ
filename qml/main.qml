@@ -5,6 +5,8 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls.Material 2.12
 import QtQuick.Shapes 1.12
 
+import "qml/main.js" as MainJs
+
 ApplicationWindow {
 	id: window
 	visible: true
@@ -63,6 +65,35 @@ ApplicationWindow {
 							}
 						}
 					}
+					Menu {
+						title: "Add"
+						MenuItem {
+							text: "Requirement"
+							onClicked: {
+								MainJs.createItem("requirement")
+							}
+						}
+						MenuItem {
+							text: "Solution"
+							onClicked: {
+								MainJs.createItem("solution")
+							}
+						}
+						MenuSeparator {
+						}
+						MenuItem {
+							text: "Link"
+						}
+					}
+					Menu {
+						title: "View"
+						MenuItem {
+							text: "Validation Engine"
+							onClicked: {
+								validationDrawer.visible = true
+							}
+						}
+					}
 				}
 			}
 		}
@@ -71,72 +102,23 @@ ApplicationWindow {
 		Item {
 			id: content
 			anchors.fill: parent
-			// Create a new card
-			function createCard(properties, textContent)
-			{
-				const componentString =
-					("import QtQuick.Controls 2.12\n" +
-					 "import QtQuick.Controls.Material 2.12\n" +
-					 "Pane {\n" +
-					 "	width: 200\n" +
-					 "	height: 100\n" +
-					 "	%2\n" +
-					 "	Material.elevation: 6\n" +
-					 "	Label { text: \"%3\"\n }\n }"
-					).arg(properties).arg(textContent)
-
-				return Qt.createQmlObject(componentString, content, "dynamicCard")
+			// Validation engine drawer
+			Drawer {
+				id: validationDrawer
+				width: parent.width / 5
+				height: parent.height
+				edge: Qt.RightEdge
+				
+				ToolBar {
+					width: parent.width
+					
+					Label {
+						text: "Validation Engine"
+						padding: 8
+						anchors.horizontalCenter: parent.horizontalCenter
+					}
+				}
 			}
-			function createLink(from, to, offset)
-			{
-				const componentString =
-					"import QtQuick 2.12\n" +
-					"import QtQuick.Shapes 1.12\n" +
-					"Shape {\n" +
-					"	opacity: 0.5\n" +
-					"	ShapePath {\n" +
-					"		strokeColor: \"#424242\"\n" +
-					"		strokeWidth: 2\n" +
-					"		startX: (%1 + %2 / 2) + %3\n".arg(from.x).arg(from.width).arg(offset) +
-					"		startY: %1 + %2\n".arg(from.y).arg(from.height) +
-					"		PathLine {\n" +
-					"			x: %1 + %2 / 2\n".arg(to.x).arg(to.width) +
-					"			y: %1\n".arg(to.y) +
-					"		}\n" +
-					"	}\n" +
-					"}"
-				return Qt.createQmlObject(componentString, content, "dynamicShape")
-			}
-
-			// Create all cards and links
-			function createItems()
-			{
-				// Requirement card
-				const requirement = createCard(
-					"anchors.top: parent.top; anchors.topMargin: 32; anchors.horizontalCenter: parent.horizontalCenter",
-					"Requirements should\nrequire a requirement"
-				)
-
-				// Left solution card
-				const solution1 = createCard(
-					"anchors.topMargin: 64; x: parent.width / 2 - width - 64",
-					"Solutions should solve\nthe requirements"
-				)
-				solution1.anchors.top = requirement.bottom
-
-				// Right solution card
-				const solution2 = createCard(
-					"anchors.top: cardRequirement.bottom; anchors.topMargin: 64; x: parent.width / 2 + 64",
-					"Requirements can be solved\nin different ways"
-				)
-				solution2.anchors.top = requirement.bottom
-
-				// Create links from requirement to solutions
-				createLink(requirement, solution1, -8)
-				createLink(requirement, solution2, 8)
-			}
-			// Start creating cards when ready
-			Component.onCompleted: createItems()
 		}
 	}
 }
