@@ -137,6 +137,37 @@ ApplicationWindow {
 			}
 			// Start creating cards when ready
 			Component.onCompleted: createItems()
+
+			Frame {
+				id: validateBox
+				x: 1043
+				y: 0
+				width: 237
+				height: 661
+
+	ToolBar {
+		id: toolBar
+		x: 0
+		y: 0
+		width: 213
+		height: 40
+
+		Label {
+			id: label
+			x: 55
+			y: 12
+			text: qsTr("Validation Engine")
+		}
+	}
+
+	RowLayout {
+		id: rowLayout
+		x: 0
+		y: 46
+		width: 213
+		height: 603
+	}
+   }
 		}
 	}
 }
