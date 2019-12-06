@@ -1,6 +1,4 @@
 from PySide2.QtWidgets import QVector, QSqlQuery, QCryptographicHash, QByteArray
-from PySide2.QtCore import QMessageLogContext, QString,
-
 
 class Solution(Item):
 	def __init__(self):
