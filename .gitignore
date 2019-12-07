@@ -39,3 +39,7 @@ OpenRQ
 
 # Ignore project files
 *.orq
+
+py/
+cpp/
+deploy/
