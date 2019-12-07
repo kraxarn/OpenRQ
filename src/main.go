@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/therecipe/qt/widgets"
@@ -22,8 +21,8 @@ func main() {
 	// make the window visible
 	window.Show()
 
-	p := NewProject("project.orq")
-	fmt.Println("database open:", p.data.Database.IsOpen())
+	// Create example project
+	NewProject("project.orq")
 
 	// start the main Qt event loop
 	app.Exec()
