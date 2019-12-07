@@ -50,37 +50,13 @@ func NewDataContext(path string) *DataContext {
 }
 
 func (data *DataContext) Create(projectName string) bool {
-	// Load file and try to parse
-	file := core.NewQFile2("../json/tables.json")
-	if !file.Open(core.QIODevice__ReadOnly | core.QIODevice__Text) {
-		fmt.Fprintln(os.Stderr, "error: failed to open json")
-		return false
-	}
-	json := core.QJsonDocument_FromJson(file.ReadAll(), nil)
-	if json.IsNull() {
-		fmt.Fprintln(os.Stderr, "error: failed to parse json")
-		return false
-	}
-
 	// Prepare query
 	query := sql.NewQSqlQuery2("", data.Database)
 
-	// Temporary list for QJsonArray
-	var list []string
-
-	// Loop through JSON file
-	tables := json.Object()
-	for _, key := range tables.Keys() {
-		// Clear from previous
-		list = list[:0]
-
-		// Transfer to list
-		for _, row := range tables.Value(key).ToArray2().ToVariantList() {
-			list = append(list, row.ToString())
-		}
-
+	// Loop through table data
+	for key, value := range tableData {
 		// Execute query
-		if !query.Exec(fmt.Sprintf("create table %s (%s)", key, strings.Join(list, ", "))) {
+		if !query.Exec(fmt.Sprintf("create table %s (%s)", key, strings.Join(value, ", "))) {
 			fmt.Fprintln(os.Stderr, "database error: failed to create", key, "table")
 			return false
 		}
