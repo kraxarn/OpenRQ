@@ -36,7 +36,9 @@ func AddMenuBars(window *widgets.QMainWindow) {
 	fileMenu.AddAction("Save")
 	fileMenu.AddAction("Save As...")
 	fileMenu.AddSeparator()
-	fileMenu.AddAction("Close")
+	fileMenu.AddAction("Close").ConnectTriggered(func(checked bool) {
+		window.Close()
+	})
 	// Add menu
 	addMenu := window.MenuBar().AddMenu2("Add")
 	addMenu.AddAction("Requirement")
