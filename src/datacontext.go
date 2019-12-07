@@ -13,6 +13,42 @@ type DataContext struct {
 	Database *sql.QSqlDatabase
 }
 
+func NewDataContext(path string) *DataContext {
+	data := new(DataContext)
+
+	// Check if SQLite is available
+	if !sql.QSqlDatabase_IsDriverAvailable("QSQLITE") {
+		fmt.Fprintln(os.Stderr, "error: sqlite is not available")
+		return nil
+	}
+
+	// Check beforehand if file exists
+	fileExists := core.QFile_Exists(path)
+
+	// Create SQLite database
+	data.Database = sql.QSqlDatabase_AddDatabase("QSQLITE", "")
+	data.Database.SetDatabaseName(path)
+
+	// Open file
+	if !data.Database.Open() {
+		fmt.Fprintln(os.Stderr, "error: failed to open database")
+	}
+
+	// Create if it didn't exist
+	if !fileExists {
+		fileName := core.NewQFileInfo3(path).FileName()
+		if strings.Contains(fileName, ".") {
+			fileName = strings.TrimLeft(fileName, ".")
+		}
+		if !data.Create(fileName) {
+			fmt.Fprintln(os.Stderr, "error: failed to create initial database")
+			return nil
+		}
+	}
+
+	return data
+}
+
 func (data *DataContext) Create(projectName string) bool {
 	// Load file and try to parse
 	file := core.NewQFile2("../json/tables.json")
@@ -30,7 +66,7 @@ func (data *DataContext) Create(projectName string) bool {
 	query := sql.NewQSqlQuery2("", data.Database)
 
 	// Temporary list for QJsonArray
-	list := []string{}
+	var list []string
 
 	// Loop through JSON file
 	tables := json.Object()
@@ -45,7 +81,7 @@ func (data *DataContext) Create(projectName string) bool {
 
 		// Execute query
 		if !query.Exec(fmt.Sprintf("create table %s (%s)", key, strings.Join(list, ", "))) {
-			fmt.Fprintln(os.Stderr, "database error: failed to create %s table", key)
+			fmt.Fprintln(os.Stderr, "database error: failed to create", key, "table")
 			return false
 		}
 	}
@@ -59,37 +95,4 @@ func (data *DataContext) Create(projectName string) bool {
 	}
 
 	return true
-}
-
-func NewDataContext(path string) *DataContext {
-	data := new(DataContext)
-
-	// Check if SQLite is available
-	if sql.QSqlDatabase_IsDriverAvailable("SQLITE") {
-		fmt.Fprintln(os.Stderr, "error: sqlite is not available")
-		return nil
-	}
-
-	// Check beforehand if file exists
-	fileExists := core.QFile_Exists(path)
-
-	// Create SQLite database
-	data.Database = sql.QSqlDatabase_AddDatabase("QSQLITE", path)
-
-	// Open file
-	data.Database.Open()
-
-	// Create if it didn't exist
-	if !fileExists {
-		fileName := core.NewQFileInfo3(path).FileName()
-		if strings.Contains(fileName, ".") {
-			fileName = strings.TrimLeft(fileName, ".")
-		}
-		if !data.Create(fileName) {
-			fmt.Fprintln(os.Stderr, "error: failed to create initial database")
-			return nil
-		}
-	}
-
-	return data
 }
