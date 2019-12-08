@@ -28,31 +28,25 @@ func main() {
 	app.Exec()
 }
 
-func AddMenuBars(window *widgets.QMainWindow) {
-	// File menu
-	fileMenu := window.MenuBar().AddMenu2("File")
-	fileMenu.AddAction("New...")
-	fileMenu.AddAction("Open...")
-	fileMenu.AddAction("Save")
-	fileMenu.AddAction("Save As...")
+func AddToolBars(window *widgets.QMainWindow) {
+	// Create tool bar
+	fileToolBar := window.AddToolBar3("")
+	// Show both icons and text (default is icons only)
+	fileToolBar.SetToolButtonStyle(core.Qt__ToolButtonTextBesideIcon)
+	// Hide area for dragging it around
+	fileToolBar.SetMovable(false)
 	fileMenu.AddSeparator()
-	fileMenu.AddAction("Close").ConnectTriggered(func(checked bool) {
+	fileQuit := fileMenu.AddAction2(gui.QIcon_FromTheme("application-exit"), "Quit")
 		window.Close()
 	})
-	// Add menu
-	addMenu := window.MenuBar().AddMenu2("Add")
-	addMenu.AddAction("Requirement")
-	addMenu.AddAction("Solution")
-	// View menu
-	viewMenu := window.MenuBar().AddMenu2("View")
-	viewMenu.AddAction("Validation Engine")
-}
+	fileTool.SetText("File")
+	fileTool.SetMenu(fileMenu)
+	fileTool.SetPopupMode(widgets.QToolButton__InstantPopup)
+	fileToolBar.AddWidget(fileTool)
 
-func AddToolBars(window *widgets.QMainWindow) {
-	fileToolBar := window.AddToolBar3("")
-	fileToolBar.SetMovable(false)
-	fileToolBar.AddAction("New Requirement")
-	fileToolBar.AddAction("New Solution")
+	// Add requirement/solution buttons
+	fileToolBar.AddAction2(gui.QIcon_FromTheme("add"), "New Requirement")
+	fileToolBar.AddAction2(gui.QIcon_FromTheme("add"), "New Solution")
 	spacer := widgets.NewQWidget(nil, 0)
 	spacer.SetSizePolicy2(widgets.QSizePolicy__Expanding, widgets.QSizePolicy__Expanding)
 	fileToolBar.AddWidget(spacer)
