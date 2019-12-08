@@ -35,8 +35,18 @@ func AddToolBars(window *widgets.QMainWindow) {
 	fileToolBar.SetToolButtonStyle(core.Qt__ToolButtonTextBesideIcon)
 	// Hide area for dragging it around
 	fileToolBar.SetMovable(false)
+
+	// Add file menu
+	fileTool := widgets.NewQToolButton(fileToolBar)
+	fileMenu := widgets.NewQMenu2("file_menu", fileTool)
+	fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "New...")
+	fileMenu.AddAction2(gui.QIcon_FromTheme("document-open"), "Open...")
+	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save"), "Save")
+	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...")
 	fileMenu.AddSeparator()
 	fileQuit := fileMenu.AddAction2(gui.QIcon_FromTheme("application-exit"), "Quit")
+	fileQuit.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__Quit))
+	fileQuit.ConnectTriggered(func(checked bool) {
 		window.Close()
 	})
 	fileTool.SetText("File")
