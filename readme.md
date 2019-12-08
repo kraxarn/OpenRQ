@@ -11,9 +11,9 @@
 * **No third-party libraries are allowed**, with the exception of any Qt 5.12 and standard Go libraries.
 
 ## Code Style
-* Structs uses pascal case (`ClassName`).
-* **All** variables and methods use dromedary case (`variableName`).
-* File names should be the **same as the class name**, but in **all lower case** (`classname.cpp`)
+* Structs uses pascal case (`StructName`).
+* **All** variables, methods and functions use dromedary case (`variableName`).
+* File names should be the **same as the struct name**, but in **all lower case** (`structname.go`)
 * Keep everything under package `main`.
 * Never leave more than one lines empty.
 * `//` comment for **every method and function** (with name) as documentation.
