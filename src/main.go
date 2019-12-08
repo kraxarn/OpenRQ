@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	"github.com/therecipe/qt/core"
+	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 )
 
@@ -15,7 +17,7 @@ func main() {
 	window.SetWindowTitle("OpenRQ")
 
 	// Add menu bar
-	AddMenuBars(window)
+	CreateLayout(window)
 	AddToolBars(window)
 
 	// make the window visible
@@ -61,4 +63,14 @@ func AddToolBars(window *widgets.QMainWindow) {
 	spacer.SetSizePolicy2(widgets.QSizePolicy__Expanding, widgets.QSizePolicy__Expanding)
 	fileToolBar.AddWidget(spacer)
 	fileToolBar.AddAction("Validation Engine").SetCheckable(true)
+}
+
+func CreateLayout(window *widgets.QMainWindow) {
+	scene := widgets.NewQGraphicsScene(nil)
+	font := gui.NewQFont()
+	font.SetPointSize(18)
+	scene.AddText("No Project Loaded", font)
+	view := widgets.NewQGraphicsView2(scene, nil)
+	window.SetCentralWidget(view)
+	view.Show()
 }
