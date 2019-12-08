@@ -27,6 +27,10 @@ There are two main branches
 * `golang`: The main development branch for most developers.
 * `stable`: Where all changes gets merged to, **do not modify or push to**.
 
+## How to Download
+Do not use `git clone ...`, use `go get github.com/kraxarn/OpenRQ` instead.
+Then, run the application using `go run github.com/kraxarn/OpenRQ`.
+
 ## How to Push
 * First, pull the latest changes:
 * `git pull`
