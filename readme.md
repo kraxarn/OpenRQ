@@ -29,7 +29,10 @@ There are two main branches
 
 ## How to Download
 Do not use `git clone ...`, use `go get github.com/kraxarn/OpenRQ` instead.
+
 Then, run the application using `go run github.com/kraxarn/OpenRQ`.
+
+The downloaded files are (probably) in `~/go/src/github.com/kraxarn/OpenRQ`.
 
 ## How to Push
 * First, pull the latest changes:
