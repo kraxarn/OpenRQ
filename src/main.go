@@ -52,7 +52,9 @@ func AddToolBars(window *widgets.QMainWindow) {
 		window.Close()
 	})
 	fileTool.SetText("File")
+	fileTool.SetIcon(gui.QIcon_FromTheme("document-properties"))
 	fileTool.SetMenu(fileMenu)
+	fileTool.SetToolButtonStyle(core.Qt__ToolButtonTextBesideIcon)
 	fileTool.SetPopupMode(widgets.QToolButton__InstantPopup)
 	fileToolBar.AddWidget(fileTool)
 
