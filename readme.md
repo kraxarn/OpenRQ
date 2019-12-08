@@ -20,7 +20,7 @@
 
 ## Directories
 * `.vscode`: VS Code settings, **do not modify**.
-* `/`: Go source files
+* `/`: Go source files.
 
 ## Branches
 There are two main branches
@@ -38,4 +38,4 @@ There are two main branches
 * `git pull`
 * Push your changes, if you get a merge conflict, you broke the rules:
 * `git push`
-* Make sure your changes were pushed to the **master** branch.
+* Make sure your changes were pushed to the **golang** branch.
