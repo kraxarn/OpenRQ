@@ -11,9 +11,18 @@ import (
 func main() {
 	app := widgets.NewQApplication(len(os.Args), os.Args)
 
-	// create a window
+	// Create window
 	window := widgets.NewQMainWindow(nil, 0)
-	window.SetMinimumSize2(1280, 720)
+	// Set minimum and initial size
+	window.SetMinimumSize2(960, 540)
+	window.Resize2(1280, 720)
+	// Center window on screen
+	window.SetGeometry(widgets.QStyle_AlignedRect(
+		core.Qt__LeftToRight,
+		core.Qt__AlignCenter,
+		window.Size(),
+		app.Desktop().AvailableGeometry(0)))
+	// Set a window title
 	window.SetWindowTitle("OpenRQ")
 
 	// Add menu bar
@@ -30,6 +39,7 @@ func main() {
 	app.Exec()
 }
 
+// AddToolBars adds a tool bar to the specified window
 func AddToolBars(window *widgets.QMainWindow) {
 	// Create tool bar
 	fileToolBar := window.AddToolBar3("")
@@ -69,6 +79,7 @@ func AddToolBars(window *widgets.QMainWindow) {
 	validate.SetIcon(gui.QIcon_FromTheme("system-search"))
 }
 
+// CreateLayout creates the main layout widgets
 func CreateLayout(window *widgets.QMainWindow) {
 	scene := widgets.NewQGraphicsScene(nil)
 	font := gui.NewQFont()
