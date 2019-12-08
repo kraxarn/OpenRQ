@@ -40,7 +40,7 @@ func AddToolBars(window *widgets.QMainWindow) {
 
 	// Add file menu
 	fileTool := widgets.NewQToolButton(fileToolBar)
-	fileMenu := widgets.NewQMenu2("file_menu", fileTool)
+	fileMenu := widgets.NewQMenu2("", fileTool)
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "New...")
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-open"), "Open...")
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save"), "Save")
