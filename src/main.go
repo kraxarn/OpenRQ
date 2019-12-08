@@ -64,7 +64,9 @@ func AddToolBars(window *widgets.QMainWindow) {
 	spacer := widgets.NewQWidget(nil, 0)
 	spacer.SetSizePolicy2(widgets.QSizePolicy__Expanding, widgets.QSizePolicy__Expanding)
 	fileToolBar.AddWidget(spacer)
-	fileToolBar.AddAction("Validation Engine").SetCheckable(true)
+	validate := fileToolBar.AddAction("Validation Engine")
+	validate.SetCheckable(true)
+	validate.SetIcon(gui.QIcon_FromTheme("system-search"))
 }
 
 func CreateLayout(window *widgets.QMainWindow) {
