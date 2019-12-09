@@ -28,7 +28,7 @@ There are two main branches
 * `stable`: Where all changes gets merged to, **do not modify or push to**.
 
 ## How to Download
-Do not use `git clone ...`, use `go get github.com/kraxarn/OpenRQ` instead.
+Do not use `git clone ...`, use `go get -v github.com/kraxarn/OpenRQ` instead.
 
 Then, run the application using `go run github.com/kraxarn/OpenRQ`.
 
