@@ -72,3 +72,28 @@ func (data *DataContext) Create(projectName string) bool {
 
 	return true
 }
+
+func UidExists(query *sql.QSqlQuery, uid int64) bool {
+	// Prepare union query
+	query.Prepare("select count(*) from (select uid from Requirements union select uid from Solutions) where uid = :uid")
+	// Bind uid
+	query.BindValue(":uid", core.NewQVariant7(uid), sql.QSql__In)
+	// Execute and get result
+	query.Exec2()
+	query.First()
+	// If count is above 0, row is found
+	return query.Value(0).ToInt(nil) > 0;
+}
+
+func (data *DataContext) GetItemUid() int64 {
+	// Prepare query
+	query := sql.NewQSqlQuery3(data.Database)
+	// Generate initial id
+	id := int64(core.QRandomGenerator_Global().Generate64())
+	// Keep generating until unique
+	for UidExists(query, id) {
+		id = int64(core.QRandomGenerator_Global().Generate64())
+	}
+	// Return newly generated value
+	return id
+}
