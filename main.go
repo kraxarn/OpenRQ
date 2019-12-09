@@ -27,7 +27,7 @@ func main() {
 
 	// Add menu bar
 	CreateLayout(window)
-	AddToolBars(window)
+	AddToolBar(window)
 
 	// make the window visible
 	window.Show()
@@ -39,8 +39,8 @@ func main() {
 	app.Exec()
 }
 
-// AddToolBars adds a tool bar to the specified window
-func AddToolBars(window *widgets.QMainWindow) {
+// AddToolBar adds a tool bar to the specified window
+func AddToolBar(window *widgets.QMainWindow) {
 	// Create tool bar
 	fileToolBar := window.AddToolBar3("")
 	// Show both icons and text (default is icons only)
