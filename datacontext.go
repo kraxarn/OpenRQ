@@ -82,17 +82,17 @@ func UidExists(query *sql.QSqlQuery, uid int64) bool {
 	query.Exec2()
 	query.First()
 	// If count is above 0, row is found
-	return query.Value(0).ToInt(nil) > 0;
+	return query.Value(0).ToInt(nil) > 0
 }
 
 func (data *DataContext) GetItemUid() int64 {
 	// Prepare query
 	query := sql.NewQSqlQuery3(data.Database)
 	// Generate initial id
-	id := int64(core.QRandomGenerator_Global().Generate64())
+	id := int64(rand.Uint64())
 	// Keep generating until unique
 	for UidExists(query, id) {
-		id = int64(core.QRandomGenerator_Global().Generate64())
+		id = int64(rand.Uint64())
 	}
 	// Return newly generated value
 	return id
