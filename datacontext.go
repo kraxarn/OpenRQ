@@ -127,6 +127,23 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 	return nil
 }
 
+//Discussion needed
+
+//func (data *DataContext) AddChild(item Item, child int, root int){
+//	query := sql.NewQSqlQuery2("", data.Database)
+
+//}
+
+//RemoveChild delete the child (((????????? not done yet)))
+////	query := sql.NewQSqlQuery2("", data.Database)
+
+//query.Prepare("update :tableName set parent = nil where id = :itemId")
+//query.BindValue(":tableName", core.NewQVariant1(item.GetChildren()), sql.QSql__In)
+//query.BindValue(":itemId", core.NewQVariant1(item.GetId()), sql.QSql__In)
+
+//}
+
+//UidExists checking if the specified uid is already taken
 func UidExists(query *sql.QSqlQuery, uid int64) bool {
 	// Prepare union query
 	query.Prepare("select count(*) from (select uid from Requirements union select uid from Solutions) where uid = :uid")
@@ -139,6 +156,7 @@ func UidExists(query *sql.QSqlQuery, uid int64) bool {
 	return query.Value(0).ToInt(nil) > 0
 }
 
+//GetItemUid If the item uid dosn't exits we will get a uid
 func (data *DataContext) GetItemUid() int64 {
 	// Prepare query
 	query := sql.NewQSqlQuery3(data.Database)
