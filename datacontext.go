@@ -22,7 +22,7 @@ func NewDataContext(path string) *DataContext {
 
 	// Check beforehand if file exists
 	_, err := os.Stat(path)
-	fileExists := os.IsNotExist(err)
+	fileExists := !os.IsNotExist(err)
 
 	// Create SQLite database
 	data.Database, err = sql.Open("sqlite3", path)
