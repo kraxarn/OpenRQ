@@ -64,8 +64,11 @@ func (data *DataContext) Create(projectName string) error {
 
 	// Insert info table
 	stmt, err := data.Database.Prepare("insert into Info (name) values (?)")
+	if err != nil {
+		return err
+	}
 	defer stmt.Close()
-	stmt.QueryRow(projectName)
+	_, err = stmt.Exec()
 	return err
 }
 
