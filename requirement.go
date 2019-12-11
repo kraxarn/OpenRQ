@@ -20,13 +20,12 @@ func (req *Requirement) SaveChanges() error {
 }
 
 // GetChildren get all children of requirement
-func (req *Requirement) GetChildren() []Item {
+func (req Requirement) GetChildren() []Item {
 	return nil
 }
 
 // RemoveChild remove specified child of requirement
-func (req *Requirement) RemoveChild() []Item {
-	return nil
+func (req Requirement) RemoveChild(child Item) {
 }
 
 // GetHash get hash of requirement
@@ -72,4 +71,7 @@ func (req Requirement) SetShown(shown bool) {
 
 func (req Requirement) GetDescription() string {
 	return req.description
+}
+func (req Requirement) AddChild(child Item) {
+
 }
