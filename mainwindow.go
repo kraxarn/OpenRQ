@@ -73,8 +73,18 @@ func CreateLayout(window *widgets.QMainWindow) {
 	scene := widgets.NewQGraphicsScene(nil)
 	font := gui.NewQFont()
 	font.SetPointSize(18)
-	scene.AddText("No Project Loaded", font)
+	//scene.AddText("No Project Loaded", font)
 	view := widgets.NewQGraphicsView2(scene, nil)
 	window.SetCentralWidget(view)
+	scene.AddItem(AddGraphicsItem(view, "Graphics Item", 0, 0, 64, 64))
 	view.Show()
+}
+
+func AddGraphicsItem(view *widgets.QGraphicsView, text string, x, y, width, height float64) *widgets.QGraphicsItemGroup {
+	group := widgets.NewQGraphicsItemGroup(nil)
+	textItem := widgets.NewQGraphicsTextItem2(text, nil)
+	shapeItem := widgets.NewQGraphicsRectItem3(x, y, width, height, nil)
+	group.AddToGroup(textItem)
+	group.AddToGroup(shapeItem)
+	return group
 }
