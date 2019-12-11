@@ -154,6 +154,7 @@ func (data *DataContext) RemoveChild(item Item, child int, root int) {
 func UidExists(db *sql.DB, uid int64) bool {
 	// Prepare union query
 	stmt, err := db.Prepare("select count(*) from (select uid from Requirements union select uid from Solutions) where uid = ?")
+	defer stmt.Close()
 	// Check for error
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "warning: failed to get uid:", err)
