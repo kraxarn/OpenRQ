@@ -49,6 +49,10 @@ func NewDataContext(path string) *DataContext {
 	return data
 }
 
+func (data *DataContext) Close() error {
+	return data.Database.Close()
+}
+
 // Create creates a new, empty database
 func (data *DataContext) Create(projectName string) error {
 	// Loop through table data
