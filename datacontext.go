@@ -26,7 +26,6 @@ func NewDataContext(path string) *DataContext {
 
 	// Create SQLite database
 	data.Database, err = sql.Open("sqlite3", path)
-	defer data.Database.Close()
 
 	// Open file
 	if err != nil {
