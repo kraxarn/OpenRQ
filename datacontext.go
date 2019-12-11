@@ -68,7 +68,7 @@ func (data *DataContext) Create(projectName string) error {
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec()
+	_, err = stmt.Exec(projectName)
 	return err
 }
 
