@@ -20,14 +20,3 @@ type Item interface {
 	AddChild(child Item)
 	RemoveChild(child Item)
 }
-
-// ItemProperties properties (but not methods) for items (if we even need this)
-type ItemProperties struct {
-	id          int
-	uid         int64
-	version     int
-	shown       bool
-	description string
-	children    []Item
-	parent      []Item
-}
