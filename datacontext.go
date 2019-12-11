@@ -129,19 +129,24 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 
 //Discussion needed
 
-//func (data *DataContext) AddChild(item Item, child int, root int){
-//	query := sql.NewQSqlQuery2("", data.Database)
+//AddChild adding children to the tree
+func (data *DataContext) AddChild(item Item, child int, root int) {
+	query := sql.NewQSqlQuery2("", data.Database)
 
-//}
+	query.Prepare("update :tableName set parent = :parentId where id = :itemId")
+	query.BindValue(":tableName", core.NewQVariant1(item.AddChild()), sql.QSql__In)
+	query.BindValue(":itemId", core.NewQVariant1(item.GetChildren()), sql.QSql__In)
+}
 
 //RemoveChild delete the child (((????????? not done yet)))
-////	query := sql.NewQSqlQuery2("", data.Database)
+func (data *DataContext) RemoveChild(item Item, child int, root int) {
+	query := sql.NewQSqlQuery2("", data.Database)
 
-//query.Prepare("update :tableName set parent = nil where id = :itemId")
-//query.BindValue(":tableName", core.NewQVariant1(item.GetChildren()), sql.QSql__In)
-//query.BindValue(":itemId", core.NewQVariant1(item.GetId()), sql.QSql__In)
+	query.Prepare("update :tableName set parent = nil where id = :itemId")
+	query.BindValue(":tableName", core.NewQVariant1(item.GetChildren()), sql.QSql__In)
+	query.BindValue(":itemId", core.NewQVariant1(item.GetId()), sql.QSql__In)
 
-//}
+}
 
 //UidExists checking if the specified uid is already taken
 func UidExists(query *sql.QSqlQuery, uid int64) bool {
