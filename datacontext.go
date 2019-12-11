@@ -159,7 +159,7 @@ func UidExists(db *sql.DB, uid int64) bool {
 	stmt.QueryRow(uid).Scan(&count)
 	// Check for error
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "warning: failed to get uid: %v", err)
+		fmt.Fprintln(os.Stderr, "warning: failed to get uid:", err)
 	}
 	// If count is above 0, row is found
 	return count > 0
