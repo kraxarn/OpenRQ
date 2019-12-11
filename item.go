@@ -17,7 +17,8 @@ type Item interface {
 
 	GetChildren() []Item
 
-	AddChild() []Item
+	AddChild(child Item)
+	RemoveChild(child Item)
 }
 
 // ItemProperties properties (but not methods) for items (if we even need this)
