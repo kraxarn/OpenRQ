@@ -14,13 +14,19 @@ type Item interface {
 
 	GetDescription() string
 	SetDescription(description string)
+
+	GetChildren() []Item
+
+	AddChild() []Item
 }
 
-// ItemProperties properties (but not methods) for items
+// ItemProperties properties (but not methods) for items (if we even need this)
 type ItemProperties struct {
 	id          int
 	uid         int64
 	version     int
 	shown       bool
 	description string
+	children    []Item
+	parent      []Item
 }
