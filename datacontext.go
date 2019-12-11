@@ -64,6 +64,7 @@ func (data *DataContext) Create(projectName string) error {
 
 	// Insert info table
 	stmt, err := data.Database.Prepare("insert into Info (name) values (?)")
+	defer stmt.Close()
 	stmt.QueryRow(projectName)
 	return err
 }
@@ -87,6 +88,7 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 			if err != nil {
 				return fmt.Errorf("failed to insert requirement: %v", err)
 			}
+			defer stmt.Close()
 		} else {
 			// Add solution
 			stmt, err := data.Database.Prepare("insert into Solutions (uid, description) values (?, ?)")
@@ -94,6 +96,7 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 			if err != nil {
 				return fmt.Errorf("failed to insert solution: %v", err)
 			}
+			defer stmt.Close()
 		}
 
 		// Find item id
@@ -102,6 +105,7 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 		if err != nil {
 			return fmt.Errorf("error: failed to get item id: %v", err)
 		}
+		defer stmt.Close()
 		var itemID int
 		err = row.Scan(&itemID)
 		if err != nil || itemID == 0 {
@@ -114,6 +118,7 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 		if err != nil {
 			return fmt.Errorf("error: failed to get create item version: %v", err)
 		}
+		defer stmt.Close()
 	}
 
 	// Rest is not completed yet
