@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/therecipe/qt/core"
 )
 
 // DataContext is the context to the database
@@ -22,10 +21,10 @@ func NewDataContext(path string) *DataContext {
 	data := new(DataContext)
 
 	// Check beforehand if file exists
-	fileExists := core.QFile_Exists(path)
+	_, err := os.Stat(path)
+	fileExists := os.IsNotExist(err)
 
 	// Create SQLite database
-	var err error
 	data.Database, err = sql.Open("sqlite3", path)
 	defer data.Database.Close()
 
