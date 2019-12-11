@@ -107,20 +107,18 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 		stmt, err := data.Database.Prepare("select id from Requirements where uid = ?")
 		row := stmt.QueryRow(item.GetUid())
 		if err != nil {
-			return fmt.Errorf("error: failed to get item id: %v", err)
+			return fmt.Errorf("failed to get item id: %v", err)
 		}
 		defer stmt.Close()
 		var itemID int
 		err = row.Scan(&itemID)
 		if err != nil || itemID == 0 {
-			return fmt.Errorf("error: failed to get item id: %v", err)
+			return fmt.Errorf("failed to get item id: %v", err)
 		}
 
 		stmt, err = data.Database.Prepare("insert into ItemVersions (version, item, type) values (?, ?, ?)")
 		if _, err = stmt.Exec(item.GetVersion(), itemID, typeName); err != nil {
-
-		if err != nil {
-			return fmt.Errorf("error: failed to get create item version: %v", err)
+			return fmt.Errorf("failed to get create item version: %v", err)
 		}
 		defer stmt.Close()
 	}
