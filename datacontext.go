@@ -89,7 +89,7 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 		if isReq {
 			// Add requirement
 			stmt, err := data.Database.Prepare("insert into Requirements (uid, description, rationale, fitCriterion) values (?, ?, ?, ?)")
-			stmt.QueryRow(item.GetUid(), item.GetDescription(), req.GetRationale(), req.GetFitCriterion())
+			_, err = stmt.Exec(item.GetUid(), item.GetDescription(), req.GetRationale(), req.GetFitCriterion())
 			if err != nil {
 				return fmt.Errorf("failed to insert requirement: %v", err)
 			}
@@ -97,8 +97,7 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 		} else {
 			// Add solution
 			stmt, err := data.Database.Prepare("insert into Solutions (uid, description) values (?, ?)")
-			stmt.QueryRow(item.GetUid(), item.GetDescription())
-			if err != nil {
+			if _, err = stmt.Exec(item.GetUid(), item.GetDescription()); err != nil {
 				return fmt.Errorf("failed to insert solution: %v", err)
 			}
 			defer stmt.Close()
@@ -118,7 +117,7 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 		}
 
 		stmt, err = data.Database.Prepare("insert into ItemVersions (version, item, type) values (?, ?, ?)")
-		row = stmt.QueryRow(item.GetVersion(), itemID, typeName)
+		if _, err = stmt.Exec(item.GetVersion(), itemID, typeName); err != nil {
 
 		if err != nil {
 			return fmt.Errorf("error: failed to get create item version: %v", err)
