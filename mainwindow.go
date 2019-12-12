@@ -109,8 +109,10 @@ func CreateLayout(window *widgets.QMainWindow) {
 		}
 	})
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
-		movingItem.SetOpacity(1.0)
-		movingItem = nil
+		if movingItem != nil {
+			movingItem.SetOpacity(1.0)
+			movingItem = nil
+		}
 	})
 	// Show the view
 	view.Show()
