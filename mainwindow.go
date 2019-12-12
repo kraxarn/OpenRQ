@@ -137,8 +137,7 @@ func CreateLayout(window *widgets.QMainWindow) {
 				return
 			}
 			fromPos := linkStart.Pos()
-			toItem := view.ItemAt(event.Pos()).Group()
-			toPos := toItem.Pos()
+			toPos := view.ItemAt(event.Pos()).Group().Pos()
 			if toPos.X() == 0 && toPos.Y() == 0 {
 				return
 			}
