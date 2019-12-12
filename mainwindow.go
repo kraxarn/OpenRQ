@@ -70,16 +70,29 @@ func AddToolBar(window *widgets.QMainWindow) {
 
 // CreateLayout creates the main layout widgets
 func CreateLayout(window *widgets.QMainWindow) {
+	// Create scene and view
 	scene := widgets.NewQGraphicsScene(nil)
-	font := gui.NewQFont()
-	font.SetPointSize(18)
-	//scene.AddText("No Project Loaded", font)
 	view := widgets.NewQGraphicsView2(scene, nil)
-	window.SetCentralWidget(view)
-	scene.AddItem(AddGraphicsItem(view, "Graphics Item", 0, 0, 64, 64))
+	// Use layout
+	splitter := widgets.NewQSplitter(nil)
+	splitter.AddWidget(CreateItemCreator())
+	splitter.AddWidget(view)
+	splitter.AddWidget(CreateValidationEngineLayout())
+	window.SetCentralWidget(splitter)
 	view.Show()
 }
 
+func CreateValidationEngineLayout() *widgets.QWidget {
+	layout := widgets.NewQVBoxLayout()
+	layout.AddWidget(widgets.NewQLabel2("Validation Engine", nil, core.Qt__Widget), 0, core.Qt__AlignTop)
+
+	widget := widgets.NewQWidget(nil, core.Qt__Widget)
+	widget.SetLayout(layout)
+	widget.SetMaximumWidth(250)
+	return widget
+}
+func CreateGroupBox(title string, childAlignment core.Qt__AlignmentFlag, children ...widgets.QWidget_ITF) *widgets.QGroupBox {
+}
 func AddGraphicsItem(view *widgets.QGraphicsView, text string, x, y, width, height float64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem2(text, nil)
