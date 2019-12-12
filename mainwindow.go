@@ -88,11 +88,27 @@ func CreateLayout(window *widgets.QMainWindow) {
 		}
 	})
 	var itemID int
+	var movingItem *widgets.QGraphicsItemGroup
 	itemSize := 64.0
 	view.ConnectDropEvent(func(event *gui.QDropEvent) {
 		pos := view.MapToScene(event.Pos())
 		scene.AddItem(AddGraphicsItem(view, fmt.Sprintf("Item %v", itemID), pos.X()-(itemSize/2.0), pos.Y()-(itemSize/2.0), itemSize, itemSize))
 		itemID = itemID + 1
+	})
+
+	view.ConnectMousePressEvent(func(event *gui.QMouseEvent) {
+		item := view.ItemAt(event.Pos())
+		if item != nil {
+			movingItem = item.Group()
+		}
+	})
+	view.ConnectMouseMoveEvent(func(event *gui.QMouseEvent) {
+		if movingItem != nil {
+			movingItem.SetPos(view.MapToScene5(event.Pos().X()-32, event.Pos().Y()-32))
+		}
+	})
+	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
+		movingItem = nil
 	})
 	// Show the view
 	view.Show()
