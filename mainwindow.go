@@ -91,7 +91,15 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 	widget.SetMaximumWidth(250)
 	return widget
 }
+
 func CreateGroupBox(title string, childAlignment core.Qt__AlignmentFlag, children ...widgets.QWidget_ITF) *widgets.QGroupBox {
+	layout := widgets.NewQVBoxLayout()
+	for _, child := range children {
+		layout.AddWidget(child, 1, childAlignment)
+	}
+	group := widgets.NewQGroupBox2(title, nil)
+	group.SetLayout(layout)
+	return group
 }
 func AddGraphicsItem(view *widgets.QGraphicsView, text string, x, y, width, height float64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
