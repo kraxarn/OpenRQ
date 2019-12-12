@@ -99,7 +99,7 @@ func CreateLayout(window *widgets.QMainWindow) {
 
 	view.ConnectMousePressEvent(func(event *gui.QMouseEvent) {
 		item := view.ItemAt(event.Pos())
-		if item != nil {
+		if item != nil && !linkRadio.IsChecked() {
 			movingItem = item.Group()
 			movingItem.SetOpacity(0.6)
 		}
