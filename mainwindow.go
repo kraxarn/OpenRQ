@@ -88,8 +88,13 @@ func CreateLayout(window *widgets.QMainWindow) {
 			event.AcceptProposedAction()
 		}
 	})
+	// ID of item to add next
 	var itemID int
+	// What item we're currently moving, if any
 	var movingItem *widgets.QGraphicsItemGroup
+	// Start position of link
+	var linkStart *core.QPoint
+
 	itemSize := 64.0
 	view.ConnectDropEvent(func(event *gui.QDropEvent) {
 		pos := view.MapToScene(event.Pos())
@@ -99,6 +104,9 @@ func CreateLayout(window *widgets.QMainWindow) {
 
 	view.ConnectMousePressEvent(func(event *gui.QMouseEvent) {
 		item := view.ItemAt(event.Pos())
+		if linkRadio.IsChecked() {
+			linkStart = event.Pos()
+		}
 		if item != nil && !linkRadio.IsChecked() {
 			movingItem = item.Group()
 			movingItem.SetOpacity(0.6)
@@ -110,10 +118,23 @@ func CreateLayout(window *widgets.QMainWindow) {
 		}
 	})
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
+		// We released a button while moving an item
 		if movingItem != nil {
+			// Reset opacity and remove as moving
 			movingItem.SetOpacity(1.0)
 			movingItem = nil
 		}
+		// We released while creating a link
+		if linkStart != nil {
+			fromPos := view.MapToScene(linkStart)
+			toPos := view.MapToScene(event.Pos())
+			scene.AddLine2(
+				float64(fromPos.X()), float64(fromPos.Y()),
+				float64(toPos.X()), float64(toPos.Y()),
+				gui.NewQPen3(gui.NewQColor3(0, 255, 0, 255)))
+			linkStart = nil
+		}
+
 	})
 	// Show the view
 	view.Show()
