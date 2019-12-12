@@ -4,17 +4,24 @@ import (
 	"strings"
 )
 
+var currentProject *Project
+
 type Project struct {
 	Open bool
-	data *DataContext
+	path string
 }
 
 func NewProject(path string) *Project {
-	p := new(Project)
-	p.Open = true
+	currentProject = new(Project)
+	currentProject.Open = true
+	currentProject.path = path
 	if !strings.HasSuffix(path, ".orq") {
 		path += ".orq"
 	}
-	p.data = NewDataContext(path)
-	return p
+	NewDataContext(path).Close()
+	return currentProject
+}
+
+func (proj *Project) GetData() *DataContext {
+	return NewDataContext(proj.path)
 }

@@ -11,6 +11,7 @@ type Link struct {
 	color uint
 }
 
+// GetHash gets the md5 hash of the item
 func (link *Link) GetHash() [16]byte {
 	h := md5.Sum([]byte(fmt.Sprintf("%v%v", link.name, link.color)))
 	fmt.Printf("%x", h)
@@ -18,7 +19,7 @@ func (link *Link) GetHash() [16]byte {
 }
 
 type Solution struct {
-	ItemProperties
+	id int
 	Item
 }
 
@@ -32,30 +33,66 @@ func (sol *Solution) SaveChanges() error {
 	return errors.New("error: not implemented")
 }
 
-func (sol *Solution) GetChildren() []Item {
-	return nil
+// GetValue gets a value from the database
+func (sol *Solution) GetValue(name string) interface{} {
+	db := currentProject.GetData()
+	defer db.Close()
+	return db.GetItemValue(sol.GetId(), "Solutions", name)
 }
 
-func (sol *Solution) RemoveChild() []Item {
-	return nil
+// SetValue sets a value to the database
+func (sol *Solution) SetValue(name string, value interface{}) {
+	db := currentProject.GetData()
+	defer db.Close()
+	db.SetItemValue(sol.GetId(), "Solutions", name, value)
 }
 
-func (sol Solution) Id() int {
-	return sol.id
+// GetRationale gets the rationale property of the solution
+func (sol *Solution) GetRationale() string {
+	return sol.GetValue("rationale").(string)
 }
 
-func (sol Solution) Uid() int64 {
-	return sol.uid
+// GetFitCriterion of solution
+func (sol *Solution) GetFitCriterion() string {
+	return sol.GetValue("fitCriterion").(string)
 }
 
-func (sol Solution) Version() int {
-	return sol.version
+// GetId gets the row ID in the database
+func (sol Solution) GetId() int {
+	return sol.GetValue("id").(int)
 }
 
-func (sol Solution) Shown() bool {
-	return sol.shown
+// GetUid gets the row Uid in the database
+func (sol Solution) GetUid() int64 {
+	return sol.GetValue("uid").(int64)
 }
 
-func (sol Solution) Description() string {
-	return sol.description
+// SetUid sets the Uid in the database
+func (sol Solution) SetUid(uid int64) {
+	sol.SetValue("uid", uid)
+}
+
+// GetVersion of Solution
+func (sol Solution) GetVersion() int {
+	return sol.GetValue("version").(int)
+}
+
+// GetShown gets the root as hidden or shown
+func (sol Solution) GetShown() bool {
+	return sol.GetValue("shown").(bool)
+}
+
+// SetShown sets the root as hidden or shown
+func (sol Solution) SetShown(shown bool) {
+	sol.SetValue("shown", shown)
+}
+
+// GetDescription gets the description from the database
+func (sol Solution) GetDescription() string {
+	return sol.GetValue("description").(string)
+}
+
+// AddChild adds child to solution
+func (sol Solution) AddChild(child Item) {
+
 }
