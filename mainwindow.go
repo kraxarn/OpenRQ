@@ -81,6 +81,7 @@ func CreateLayout(window *widgets.QMainWindow) {
 	window.SetCentralWidget(splitter)
 	// Add example item
 	view.SetAcceptDrops(true)
+	view.SetAlignment(core.Qt__AlignTop | core.Qt__AlignLeft)
 	view.ConnectDragMoveEvent(func(event *gui.QDragMoveEvent) {
 		if event.Source() != nil {
 			event.AcceptProposedAction()
