@@ -75,7 +75,8 @@ func CreateLayout(window *widgets.QMainWindow) {
 	view := widgets.NewQGraphicsView2(scene, nil)
 	// Use layout
 	splitter := widgets.NewQSplitter(nil)
-	splitter.AddWidget(CreateItemCreator())
+	linkRadio := widgets.NewQRadioButton2("Link", nil)
+	splitter.AddWidget(CreateItemCreator(linkRadio))
 	splitter.AddWidget(view)
 	splitter.AddWidget(CreateValidationEngineLayout())
 	window.SetCentralWidget(splitter)
@@ -138,12 +139,14 @@ func CreateGroupBox(title string, childAlignment core.Qt__AlignmentFlag, childre
 	return group
 }
 
-func CreateItemCreator() *widgets.QWidget {
+func CreateItemCreator(linkRadio *widgets.QRadioButton) *widgets.QWidget {
 	layout := widgets.NewQVBoxLayout()
 	// Requirement/solution selection
 	reqRadio := widgets.NewQRadioButton2("Requirement", nil)
 	reqRadio.SetChecked(true)
-	layout.AddWidget(CreateGroupBox("Item Type", core.Qt__AlignTop, reqRadio, widgets.NewQRadioButton2("Solution", nil)), 1, core.Qt__AlignTop)
+	layout.AddWidget(CreateGroupBox("Item Type", core.Qt__AlignTop,
+		reqRadio, widgets.NewQRadioButton2("Solution", nil), linkRadio,
+	), 1, core.Qt__AlignTop)
 
 	shapeList := widgets.NewQListWidget(nil)
 	shapeList.SetDragEnabled(true)
