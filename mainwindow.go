@@ -101,6 +101,27 @@ func CreateGroupBox(title string, childAlignment core.Qt__AlignmentFlag, childre
 	group.SetLayout(layout)
 	return group
 }
+
+func CreateItemCreator() *widgets.QWidget {
+	layout := widgets.NewQVBoxLayout()
+	// Requirement/solution selection
+	reqRadio := widgets.NewQRadioButton2("Requirement", nil)
+	reqRadio.SetChecked(true)
+	layout.AddWidget(CreateGroupBox("Item Type", core.Qt__AlignTop, reqRadio, widgets.NewQRadioButton2("Solution", nil)), 1, core.Qt__AlignTop)
+
+	shapeList := widgets.NewQListWidget(nil)
+	shapeList.SetDragEnabled(true)
+	shapeList.AddItem("Square")
+	layout.AddWidget(CreateGroupBox("Create", 0, shapeList), 0, 0)
+
+	widget := widgets.NewQWidget(nil, core.Qt__Widget)
+	widget.SetLayout(layout)
+	widget.SetMaximumWidth(250)
+
+	return widget
+
+}
+
 func AddGraphicsItem(view *widgets.QGraphicsView, text string, x, y, width, height float64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem2(text, nil)
