@@ -100,6 +100,7 @@ func CreateLayout(window *widgets.QMainWindow) {
 		item := view.ItemAt(event.Pos())
 		if item != nil {
 			movingItem = item.Group()
+			movingItem.SetOpacity(0.6)
 		}
 	})
 	view.ConnectMouseMoveEvent(func(event *gui.QMouseEvent) {
@@ -108,6 +109,7 @@ func CreateLayout(window *widgets.QMainWindow) {
 		}
 	})
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
+		movingItem.SetOpacity(1.0)
 		movingItem = nil
 	})
 	// Show the view
