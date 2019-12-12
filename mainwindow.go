@@ -93,7 +93,7 @@ func CreateLayout(window *widgets.QMainWindow) {
 	// What item we're currently moving, if any
 	var movingItem *widgets.QGraphicsItemGroup
 	// Start position of link
-	var linkStart *core.QPoint
+	var linkStart *widgets.QGraphicsItemGroup
 
 	itemSize := 64.0
 	view.ConnectDropEvent(func(event *gui.QDropEvent) {
@@ -104,12 +104,17 @@ func CreateLayout(window *widgets.QMainWindow) {
 
 	view.ConnectMousePressEvent(func(event *gui.QMouseEvent) {
 		item := view.ItemAt(event.Pos())
-		if linkRadio.IsChecked() {
-			linkStart = event.Pos()
-		}
-		if item != nil && !linkRadio.IsChecked() {
-			movingItem = item.Group()
-			movingItem.SetOpacity(0.6)
+		// If an item was found
+		if item != nil {
+			if linkRadio.IsChecked() {
+				// We're creating a link
+				linkStart = item.Group()
+
+			} else {
+				// We're moving an item
+				movingItem = item.Group()
+				movingItem.SetOpacity(0.6)
+			}
 		}
 	})
 	view.ConnectMouseMoveEvent(func(event *gui.QMouseEvent) {
@@ -126,15 +131,23 @@ func CreateLayout(window *widgets.QMainWindow) {
 		}
 		// We released while creating a link
 		if linkStart != nil {
-			fromPos := view.MapToScene(linkStart)
-			toPos := view.MapToScene(event.Pos())
+			// If we try to link to the empty void
+			if view.ItemAt(event.Pos()).Group() == nil {
+				linkStart = nil
+				return
+			}
+			fromPos := linkStart.Pos()
+			toItem := view.ItemAt(event.Pos()).Group()
+			toPos := toItem.Pos()
+			if toPos.X() == 0 && toPos.Y() == 0 {
+				return
+			}
 			scene.AddLine2(
-				float64(fromPos.X()), float64(fromPos.Y()),
-				float64(toPos.X()), float64(toPos.Y()),
+				fromPos.X()+32, fromPos.Y()+32,
+				toPos.X()+32, toPos.Y()+32,
 				gui.NewQPen3(gui.NewQColor3(0, 255, 0, 255)))
 			linkStart = nil
 		}
-
 	})
 	// Show the view
 	view.Show()
