@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/therecipe/qt/core"
@@ -10,7 +11,6 @@ import (
 
 func NewMainWindow() (*widgets.QApplication, *widgets.QMainWindow) {
 	app := widgets.NewQApplication(len(os.Args), os.Args)
-
 	// Create window
 	window := widgets.NewQMainWindow(nil, 0)
 	// Set minimum and initial size
@@ -79,6 +79,21 @@ func CreateLayout(window *widgets.QMainWindow) {
 	splitter.AddWidget(view)
 	splitter.AddWidget(CreateValidationEngineLayout())
 	window.SetCentralWidget(splitter)
+	// Add example item
+	view.SetAcceptDrops(true)
+	view.ConnectDragMoveEvent(func(event *gui.QDragMoveEvent) {
+		if event.Source() != nil {
+			event.AcceptProposedAction()
+		}
+	})
+	var itemID int
+	itemSize := 64.0
+	view.ConnectDropEvent(func(event *gui.QDropEvent) {
+		pos := view.MapToScene(event.Pos())
+		scene.AddItem(AddGraphicsItem(view, fmt.Sprintf("Item %v", itemID), pos.X()-(itemSize/2.0), pos.Y()-(itemSize/2.0), itemSize, itemSize))
+		itemID = itemID + 1
+	})
+	// Show the view
 	view.Show()
 }
 
