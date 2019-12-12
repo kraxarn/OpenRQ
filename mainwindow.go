@@ -135,14 +135,14 @@ func CreateItemCreator() *widgets.QWidget {
 	widget.SetMaximumWidth(250)
 
 	return widget
-
 }
 
 func AddGraphicsItem(view *widgets.QGraphicsView, text string, x, y, width, height float64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem2(text, nil)
-	shapeItem := widgets.NewQGraphicsRectItem3(x, y, width, height, nil)
+	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, width, height, nil)
 	group.AddToGroup(textItem)
 	group.AddToGroup(shapeItem)
+	group.SetPos2(x, y)
 	return group
 }
