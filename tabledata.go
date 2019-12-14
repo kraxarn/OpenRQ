@@ -23,6 +23,7 @@ var tableData = map[string][]string{
 	},
 	"Projects": {
 		"id integer primary key",
+		"uid integer",
 		"name text",
 		"created integer default current_timestamp",
 	},
