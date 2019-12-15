@@ -28,6 +28,8 @@ func NewMainWindow() (*widgets.QApplication, *widgets.QMainWindow) {
 	return app, window
 }
 
+var dockValidation *widgets.QDockWidget
+
 // AddToolBar adds a tool bar to the specified window
 func AddToolBar(window *widgets.QMainWindow) {
 	// Create tool bar
@@ -66,6 +68,14 @@ func AddToolBar(window *widgets.QMainWindow) {
 	validate := fileToolBar.AddAction("Validation Engine")
 	validate.SetCheckable(true)
 	validate.SetIcon(gui.QIcon_FromTheme("system-search"))
+	// Open validation engine widget when toggling
+	validate.ConnectTriggered(func(checked bool) {
+		if checked {
+			dockValidation.Show()
+		} else {
+			dockValidation.Hide()
+		}
+	})
 }
 
 // CreateLayout creates the main layout widgets
@@ -73,13 +83,36 @@ func CreateLayout(window *widgets.QMainWindow) {
 	// Create scene and view
 	scene := widgets.NewQGraphicsScene(nil)
 	view := widgets.NewQGraphicsView2(scene, nil)
-	// Use layout
-	splitter := widgets.NewQSplitter(nil)
+
+	// Set view as central widget
+	window.SetCentralWidget(view)
+
+	// Create validation engine dock widget
+	dockValidation = widgets.NewQDockWidget("Validation Engine", window, 0)
+	dockValidation.SetWidget(CreateValidationEngineLayout())
+	// Hide by default
+	dockValidation.Hide()
+	// Hide close button as that's done from the tool bar
+	dockValidation.SetFeatures(widgets.QDockWidget__DockWidgetMovable | widgets.QDockWidget__DockWidgetFloatable)
+	// Add dock to main window
+	window.AddDockWidget(core.Qt__RightDockWidgetArea, dockValidation)
+
+	// Create item type dock widget
+	dockItemType := widgets.NewQDockWidget("Item Type", window, 0)
 	linkRadio := widgets.NewQRadioButton2("Link", nil)
-	splitter.AddWidget(CreateItemCreator(linkRadio))
-	splitter.AddWidget(view)
-	splitter.AddWidget(CreateValidationEngineLayout())
-	window.SetCentralWidget(splitter)
+	dockItemType.SetWidget(CreateItemTypeCreator(linkRadio))
+	// Hide close button as there's no reason to close it
+	dockItemType.SetFeatures(widgets.QDockWidget__DockWidgetMovable | widgets.QDockWidget__DockWidgetFloatable)
+	// Add dock to main window
+	window.AddDockWidget(core.Qt__LeftDockWidgetArea, dockItemType)
+
+	// Create item shape dock widget
+	dockItemShape := widgets.NewQDockWidget("Shape", window, 0)
+	dockItemShape.SetWidget(CreateItemShapeCreator())
+	// Hide close button as there's no reason to close it
+	dockItemShape.SetFeatures(widgets.QDockWidget__DockWidgetMovable | widgets.QDockWidget__DockWidgetFloatable)
+	window.AddDockWidget(core.Qt__LeftDockWidgetArea, dockItemShape)
+
 	// Add example item
 	view.SetAcceptDrops(true)
 	view.SetAlignment(core.Qt__AlignTop | core.Qt__AlignLeft)
@@ -154,11 +187,12 @@ func CreateLayout(window *widgets.QMainWindow) {
 
 func CreateValidationEngineLayout() *widgets.QWidget {
 	layout := widgets.NewQVBoxLayout()
-	layout.AddWidget(widgets.NewQLabel2("Validation Engine", nil, core.Qt__Widget), 0, core.Qt__AlignTop)
+	layout.AddWidget(widgets.NewQLabel2("Nothing to validate", nil, core.Qt__Widget), 0, core.Qt__AlignTop)
 
 	widget := widgets.NewQWidget(nil, core.Qt__Widget)
 	widget.SetLayout(layout)
 	widget.SetMaximumWidth(250)
+	widget.SetMinimumWidth(150)
 	return widget
 }
 
@@ -172,23 +206,45 @@ func CreateGroupBox(title string, childAlignment core.Qt__AlignmentFlag, childre
 	return group
 }
 
-func CreateItemCreator(linkRadio *widgets.QRadioButton) *widgets.QWidget {
+func CreateVBoxWidget(children ...widgets.QWidget_ITF) *widgets.QWidget {
+	layout := widgets.NewQVBoxLayout()
+	for _, child := range children {
+		layout.AddWidget(child, 1, 0)
+	}
+	widget := widgets.NewQWidget(nil, 0)
+	widget.SetLayout(layout)
+	return widget
+}
+
+func CreateItemTypeCreator(linkRadio *widgets.QRadioButton) *widgets.QWidget {
 	layout := widgets.NewQVBoxLayout()
 	// Requirement/solution selection
 	reqRadio := widgets.NewQRadioButton2("Requirement", nil)
 	reqRadio.SetChecked(true)
-	layout.AddWidget(CreateGroupBox("Item Type", core.Qt__AlignTop,
-		reqRadio, widgets.NewQRadioButton2("Solution", nil), linkRadio,
-	), 1, core.Qt__AlignTop)
-
-	shapeList := widgets.NewQListWidget(nil)
-	shapeList.SetDragEnabled(true)
-	shapeList.AddItem("Square")
-	layout.AddWidget(CreateGroupBox("Create", 0, shapeList), 0, 0)
+	layout.AddWidget(CreateVBoxWidget(
+		reqRadio,
+		widgets.NewQRadioButton2("Solution", nil),
+		linkRadio), 1, core.Qt__AlignTop)
 
 	widget := widgets.NewQWidget(nil, core.Qt__Widget)
 	widget.SetLayout(layout)
-	widget.SetMaximumWidth(250)
+	widget.SetMaximumWidth(200)
+	widget.SetMinimumWidth(150)
+
+	return widget
+}
+
+func CreateItemShapeCreator() *widgets.QWidget {
+	layout := widgets.NewQVBoxLayout()
+	shapeList := widgets.NewQListWidget(nil)
+	shapeList.SetDragEnabled(true)
+	shapeList.AddItem("Square")
+	layout.AddWidget(CreateVBoxWidget(shapeList), 0, 0)
+
+	widget := widgets.NewQWidget(nil, core.Qt__Widget)
+	widget.SetLayout(layout)
+	widget.SetMaximumWidth(200)
+	widget.SetMinimumWidth(150)
 
 	return widget
 }
