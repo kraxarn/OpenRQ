@@ -216,6 +216,14 @@ func CreateVBoxWidget(children ...widgets.QWidget_ITF) *widgets.QWidget {
 	return widget
 }
 
+func LayoutToWidget(vbox *widgets.QVBoxLayout) *widgets.QWidget {
+	widget := widgets.NewQWidget(nil, 0)
+	widget.SetLayout(vbox)
+	widget.SetMaximumWidth(200)
+	widget.SetMinimumWidth(150)
+	return widget
+}
+
 func CreateItemTypeCreator(linkRadio *widgets.QRadioButton) *widgets.QWidget {
 	layout := widgets.NewQVBoxLayout()
 	// Requirement/solution selection
@@ -225,13 +233,7 @@ func CreateItemTypeCreator(linkRadio *widgets.QRadioButton) *widgets.QWidget {
 		reqRadio,
 		widgets.NewQRadioButton2("Solution", nil),
 		linkRadio), 1, core.Qt__AlignTop)
-
-	widget := widgets.NewQWidget(nil, core.Qt__Widget)
-	widget.SetLayout(layout)
-	widget.SetMaximumWidth(200)
-	widget.SetMinimumWidth(150)
-
-	return widget
+	return LayoutToWidget(layout)
 }
 
 func CreateItemShapeCreator() *widgets.QWidget {
@@ -240,13 +242,7 @@ func CreateItemShapeCreator() *widgets.QWidget {
 	shapeList.SetDragEnabled(true)
 	shapeList.AddItem("Square")
 	layout.AddWidget(CreateVBoxWidget(shapeList), 0, 0)
-
-	widget := widgets.NewQWidget(nil, 0)
-	widget.SetLayout(layout)
-	widget.SetMaximumWidth(200)
-	widget.SetMinimumWidth(150)
-
-	return widget
+	return LayoutToWidget(layout)
 }
 
 func AddGraphicsItem(view *widgets.QGraphicsView, text string, x, y, width, height float64) *widgets.QGraphicsItemGroup {
