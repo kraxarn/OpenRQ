@@ -138,7 +138,7 @@ func CreateLayout(window *widgets.QMainWindow) {
 	view.ConnectMousePressEvent(func(event *gui.QMouseEvent) {
 		item := view.ItemAt(event.Pos())
 		// If an item was found
-		if item != nil {
+		if item != nil && item.Group() != nil {
 			if linkRadio.IsChecked() {
 				// We're creating a link
 				linkStart = item.Group()
