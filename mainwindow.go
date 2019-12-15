@@ -241,7 +241,7 @@ func CreateItemShapeCreator() *widgets.QWidget {
 	shapeList.AddItem("Square")
 	layout.AddWidget(CreateVBoxWidget(shapeList), 0, 0)
 
-	widget := widgets.NewQWidget(nil, core.Qt__Widget)
+	widget := widgets.NewQWidget(nil, 0)
 	widget.SetLayout(layout)
 	widget.SetMaximumWidth(200)
 	widget.SetMinimumWidth(150)
