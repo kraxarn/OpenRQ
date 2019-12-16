@@ -211,16 +211,6 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 	return widget
 }
 
-func CreateGroupBox(title string, childAlignment core.Qt__AlignmentFlag, children ...widgets.QWidget_ITF) *widgets.QGroupBox {
-	layout := widgets.NewQVBoxLayout()
-	for _, child := range children {
-		layout.AddWidget(child, 1, childAlignment)
-	}
-	group := widgets.NewQGroupBox2(title, nil)
-	group.SetLayout(layout)
-	return group
-}
-
 func CreateVBoxWidget(children ...widgets.QWidget_ITF) *widgets.QWidget {
 	layout := widgets.NewQVBoxLayout()
 	for _, child := range children {
