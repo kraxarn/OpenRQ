@@ -9,6 +9,60 @@ import (
 	"github.com/therecipe/qt/widgets"
 )
 
+type Line struct {
+	parent *widgets.QGraphicsItemGroup
+	child  *widgets.QGraphicsItemGroup
+	line   *widgets.QGraphicsLineItem
+}
+
+var links map[*widgets.QGraphicsItemGroup]Line
+
+func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineItem {
+	// Check if map needs to be created
+	if links == nil {
+		links = make(map[*widgets.QGraphicsItemGroup]Line)
+	}
+	// Get from (parent) and to (child)
+	fromPos := parent.Pos()
+	toPos := child.Pos()
+	// Create graphics line
+	line := widgets.NewQGraphicsLineItem3(
+		fromPos.X()+32, fromPos.Y()+32,
+		toPos.X()+32, toPos.Y()+32,
+		nil,
+	)
+	// Set the color of it
+	line.SetPen(gui.NewQPen3(gui.NewQColor3(0, 255, 0, 255)))
+	// Create line data
+	lineData := Line{
+		parent, child, line,
+	}
+	fmt.Println("adding to map:", parent, child)
+	links[parent] = lineData
+	links[child] = lineData
+	// Return the graphics line to add to scene
+	return line
+}
+
+func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
+	// Get link
+	link := links[item]
+	// Error checking
+	//if link == (Line{}) {
+	//	return
+	//}
+	// If the item is the parent
+	isParent := link.parent == item
+	// Update position of either parent or child
+	if isParent {
+		pos := link.child.Pos()
+		link.line.SetLine2(x, y, pos.X(), pos.Y())
+	} else {
+		pos := link.parent.Pos()
+		link.line.SetLine2(pos.X(), pos.Y(), x, y)
+	}
+}
+
 func NewMainWindow() (*widgets.QApplication, *widgets.QMainWindow) {
 	app := widgets.NewQApplication(len(os.Args), os.Args)
 	// Create window
@@ -173,6 +227,12 @@ func CreateLayout(window *widgets.QMainWindow) {
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
 		// We released a button while moving an item
 		if movingItem != nil {
+			// Update link if needed
+			_, inMap := links[movingItem]
+			fmt.Println("moving item:", *movingItem, fmt.Sprintf("%d", *movingItem), "exists in map:", inMap)
+			if _, ok := links[movingItem]; ok {
+				UpdateLinkPos(movingItem, movingItem.Pos().X(), movingItem.Pos().Y())
+			}
 			// Reset opacity and remove as moving
 			movingItem.SetOpacity(1.0)
 			movingItem = nil
@@ -184,15 +244,11 @@ func CreateLayout(window *widgets.QMainWindow) {
 				linkStart = nil
 				return
 			}
-			fromPos := linkStart.Pos()
 			toPos := view.ItemAt(event.Pos()).Group().Pos()
 			if toPos.X() == 0 && toPos.Y() == 0 {
 				return
 			}
-			scene.AddLine2(
-				fromPos.X()+32, fromPos.Y()+32,
-				toPos.X()+32, toPos.Y()+32,
-				gui.NewQPen3(gui.NewQColor3(0, 255, 0, 255)))
+			scene.AddItem(AddLink(linkStart, view.ItemAt(event.Pos()).Group()))
 			linkStart = nil
 		}
 	})
@@ -229,6 +285,7 @@ func LayoutToWidget(vbox *widgets.QVBoxLayout) *widgets.QWidget {
 	return widget
 }
 
+//CreateItemTypeCreator
 func CreateItemTypeCreator(linkRadio *widgets.QRadioButton) *widgets.QWidget {
 	layout := widgets.NewQVBoxLayout()
 	// Requirement/solution selection
@@ -241,6 +298,7 @@ func CreateItemTypeCreator(linkRadio *widgets.QRadioButton) *widgets.QWidget {
 	return LayoutToWidget(layout)
 }
 
+//CreateItemShapeCreator
 func CreateItemShapeCreator() *widgets.QWidget {
 	layout := widgets.NewQVBoxLayout()
 	shapeList := widgets.NewQListWidget(nil)
@@ -250,6 +308,7 @@ func CreateItemShapeCreator() *widgets.QWidget {
 	return LayoutToWidget(layout)
 }
 
+//AddGraphicsItem
 func AddGraphicsItem(view *widgets.QGraphicsView, text string, x, y, width, height float64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem2(text, nil)
