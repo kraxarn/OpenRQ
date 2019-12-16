@@ -17,6 +17,7 @@ func main() {
 	AddToolBar(window)
 
 	// make the window visible
+	//test
 	window.Show()
 
 	// Create example project
