@@ -52,6 +52,15 @@ func AddToolBar(window *widgets.QMainWindow) {
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...")
 	// Seperation for other stuff
 	fileMenu.AddSeparator()
+	// About button that shows version and license information
+	fileAbout := fileMenu.AddAction2(gui.QIcon_FromTheme("help-about"), "About")
+	fileAbout.ConnectTriggered(func(checked bool) {
+		aboutMessage := "This version was compiled without proper version information.\nNo version info available."
+		if len(versionTagName) > 0 && len(versionCommitHash) > 0 {
+			aboutMessage = fmt.Sprintf("Version %v, commit %v", versionTagName, versionCommitHash)
+		}
+		widgets.QMessageBox_About(window, "About OpenRQ", aboutMessage)
+	})
 	// Quit option that closes everything, sets default quit keybind
 	fileQuit := fileMenu.AddAction2(gui.QIcon_FromTheme("application-exit"), "Quit")
 	fileQuit.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__Quit))

@@ -1,5 +1,8 @@
 package main
 
+var versionTagName string
+var versionCommitHash string
+
 func main() {
 	// Create window and main app
 	app, window := NewMainWindow()
