@@ -1,17 +1,8 @@
 package main
 
-import (
-	"fmt"
-	"os"
-)
-
 func main() {
 	// Create window and main app
 	app, window := NewMainWindow()
-
-	// Create example project
-	proj := NewProject("default.orq")
-	req := Requirement{}
 
 	// Add menu bar
 	CreateLayout(window)
