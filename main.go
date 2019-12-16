@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	// Create window and main app
 	app, window := NewMainWindow()
 
 	// Create example project
@@ -17,7 +18,6 @@ func main() {
 	AddToolBar(window)
 
 	// make the window visible
-	//test
 	window.Show()
 
 	// Create example project
