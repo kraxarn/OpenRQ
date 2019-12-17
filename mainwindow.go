@@ -75,7 +75,7 @@ func NewMainWindow() (*widgets.QApplication, *widgets.QMainWindow) {
 		core.Qt__LeftToRight,
 		core.Qt__AlignCenter,
 		window.Size(),
-		app.Desktop().AvailableGeometry(0)))
+		gui.QGuiApplication_Screens()[0].AvailableGeometry()))
 	// Set a window title
 	window.SetWindowTitle("OpenRQ")
 
