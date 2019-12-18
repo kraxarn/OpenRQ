@@ -25,6 +25,7 @@ func GetGroupUID(group *widgets.QGraphicsItemGroup) uint64 {
 }
 
 func GetGroupFromUID(id uint64) *widgets.QGraphicsItemGroup {
+	// TODO: This needs to be done in a quicker way
 	for _, item := range view.Items() {
 		if group := item.Group(); group != nil && GetGroupUID(group) == id {
 			return group
@@ -69,9 +70,9 @@ func GetRandomItemUID() uint64 {
 func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 	// Get link
 	itemID := GetGroupUID(item)
-	link := links[itemID]
+	link, ok := links[itemID]
 	// Error checking
-	if link == (Line{}) {
+	if !ok {
 		return
 	}
 	// If the item is the parent
@@ -251,9 +252,8 @@ func CreateLayout(window *widgets.QMainWindow) {
 		// We released a button while moving an item
 		if movingItem != nil {
 			// Update link if needed
-			if _, ok := links[GetGroupUID(movingItem)]; ok {
-				UpdateLinkPos(movingItem, movingItem.Pos().X(), movingItem.Pos().Y())
-			}
+			// Error handling is already taken care of in UpdateLinkPos
+			UpdateLinkPos(movingItem, movingItem.Pos().X(), movingItem.Pos().Y())
 			// Reset opacity and remove as moving
 			movingItem.SetOpacity(1.0)
 			movingItem = nil
