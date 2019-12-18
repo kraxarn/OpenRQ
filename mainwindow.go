@@ -2,12 +2,90 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 )
+
+type Line struct {
+	parent uint64
+	child  uint64
+	line   *widgets.QGraphicsLineItem
+}
+
+var links map[uint64]Line
+
+var view *widgets.QGraphicsView
+
+func GetGroupUID(group *widgets.QGraphicsItemGroup) uint64 {
+	return group.Data(0).ToULongLong(nil)
+}
+
+func GetGroupFromUID(id uint64) *widgets.QGraphicsItemGroup {
+	// TODO: This needs to be done in a quicker way
+	for _, item := range view.Items() {
+		if group := item.Group(); group != nil && GetGroupUID(group) == id {
+			return group
+		}
+	}
+	return nil
+}
+
+func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineItem {
+	// Check if map needs to be created
+	if links == nil {
+		links = make(map[uint64]Line)
+	}
+	// Get from (parent) and to (child)
+	fromPos := parent.Pos()
+	toPos := child.Pos()
+	// Create graphics line
+	line := widgets.NewQGraphicsLineItem3(
+		fromPos.X()+32, fromPos.Y()+32,
+		toPos.X()+32, toPos.Y()+32,
+		nil,
+	)
+	// Set the color of it
+	line.SetPen(gui.NewQPen3(gui.NewQColor3(0, 255, 0, 255)))
+	// Create line data
+	parentID := GetGroupUID(parent)
+	childID := GetGroupUID(child)
+	lineData := Line{
+		parentID, childID, line,
+	}
+	links[parentID] = lineData
+	links[childID] = lineData
+	// Return the graphics line to add to scene
+	return line
+}
+
+func GetRandomItemUID() uint64 {
+	// TODO: This should guarantee unique, for now, just return random uint64
+	return rand.Uint64()
+}
+
+func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
+	// Get link
+	itemID := GetGroupUID(item)
+	link, ok := links[itemID]
+	// Error checking
+	if !ok {
+		return
+	}
+	// If the item is the parent
+	isParent := link.parent == itemID
+	// Update position of either parent or child
+	if isParent {
+		pos := GetGroupFromUID(link.child).Pos()
+		link.line.SetLine2(x+32, y+32, pos.X()+32, pos.Y()+32)
+	} else {
+		pos := GetGroupFromUID(link.parent).Pos()
+		link.line.SetLine2(pos.X()+32, pos.Y()+32, x+32, y+32)
+	}
+}
 
 func NewMainWindow() (*widgets.QApplication, *widgets.QMainWindow) {
 	app := widgets.NewQApplication(len(os.Args), os.Args)
@@ -21,7 +99,7 @@ func NewMainWindow() (*widgets.QApplication, *widgets.QMainWindow) {
 		core.Qt__LeftToRight,
 		core.Qt__AlignCenter,
 		window.Size(),
-		app.Desktop().AvailableGeometry(0)))
+		gui.QGuiApplication_Screens()[0].AvailableGeometry()))
 	// Set a window title
 	window.SetWindowTitle("OpenRQ")
 
@@ -42,11 +120,26 @@ func AddToolBar(window *widgets.QMainWindow) {
 	// Add file menu
 	fileTool := widgets.NewQToolButton(fileToolBar)
 	fileMenu := widgets.NewQMenu2("", fileTool)
+	// Add "new project" option
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "New...")
+	// Add "open project" option
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-open"), "Open...")
+	// Add "save project" option
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save"), "Save")
+	// Add "save project as" option
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...")
+	// Seperation for other stuff
 	fileMenu.AddSeparator()
+	// About button that shows version and license information
+	fileAbout := fileMenu.AddAction2(gui.QIcon_FromTheme("help-about"), "About")
+	fileAbout.ConnectTriggered(func(checked bool) {
+		aboutMessage := "This version was compiled without proper version information.\nNo version info available."
+		if len(versionTagName) > 0 && len(versionCommitHash) > 0 {
+			aboutMessage = fmt.Sprintf("Version %v, commit %v", versionTagName, versionCommitHash)
+		}
+		widgets.QMessageBox_About(window, "About OpenRQ", aboutMessage)
+	})
+	// Quit option that closes everything, sets default quit keybind
 	fileQuit := fileMenu.AddAction2(gui.QIcon_FromTheme("application-exit"), "Quit")
 	fileQuit.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__Quit))
 	fileQuit.ConnectTriggered(func(checked bool) {
@@ -82,7 +175,7 @@ func AddToolBar(window *widgets.QMainWindow) {
 func CreateLayout(window *widgets.QMainWindow) {
 	// Create scene and view
 	scene := widgets.NewQGraphicsScene(nil)
-	view := widgets.NewQGraphicsView2(scene, nil)
+	view = widgets.NewQGraphicsView2(scene, nil)
 
 	// Set view as central widget
 	window.SetCentralWidget(view)
@@ -158,6 +251,9 @@ func CreateLayout(window *widgets.QMainWindow) {
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
 		// We released a button while moving an item
 		if movingItem != nil {
+			// Update link if needed
+			// Error handling is already taken care of in UpdateLinkPos
+			UpdateLinkPos(movingItem, movingItem.Pos().X(), movingItem.Pos().Y())
 			// Reset opacity and remove as moving
 			movingItem.SetOpacity(1.0)
 			movingItem = nil
@@ -169,15 +265,11 @@ func CreateLayout(window *widgets.QMainWindow) {
 				linkStart = nil
 				return
 			}
-			fromPos := linkStart.Pos()
 			toPos := view.ItemAt(event.Pos()).Group().Pos()
 			if toPos.X() == 0 && toPos.Y() == 0 {
 				return
 			}
-			scene.AddLine2(
-				fromPos.X()+32, fromPos.Y()+32,
-				toPos.X()+32, toPos.Y()+32,
-				gui.NewQPen3(gui.NewQColor3(0, 255, 0, 255)))
+			scene.AddItem(AddLink(linkStart, view.ItemAt(event.Pos()).Group()))
 			linkStart = nil
 		}
 	})
@@ -194,16 +286,6 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 	widget.SetMaximumWidth(250)
 	widget.SetMinimumWidth(150)
 	return widget
-}
-
-func CreateGroupBox(title string, childAlignment core.Qt__AlignmentFlag, children ...widgets.QWidget_ITF) *widgets.QGroupBox {
-	layout := widgets.NewQVBoxLayout()
-	for _, child := range children {
-		layout.AddWidget(child, 1, childAlignment)
-	}
-	group := widgets.NewQGroupBox2(title, nil)
-	group.SetLayout(layout)
-	return group
 }
 
 func CreateVBoxWidget(children ...widgets.QWidget_ITF) *widgets.QWidget {
@@ -224,6 +306,7 @@ func LayoutToWidget(vbox *widgets.QVBoxLayout) *widgets.QWidget {
 	return widget
 }
 
+//CreateItemTypeCreator
 func CreateItemTypeCreator(linkRadio *widgets.QRadioButton) *widgets.QWidget {
 	layout := widgets.NewQVBoxLayout()
 	// Requirement/solution selection
@@ -236,6 +319,7 @@ func CreateItemTypeCreator(linkRadio *widgets.QRadioButton) *widgets.QWidget {
 	return LayoutToWidget(layout)
 }
 
+//CreateItemShapeCreator
 func CreateItemShapeCreator() *widgets.QWidget {
 	layout := widgets.NewQVBoxLayout()
 	shapeList := widgets.NewQListWidget(nil)
@@ -245,6 +329,7 @@ func CreateItemShapeCreator() *widgets.QWidget {
 	return LayoutToWidget(layout)
 }
 
+//AddGraphicsItem
 func AddGraphicsItem(view *widgets.QGraphicsView, text string, x, y, width, height float64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem2(text, nil)
@@ -252,5 +337,6 @@ func AddGraphicsItem(view *widgets.QGraphicsView, text string, x, y, width, heig
 	group.AddToGroup(textItem)
 	group.AddToGroup(shapeItem)
 	group.SetPos2(x, y)
+	group.SetData(0, core.NewQVariant1(GetRandomItemUID()))
 	return group
 }
