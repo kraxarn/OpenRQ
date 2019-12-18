@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 
 	"github.com/therecipe/qt/core"
@@ -10,17 +11,32 @@ import (
 )
 
 type Line struct {
-	parent *widgets.QGraphicsItemGroup
-	child  *widgets.QGraphicsItemGroup
+	parent uint64
+	child  uint64
 	line   *widgets.QGraphicsLineItem
 }
 
-var links map[*widgets.QGraphicsItemGroup]Line
+var links map[uint64]Line
+
+var view *widgets.QGraphicsView
+
+func GetGroupUID(group *widgets.QGraphicsItemGroup) uint64 {
+	return group.Data(0).ToULongLong(nil)
+}
+
+func GetGroupFromUID(id uint64) *widgets.QGraphicsItemGroup {
+	for _, item := range view.Items() {
+		if group := item.Group(); group != nil && GetGroupUID(group) == id {
+			return group
+		}
+	}
+	return nil
+}
 
 func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineItem {
 	// Check if map needs to be created
 	if links == nil {
-		links = make(map[*widgets.QGraphicsItemGroup]Line)
+		links = make(map[uint64]Line)
 	}
 	// Get from (parent) and to (child)
 	fromPos := parent.Pos()
@@ -34,32 +50,39 @@ func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineIt
 	// Set the color of it
 	line.SetPen(gui.NewQPen3(gui.NewQColor3(0, 255, 0, 255)))
 	// Create line data
+	parentID := GetGroupUID(parent)
+	childID := GetGroupUID(child)
 	lineData := Line{
-		parent, child, line,
+		parentID, childID, line,
 	}
-	fmt.Println("adding to map:", parent, child)
-	links[parent] = lineData
-	links[child] = lineData
+	links[parentID] = lineData
+	links[childID] = lineData
 	// Return the graphics line to add to scene
 	return line
 }
 
+func GetRandomItemUID() uint64 {
+	// TODO: This should guarantee unique, for now, just return random uint64
+	return rand.Uint64()
+}
+
 func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 	// Get link
-	link := links[item]
+	itemID := GetGroupUID(item)
+	link := links[itemID]
 	// Error checking
-	//if link == (Line{}) {
-	//	return
-	//}
+	if link == (Line{}) {
+		return
+	}
 	// If the item is the parent
-	isParent := link.parent == item
+	isParent := link.parent == itemID
 	// Update position of either parent or child
 	if isParent {
-		pos := link.child.Pos()
-		link.line.SetLine2(x, y, pos.X(), pos.Y())
+		pos := GetGroupFromUID(link.child).Pos()
+		link.line.SetLine2(x+32, y+32, pos.X()+32, pos.Y()+32)
 	} else {
-		pos := link.parent.Pos()
-		link.line.SetLine2(pos.X(), pos.Y(), x, y)
+		pos := GetGroupFromUID(link.parent).Pos()
+		link.line.SetLine2(pos.X()+32, pos.Y()+32, x+32, y+32)
 	}
 }
 
@@ -151,7 +174,7 @@ func AddToolBar(window *widgets.QMainWindow) {
 func CreateLayout(window *widgets.QMainWindow) {
 	// Create scene and view
 	scene := widgets.NewQGraphicsScene(nil)
-	view := widgets.NewQGraphicsView2(scene, nil)
+	view = widgets.NewQGraphicsView2(scene, nil)
 
 	// Set view as central widget
 	window.SetCentralWidget(view)
@@ -228,9 +251,7 @@ func CreateLayout(window *widgets.QMainWindow) {
 		// We released a button while moving an item
 		if movingItem != nil {
 			// Update link if needed
-			_, inMap := links[movingItem]
-			fmt.Println("moving item:", *movingItem, fmt.Sprintf("%d", *movingItem), "exists in map:", inMap)
-			if _, ok := links[movingItem]; ok {
+			if _, ok := links[GetGroupUID(movingItem)]; ok {
 				UpdateLinkPos(movingItem, movingItem.Pos().X(), movingItem.Pos().Y())
 			}
 			// Reset opacity and remove as moving
@@ -316,5 +337,6 @@ func AddGraphicsItem(view *widgets.QGraphicsView, text string, x, y, width, heig
 	group.AddToGroup(textItem)
 	group.AddToGroup(shapeItem)
 	group.SetPos2(x, y)
+	group.SetData(0, core.NewQVariant1(GetRandomItemUID()))
 	return group
 }
