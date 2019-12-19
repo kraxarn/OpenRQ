@@ -9,7 +9,9 @@ import (
 	"github.com/therecipe/qt/widgets"
 )
 
+// NewMainWindow creates and lays out the main window
 func NewMainWindow() (*widgets.QApplication, *widgets.QMainWindow) {
+	// Create basic Qt application
 	app := widgets.NewQApplication(len(os.Args), os.Args)
 	// Create window
 	window := widgets.NewQMainWindow(nil, 0)
@@ -24,10 +26,11 @@ func NewMainWindow() (*widgets.QApplication, *widgets.QMainWindow) {
 		gui.QGuiApplication_Screens()[0].AvailableGeometry()))
 	// Set a window title
 	window.SetWindowTitle("OpenRQ")
-
+	// Return app and window for use in the main function
 	return app, window
 }
 
+// Temporary global pointer to the validation engine window for the hide/show button
 var dockValidation *widgets.QDockWidget
 
 // AddToolBar adds a tool bar to the specified window
@@ -67,6 +70,7 @@ func AddToolBar(window *widgets.QMainWindow) {
 	fileQuit.ConnectTriggered(func(checked bool) {
 		window.Close()
 	})
+	// Create the actual menu and attack it to the main tool bar
 	fileTool.SetText("File")
 	fileTool.SetIcon(gui.QIcon_FromTheme("document-properties"))
 	fileTool.SetMenu(fileMenu)
@@ -77,9 +81,11 @@ func AddToolBar(window *widgets.QMainWindow) {
 	// Add requirement/solution buttons
 	fileToolBar.AddAction2(gui.QIcon_FromTheme("add"), "New Requirement")
 	fileToolBar.AddAction2(gui.QIcon_FromTheme("add"), "New Solution")
+	// Add a spacer to show the button to the far right
 	spacer := widgets.NewQWidget(nil, 0)
 	spacer.SetSizePolicy2(widgets.QSizePolicy__Expanding, widgets.QSizePolicy__Expanding)
 	fileToolBar.AddWidget(spacer)
+	// Add validation engine toggle button
 	validate := fileToolBar.AddAction("Validation Engine")
 	validate.SetCheckable(true)
 	validate.SetIcon(gui.QIcon_FromTheme("system-search"))
@@ -126,10 +132,14 @@ func CreateLayout(window *widgets.QMainWindow) {
 	window.AddDockWidget(core.Qt__LeftDockWidgetArea, dockItemShape)
 }
 
+// CreateValidationEngineLayout creates the validation engine window
 func CreateValidationEngineLayout() *widgets.QWidget {
+	// Main vertical box
 	layout := widgets.NewQVBoxLayout()
+	// Temporary label until we have validation engine added
 	layout.AddWidget(widgets.NewQLabel2("Nothing to validate", nil, core.Qt__Widget), 0, core.Qt__AlignTop)
 
+	// Convert layout to widget and return it
 	widget := widgets.NewQWidget(nil, core.Qt__Widget)
 	widget.SetLayout(layout)
 	widget.SetMaximumWidth(250)
