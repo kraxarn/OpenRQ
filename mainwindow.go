@@ -16,7 +16,7 @@ type Line struct {
 	line   *widgets.QGraphicsLineItem
 }
 
-var links map[uint64][]Line
+var links map[uint64][]*Line
 
 var view *widgets.QGraphicsView
 
@@ -37,7 +37,7 @@ func GetGroupFromUID(id uint64) *widgets.QGraphicsItemGroup {
 func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineItem {
 	// Check if map needs to be created
 	if links == nil {
-		links = make(map[uint64][]Line)
+		links = make(map[uint64][]*Line)
 	}
 	// Get from (parent) and to (child)
 	fromPos := parent.Pos()
@@ -56,8 +56,8 @@ func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineIt
 	lineData := Line{
 		parentID, childID, line,
 	}
-	links[parentID] = append(links[parentID], lineData)
-	links[childID] = append(links[childID], lineData)
+	links[parentID] = append(links[parentID], &lineData)
+	links[childID] = append(links[childID], &lineData)
 	// Return the graphics line to add to scene
 	return line
 }
