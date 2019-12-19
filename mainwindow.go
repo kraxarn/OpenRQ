@@ -16,7 +16,7 @@ type Line struct {
 	line   *widgets.QGraphicsLineItem
 }
 
-var links map[uint64]Line
+var links map[uint64][]Line
 
 var view *widgets.QGraphicsView
 
@@ -37,7 +37,7 @@ func GetGroupFromUID(id uint64) *widgets.QGraphicsItemGroup {
 func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineItem {
 	// Check if map needs to be created
 	if links == nil {
-		links = make(map[uint64]Line)
+		links = make(map[uint64][]Line)
 	}
 	// Get from (parent) and to (child)
 	fromPos := parent.Pos()
@@ -56,8 +56,8 @@ func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineIt
 	lineData := Line{
 		parentID, childID, line,
 	}
-	links[parentID] = lineData
-	links[childID] = lineData
+	links[parentID] = append(links[parentID], lineData)
+	links[childID] = append(links[childID], lineData)
 	// Return the graphics line to add to scene
 	return line
 }
@@ -75,15 +75,17 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 	if !ok {
 		return
 	}
-	// If the item is the parent
-	isParent := link.parent == itemID
-	// Update position of either parent or child
-	if isParent {
-		pos := GetGroupFromUID(link.child).Pos()
-		link.line.SetLine2(x+32, y+32, pos.X()+32, pos.Y()+32)
-	} else {
-		pos := GetGroupFromUID(link.parent).Pos()
-		link.line.SetLine2(pos.X()+32, pos.Y()+32, x+32, y+32)
+	for _, l := range link {
+		// If the item is the parent
+		isParent := l.parent == itemID
+		// Update position of either parent or child
+		if isParent {
+			pos := GetGroupFromUID(l.child).Pos()
+			l.line.SetLine2(x+32, y+32, pos.X()+32, pos.Y()+32)
+		} else {
+			pos := GetGroupFromUID(l.parent).Pos()
+			l.line.SetLine2(pos.X()+32, pos.Y()+32, x+32, y+32)
+		}
 	}
 }
 
