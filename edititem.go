@@ -1,17 +1,26 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 )
 
 type TextFormat int8
+type EntryType int8
 
 const (
 	FormatBold          TextFormat = 0
 	FormatItalic        TextFormat = 1
 	FormatUnderline     TextFormat = 2
 	FormatStrikeThrough TextFormat = 3
+)
+
+const (
+	Description  EntryType = 0
+	Rationale    EntryType = 1
+	FitCriterion EntryType = 2
 )
 
 func CreateGroupBox(title string, children ...widgets.QWidget_ITF) *widgets.QGroupBox {
@@ -58,11 +67,36 @@ func CreateEditWidget() *widgets.QDockWidget {
 	layout.AddWidget(itemType, 0, 0)
 
 	textOptions := [3]*widgets.QToolBar{}
+	textEdits := [3]*widgets.QTextEdit{}
+
+	textValues := [3]string{}
+	textEndings := [3]string{}
 
 	for i := 0; i < 3; i++ {
 		t := CreateTextOptions()
 		t.SetVisible(false)
 		textOptions[i] = t
+
+		// Attach(Attack) tool bar buttons to actions
+		i2 := i
+		for format, action := range t.Actions() {
+			f := format
+			action.ConnectTriggered(func(checked bool) {
+				textValues[i2] = textEdits[i2].ToHtml()
+				switch TextFormat(f) {
+				case FormatBold:
+					if checked {
+						textValues[i2] += "<b>"
+						textEndings[i2] = "</b>"
+					} else {
+						textValues[i2] += "</b>"
+						textEndings[i2] = ""
+					}
+				}
+				textEdits[i2].SetHtml(textValues[i2])
+				fmt.Println(textValues[i2])
+			})
+		}
 	}
 
 	updateTextOptions := func(index int) {
@@ -79,13 +113,13 @@ func CreateEditWidget() *widgets.QDockWidget {
 		"Fit Criterion",
 	}
 	for i := 0; i < len(titles); i++ {
-		textEdit := widgets.NewQTextEdit(nil)
+		textEdits[i] = widgets.NewQTextEdit(nil)
 		// Local copy of i
 		i2 := i
-		textEdit.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
+		textEdits[i].ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
 			updateTextOptions(i2)
 		})
-		layout.AddWidget(CreateGroupBox(titles[i], textOptions[i], textEdit), 1, 0)
+		layout.AddWidget(CreateGroupBox(titles[i], textOptions[i], textEdits[i]), 1, 0)
 	}
 
 	// Save and dismiss
