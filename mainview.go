@@ -47,6 +47,9 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	})
 
 	view.ConnectMousePressEvent(func(event *gui.QMouseEvent) {
+		if event.Button() != core.Qt__LeftButton {
+			return
+		}
 		item := view.ItemAt(event.Pos())
 		// If an item was found
 		if item != nil && item.Group() != nil {
@@ -67,6 +70,24 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 		}
 	})
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
+		if event.Button() == core.Qt__RightButton {
+			// When right clicking item, show edit/delete options
+			menu := widgets.NewQMenu(nil)
+			// Edit option
+			editAction := menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit")
+			editAction.ConnectTriggered(func(checked bool) {
+				window.AddDockWidget(core.Qt__RightDockWidgetArea, CreateEditWidget())
+			})
+			// Delete option
+			deleteAction := menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete")
+			deleteAction.ConnectTriggered(func(checked bool) {
+				// Hakke write ur delete here
+			})
+			// Show menu at cursor
+			menu.Popup(view.MapToGlobal(event.Pos()), nil)
+			return
+		}
+
 		// We released a button while moving an item
 		if movingItem != nil {
 			// Update link if needed
@@ -76,6 +97,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 			movingItem.SetOpacity(1.0)
 			movingItem = nil
 		}
+
 		// We released while creating a link
 		if linkStart != nil {
 			// If we try to link to the empty void
