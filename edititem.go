@@ -16,39 +16,31 @@ const (
 
 func CreateGroupBox(title string, children ...widgets.QWidget_ITF) *widgets.QGroupBox {
 	layout := widgets.NewQVBoxLayout()
-	for _, child := range children {
-		layout.AddWidget(child, 1, 0)
+	layout.SetSpacing(0)
+	layout.SetContentsMargins(0, 0, 0, 0)
+	for i, child := range children {
+		layout.AddWidget(child, i, 0)
 	}
 	groupBox := widgets.NewQGroupBox2(title, nil)
 	groupBox.SetLayout(layout)
 	return groupBox
 }
 
-func CreateIconButton(icon string) *widgets.QPushButton {
-	button := widgets.NewQPushButton(nil)
-	button.SetCheckable(true)
-	button.SetIcon(gui.QIcon_FromTheme(icon))
-	button.SetFlat(true)
-	return button
-}
+func CreateTextOptions() *widgets.QToolBar {
+	toolBar := widgets.NewQToolBar2(nil)
 
-func CreateTextOptions() (*widgets.QWidget, []*widgets.QPushButton) {
-	layout := widgets.NewQHBoxLayout()
-
-	buttons := []*widgets.QPushButton{
-		CreateIconButton("format-text-bold"),
-		CreateIconButton("format-text-italic"),
-		CreateIconButton("format-text-underline"),
-		CreateIconButton("format-text-strikethrough"),
+	buttons := []string{
+		"format-text-bold",
+		"format-text-italic",
+		"format-text-underline",
+		"format-text-strikethrough",
 	}
 
 	for _, button := range buttons {
-		layout.AddWidget(button, 1, 0)
+		toolBar.AddAction2(gui.QIcon_FromTheme(button), button).SetCheckable(true)
 	}
 
-	widget := widgets.NewQWidget(nil, 0)
-	widget.SetLayout(layout)
-	return widget, buttons
+	return toolBar
 }
 
 func CreateEditWidget() *widgets.QDockWidget {
@@ -65,14 +57,12 @@ func CreateEditWidget() *widgets.QDockWidget {
 	itemType.SetLayout(itemTypeLayout)
 	layout.AddWidget(itemType, 0, 0)
 
-	textOptions := [3]*widgets.QWidget{}
-	textButtons := [3][]*widgets.QPushButton{}
+	textOptions := [3]*widgets.QToolBar{}
 
 	for i := 0; i < 3; i++ {
-		o, b := CreateTextOptions()
-		//o.SetVisible(false)
-		textOptions[i] = o
-		textButtons[i] = b
+		t := CreateTextOptions()
+		t.SetVisible(false)
+		textOptions[i] = t
 	}
 
 	updateTextOptions := func(index int) {
@@ -82,26 +72,21 @@ func CreateEditWidget() *widgets.QDockWidget {
 		textOptions[index].SetVisible(true)
 	}
 
-	// Description
-	descText := widgets.NewQTextEdit(nil)
-	descText.ConnectFocusInEvent(func(event *gui.QFocusEvent) {
-		updateTextOptions(0)
-	})
-	layout.AddWidget(CreateGroupBox("Description", textOptions[0], descText), 1, 0)
-
-	// Rationale
-	ratText := widgets.NewQTextEdit(nil)
-	ratText.ConnectFocusInEvent(func(event *gui.QFocusEvent) {
-		updateTextOptions(1)
-	})
-	layout.AddWidget(CreateGroupBox("Rationale", textOptions[1], ratText), 1, 0)
-
-	// Fit criterion
-	fitText := widgets.NewQTextEdit(nil)
-	fitText.ConnectFocusInEvent(func(event *gui.QFocusEvent) {
-		updateTextOptions(2)
-	})
-	layout.AddWidget(CreateGroupBox("Fit Criterion", textOptions[2], fitText), 1, 0)
+	// Looping through Description, Rationale, Fit Criterion.
+	titles := []string{
+		"Description",
+		"Rationale",
+		"Fit Criterion",
+	}
+	for i := 0; i < len(titles); i++ {
+		textEdit := widgets.NewQTextEdit(nil)
+		// Local copy of i
+		i2 := i
+		textEdit.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
+			updateTextOptions(i2)
+		})
+		layout.AddWidget(CreateGroupBox(titles[i], textOptions[i], textEdit), 1, 0)
+	}
 
 	// Save and dismiss
 	layout.AddWidget(widgets.NewQPushButton2("Save", nil), 1, 0)
