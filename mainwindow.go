@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
@@ -58,10 +59,17 @@ func AddToolBar(window *widgets.QMainWindow) {
 	// About button that shows version and license information
 	fileAbout := fileMenu.AddAction2(gui.QIcon_FromTheme("help-about"), "About")
 	fileAbout.ConnectTriggered(func(checked bool) {
+		// Add app version information
 		aboutMessage := "This version was compiled without proper version information.\nNo version info available."
 		if len(versionTagName) > 0 && len(versionCommitHash) > 0 {
 			aboutMessage = fmt.Sprintf("Version %v, commit %v", versionTagName, versionCommitHash)
 		}
+		// Add useless version and memory information
+		var mem runtime.MemStats
+		runtime.ReadMemStats(&mem)
+		aboutMessage += fmt.Sprintf("\n\nQt %v, Go %v, %v\nMemory usage: %.2f mb (%.2f mb allocated by OS)",
+			core.QLibraryInfo_Version().ToString(), runtime.Version()[2:], runtime.GOARCH, float64(mem.TotalAlloc)/1000000, float64(mem.Sys)/1000000)
+		// Show simple dialog for now
 		widgets.QMessageBox_About(window, "About OpenRQ", aboutMessage)
 	})
 	// Quit option that closes everything, sets default quit keybind
