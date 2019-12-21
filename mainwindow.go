@@ -95,6 +95,37 @@ func AddToolBar(window *widgets.QMainWindow) {
 	aboutMenu.AddAction2(gui.QIcon_FromTheme("qt"), "About Qt").ConnectTriggered(func(checked bool) {
 		widgets.QMessageBox_AboutQt(window, "About Qt")
 	})
+	aboutMenu.AddSeparator()
+	aboutMenu.AddAction2(gui.QIcon_FromTheme("download"), "Check for updates").ConnectTriggered(func(checked bool) {
+		// Check if version was compiled with version information
+		if len(versionCommitHash) <= 0 {
+			widgets.QMessageBox_About(window, "Updater", "This version was compiled without version information, updater is not available")
+			return
+		}
+		// Actually check for updates
+		if IsLatestVersion() {
+			widgets.QMessageBox_Information(
+				window, "Updater", "You are running the latest version",
+				widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+			return
+		}
+		// New update was found
+		switch widgets.QMessageBox_Question(
+			window, "Updater",
+			"New update found, do you want to update now?",
+			widgets.QMessageBox__Yes|widgets.QMessageBox__No, widgets.QMessageBox__Yes) {
+		case widgets.QMessageBox__Yes:
+			if err := Update(); err != nil {
+				widgets.QMessageBox_Warning(
+					window, "Updater", fmt.Sprintf("Failed to update: %v", err),
+					widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+			} else {
+				widgets.QMessageBox_Information(
+					window, "Updater", "Update successful, restart application to apply changes",
+					widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+			}
+		}
+	})
 	aboutBar.SetMenu(aboutMenu)
 	// Add menu to main toolbar
 	fileToolBar.AddWidget(aboutBar)
