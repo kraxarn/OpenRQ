@@ -126,6 +126,20 @@ func AddToolBar(window *widgets.QMainWindow) {
 			}
 		}
 	})
+	aboutMenu.AddAction2(gui.QIcon_FromTheme("run-clean"), "Run GC").ConnectTriggered(func(checked bool) {
+		// Get memory information
+		var mem runtime.MemStats
+		runtime.ReadMemStats(&mem)
+		// Fetch how much memory we used before
+		memBefore := mem.TotalAlloc
+		// Run garbage collector
+		runtime.GC()
+		// Show dialog how much memory we saved
+		runtime.ReadMemStats(&mem)
+		widgets.QMessageBox_Information(
+			window, "Memory Info", fmt.Sprintf("Freed %.2f kb of memory", float64(mem.TotalAlloc-memBefore)/1000.0),
+			widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+	})
 	aboutBar.SetMenu(aboutMenu)
 	// Add menu to main toolbar
 	fileToolBar.AddWidget(aboutBar)
