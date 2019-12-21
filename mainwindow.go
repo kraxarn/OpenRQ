@@ -56,22 +56,6 @@ func AddToolBar(window *widgets.QMainWindow) {
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...")
 	// Seperation for other stuff
 	fileMenu.AddSeparator()
-	// About button that shows version and license information
-	fileAbout := fileMenu.AddAction2(gui.QIcon_FromTheme("help-about"), "About")
-	fileAbout.ConnectTriggered(func(checked bool) {
-		// Add app version information
-		aboutMessage := "This version was compiled without proper version information.\nNo version info available."
-		if len(versionTagName) > 0 && len(versionCommitHash) > 0 {
-			aboutMessage = fmt.Sprintf("Version %v, commit %v", versionTagName, versionCommitHash)
-		}
-		// Add useless version and memory information
-		var mem runtime.MemStats
-		runtime.ReadMemStats(&mem)
-		aboutMessage += fmt.Sprintf("\n\nQt %v, Go %v, %v\nMemory usage: %.2f mb (%.2f mb allocated by OS)",
-			core.QLibraryInfo_Version().ToString(), runtime.Version()[2:], runtime.GOARCH, float64(mem.TotalAlloc)/1000000, float64(mem.Sys)/1000000)
-		// Show simple dialog for now
-		widgets.QMessageBox_About(window, "About OpenRQ", aboutMessage)
-	})
 	// Quit option that closes everything, sets default quit keybind
 	fileQuit := fileMenu.AddAction2(gui.QIcon_FromTheme("application-exit"), "Quit")
 	fileQuit.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__Quit))
@@ -85,6 +69,35 @@ func AddToolBar(window *widgets.QMainWindow) {
 	fileTool.SetToolButtonStyle(core.Qt__ToolButtonTextBesideIcon)
 	fileTool.SetPopupMode(widgets.QToolButton__InstantPopup)
 	fileToolBar.AddWidget(fileTool)
+
+	// Add about button
+	aboutBar := widgets.NewQToolButton(fileToolBar)
+	aboutBar.SetIcon(gui.QIcon_FromTheme("help"))
+	aboutBar.SetToolButtonStyle(core.Qt__ToolButtonTextBesideIcon)
+	aboutBar.SetPopupMode(widgets.QToolButton__InstantPopup)
+	aboutBar.SetText("Help")
+	// Add menu options
+	aboutMenu := widgets.NewQMenu2("", aboutBar)
+	aboutMenu.AddAction2(gui.QIcon_FromTheme("help-about"), "About OpenRQ").ConnectTriggered(func(checked bool) {
+		// Add app version information
+		aboutMessage := "This version was compiled without proper version information.\nNo version info available."
+		if len(versionTagName) > 0 && len(versionCommitHash) > 0 {
+			aboutMessage = fmt.Sprintf("Version\t%v\nCommit\t%v", versionTagName[1:], versionCommitHash)
+		}
+		// Add useless version and memory information
+		var mem runtime.MemStats
+		runtime.ReadMemStats(&mem)
+		aboutMessage += fmt.Sprintf("\n\nQt %v, Go %v, %v\nMemory usage: %.2f mb (%.2f mb allocated)",
+			core.QLibraryInfo_Version().ToString(), runtime.Version()[2:], runtime.GOARCH, float64(mem.TotalAlloc)/1000000, float64(mem.Sys)/1000000)
+		// Show simple dialog for now
+		widgets.QMessageBox_About(window, "About OpenRQ", aboutMessage)
+	})
+	aboutMenu.AddAction2(gui.QIcon_FromTheme("qt"), "About Qt").ConnectTriggered(func(checked bool) {
+		widgets.QMessageBox_AboutQt(window, "About Qt")
+	})
+	aboutBar.SetMenu(aboutMenu)
+	// Add menu to main toolbar
+	fileToolBar.AddWidget(aboutBar)
 
 	// Add requirement/solution buttons
 	fileToolBar.AddAction2(gui.QIcon_FromTheme("add"), "New Requirement")
