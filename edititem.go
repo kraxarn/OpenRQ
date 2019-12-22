@@ -138,9 +138,20 @@ func CreateEditWidget() *widgets.QDockWidget {
 		textEdits[i] = widgets.NewQTextEdit(nil)
 		// Local copy of i
 		i2 := i
+		// Show/hide font options on selection
 		textEdits[i].ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
 			updateTextOptions(i2)
 		})
+		// Update font options when selecting new text
+		textEdits[i].ConnectCurrentCharFormatChanged(func(charFormat *gui.QTextCharFormat) {
+			actions := textOptions[i2].Actions()
+			font := charFormat.Font()
+			actions[FormatBold].SetChecked(font.Bold())
+			actions[FormatItalic].SetChecked(font.Italic())
+			actions[FormatUnderline].SetChecked(font.Underline())
+			actions[FormatStrikeThrough].SetChecked(font.StrikeOut())
+		})
+		// Add text edit in group box to main layout
 		layout.AddWidget(CreateGroupBox(titles[i], textOptions[i], textEdits[i]), 1, 0)
 	}
 
