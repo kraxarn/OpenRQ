@@ -63,6 +63,7 @@ func CreateEditWidget() *widgets.QDockWidget {
 	// Requirement/solution selection
 	itemType := widgets.NewQGroupBox2("Item Type", nil)
 	reqRadio := widgets.NewQRadioButton2("Requirement", nil)
+	reqRadio.SetChecked(true)
 	solRadio := widgets.NewQRadioButton2("Solution", nil)
 	itemTypeLayout := widgets.NewQHBoxLayout()
 	itemTypeLayout.AddWidget(reqRadio, 1, 0)
