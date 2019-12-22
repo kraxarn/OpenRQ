@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 )
@@ -55,6 +53,16 @@ func CreateTextOptions() *widgets.QToolBar {
 	return toolBar
 }
 
+// MergeFormat formats text in a text view
+func MergeFormat(textEdit *widgets.QTextEdit, format *gui.QTextCharFormat) {
+	cursor := textEdit.TextCursor()
+	if !cursor.HasSelection() {
+		cursor.Select(gui.QTextCursor__WordUnderCursor)
+	}
+	cursor.MergeCharFormat(format)
+	textEdit.MergeCurrentCharFormat(format)
+}
+
 // CreateEditWidget creates the main window for editing an item
 func CreateEditWidget() *widgets.QDockWidget {
 	// Main vertical layout
@@ -74,9 +82,6 @@ func CreateEditWidget() *widgets.QDockWidget {
 	textOptions := [3]*widgets.QToolBar{}
 	textEdits := [3]*widgets.QTextEdit{}
 
-	textValues := [3]string{}
-	textEndings := [3]string{}
-
 	for i := 0; i < 3; i++ {
 		t := CreateTextOptions()
 		t.SetVisible(false)
@@ -87,19 +92,32 @@ func CreateEditWidget() *widgets.QDockWidget {
 		for format, action := range t.Actions() {
 			f := format
 			action.ConnectTriggered(func(checked bool) {
-				textValues[i2] = textEdits[i2].ToHtml()
 				switch TextFormat(f) {
+				// Bold text
 				case FormatBold:
+					charFormat := gui.NewQTextCharFormat()
+					fontWeight := gui.QFont__Normal
 					if checked {
-						textValues[i2] += "<b>"
-						textEndings[i2] = "</b>"
-					} else {
-						textValues[i2] += "</b>"
-						textEndings[i2] = ""
+						fontWeight = gui.QFont__Bold
 					}
+					charFormat.SetFontWeight(int(fontWeight))
+					MergeFormat(textEdits[i2], charFormat)
+				// Italic text
+				case FormatItalic:
+					charFormat := gui.NewQTextCharFormat()
+					charFormat.SetFontItalic(checked)
+					MergeFormat(textEdits[i2], charFormat)
+				// Strike through text
+				case FormatStrikeThrough:
+					charFormat := gui.NewQTextCharFormat()
+					charFormat.SetFontStrikeOut(checked)
+					MergeFormat(textEdits[i2], charFormat)
+				// Underlined text
+				case FormatUnderline:
+					charFormat := gui.NewQTextCharFormat()
+					charFormat.SetFontUnderline(checked)
+					MergeFormat(textEdits[i2], charFormat)
 				}
-				textEdits[i2].SetHtml(textValues[i2])
-				fmt.Println(textValues[i2])
 			})
 		}
 	}
