@@ -141,10 +141,10 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 	if isReq {
 		// Add requirement
 		stmt, err := data.Database.Prepare("insert into Requirements (uid) values (?)")
-		_, err = stmt.Exec(itemUID)
 		if err != nil {
 			return fmt.Errorf("failed to insert requirement: %v", err)
 		}
+		_, err = stmt.Exec(itemUID)
 		defer stmt.Close()
 	} else {
 		// Add solution
@@ -157,10 +157,10 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 
 	// Find item id
 	stmt, err := data.Database.Prepare("select id from Requirements where uid = ?")
-	row := stmt.QueryRow(item.GetUid())
 	if err != nil {
 		return fmt.Errorf("failed to get item id: %v", err)
 	}
+	row := stmt.QueryRow(item.GetUid())
 	defer stmt.Close()
 	err = row.Scan(&req.id)
 	if err != nil || req.id == 0 {
