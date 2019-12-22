@@ -110,11 +110,10 @@ func AddToolBar(window *widgets.QMainWindow) {
 			return
 		}
 		// New update was found
-		switch widgets.QMessageBox_Question(
+		if widgets.QMessageBox_Question(
 			window, "Updater",
 			"New update found, do you want to update now?",
-			widgets.QMessageBox__Yes|widgets.QMessageBox__No, widgets.QMessageBox__Yes) {
-		case widgets.QMessageBox__Yes:
+			widgets.QMessageBox__Yes|widgets.QMessageBox__No, widgets.QMessageBox__Yes) == widgets.QMessageBox__Yes {
 			if err := Update(); err != nil {
 				widgets.QMessageBox_Warning(
 					window, "Updater", fmt.Sprintf("Failed to update: %v", err),
