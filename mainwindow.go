@@ -54,9 +54,9 @@ func AddToolBar(window *widgets.QMainWindow) {
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save"), "Save")
 	// Add "save project as" option
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...")
-	// Seperation for other stuff
+	// Separation for other stuff
 	fileMenu.AddSeparator()
-	// Quit option that closes everything, sets default quit keybind
+	// Quit option that closes everything, sets default quit shortcut
 	fileQuit := fileMenu.AddAction2(gui.QIcon_FromTheme("application-exit"), "Quit")
 	fileQuit.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__Quit))
 	fileQuit.ConnectTriggered(func(checked bool) {
