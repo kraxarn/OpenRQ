@@ -1,8 +1,7 @@
 package main
 
 // Variables set from linker flags
-var versionTagName string
-var versionCommitHash string
+var versionTagName, versionCommitHash string
 
 func main() {
 	// Create window and main app
