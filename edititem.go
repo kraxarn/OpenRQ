@@ -7,9 +7,8 @@ import (
 	"github.com/therecipe/qt/widgets"
 )
 
+// TextFormat enum (bold, italic, underline, strikethrough)
 type TextFormat int8
-type EntryType int8
-
 const (
 	FormatBold          TextFormat = 0
 	FormatItalic        TextFormat = 1
@@ -17,12 +16,15 @@ const (
 	FormatStrikeThrough TextFormat = 3
 )
 
+// EntryType enum (description, rationale, fit criterion)
+type EntryType int8
 const (
 	Description  EntryType = 0
 	Rationale    EntryType = 1
 	FitCriterion EntryType = 2
 )
 
+// CreateGroupBox creates a new group box with children in a vertical layout
 func CreateGroupBox(title string, children ...widgets.QWidget_ITF) *widgets.QGroupBox {
 	layout := widgets.NewQVBoxLayout()
 	layout.SetSpacing(0)
@@ -35,6 +37,7 @@ func CreateGroupBox(title string, children ...widgets.QWidget_ITF) *widgets.QGro
 	return groupBox
 }
 
+// CreateTextOptions creates the buttons for the various formatting options
 func CreateTextOptions() *widgets.QToolBar {
 	toolBar := widgets.NewQToolBar2(nil)
 
@@ -52,6 +55,7 @@ func CreateTextOptions() *widgets.QToolBar {
 	return toolBar
 }
 
+// CreateEditWidget creates the main window for editing an item
 func CreateEditWidget() *widgets.QDockWidget {
 	// Main vertical layout
 	layout := widgets.NewQVBoxLayout()

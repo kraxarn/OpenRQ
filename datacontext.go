@@ -11,13 +11,14 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// ItemType enum
 type ItemType int8
-
 const (
 	TypeSolution    ItemType = 0
 	TypeRequirement ItemType = 1
 )
 
+// DataContext holding the connection to the database
 type DataContext struct {
 	Database *sql.DB
 }
@@ -54,6 +55,7 @@ func NewDataContext(path string) *DataContext {
 	return data
 }
 
+// Close closes the connection to the database
 func (data *DataContext) Close() error {
 	return data.Database.Close()
 }
@@ -80,29 +82,37 @@ func (data *DataContext) Create(projectName string) error {
 	return err
 }
 
+// AddRequirement adds a requirement to the current database
 func (data *DataContext) AddRequirement(description, rationale, fitCriterion string) error {
+	// Generate a new random UID
 	reqUID := data.GetItemUid()
+	// Try to add the requirement to the database
 	if _, err := data.Database.Exec(
 		"insert into Requirements (uid, description, rationale, fitCriterion) values (?, ?, ?, ?)",
 		reqUID, description, rationale, fitCriterion); err != nil {
 		return err
 	}
+	// Try to version it and return the result of it
 	return data.AddItemVersion(reqUID, TypeRequirement)
 }
 
+// AddSolution adds a solution to the database
 func (data *DataContext) AddSolution(description string) error {
+	// Generate a new random UID
 	solUID := data.GetItemUid()
+	// Try to add the solution to the database
 	if _, err := data.Database.Exec(
 		"insert into Solutions (uid, description) values (?, ?)",
 		solUID, description); err != nil {
 		return err
 	}
-
+	// Try to version it and return the result of it
 	return data.AddItemVersion(solUID, TypeSolution)
 }
 
+// AddItemVersion versions an item
 func (data *DataContext) AddItemVersion(itemUID int64, itemType ItemType) error {
-	// Find item id
+	// Find item ID
 	var itemID int
 	stmt, err := data.Database.Prepare("select id from ? where uid = ?")
 	if err != nil {
@@ -116,11 +126,13 @@ func (data *DataContext) AddItemVersion(itemUID int64, itemType ItemType) error 
 	return err
 }
 
-// UpdateItemVersion Implement this later
+// UpdateItemVersion increases the version of an item
+// TODO: Not yet implemented as version control isn't implemented
 func (data *DataContext) UpdateItemVersion() error {
 	return nil
 }
 
+// RemoveItem removes the item from the current version
 func (data *DataContext) RemoveItem(itemType ItemType, itemID int) error {
 	// Execute SQL
 	_, err := data.Database.Exec(
@@ -129,6 +141,7 @@ func (data *DataContext) RemoveItem(itemType ItemType, itemID int) error {
 	return err
 }
 
+// UpdateItem updates the content of an item
 func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 	// Try to cast item as requirement
 	req, isReq := item.(Requirement)
@@ -171,6 +184,7 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 	return nil
 }
 
+// GetItemType gets what struct the generic item interface is
 func GetItemType(item Item) ItemType {
 	switch item.(type) {
 	case Requirement:
@@ -180,6 +194,7 @@ func GetItemType(item Item) ItemType {
 	}
 }
 
+// GetItemTableName gets the table name in the database for an item
 func GetItemTableName(itemType ItemType) string {
 	switch itemType {
 	case TypeRequirement:
@@ -217,6 +232,7 @@ func (data *DataContext) GetItemValue(itemID int, tableName, name string) interf
 	return value
 }
 
+// AddItemChild creates a link between parent and child
 func (data *DataContext) AddItemChild(parent, child Item) error {
 	// Get what table name child has
 	childTable := "Solutions"
@@ -230,6 +246,7 @@ func (data *DataContext) AddItemChild(parent, child Item) error {
 	return err
 }
 
+// RemoveItemParent removes the link between parent and child
 func (data *DataContext) RemoveItemParent(child Item) error {
 	// Get what table name child has
 	childTable := "Solutions"
