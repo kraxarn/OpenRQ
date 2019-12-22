@@ -82,12 +82,11 @@ func CreateEditWidget() *widgets.QDockWidget {
 	textOptions := [3]*widgets.QToolBar{}
 	textEdits := [3]*widgets.QTextEdit{}
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < len(textOptions); i++ {
 		t := CreateTextOptions()
 		t.SetVisible(false)
 		textOptions[i] = t
-
-		// Attach(Attack) tool bar buttons to actions
+		// Attack tool bar buttons for actions
 		i2 := i
 		for format, action := range t.Actions() {
 			f := format
