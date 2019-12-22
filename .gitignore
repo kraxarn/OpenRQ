@@ -40,6 +40,8 @@ OpenRQ
 # Ignore project files
 *.orq
 
-py/
-cpp/
+# Ignore files from qtdeploy
 deploy/
+
+# Ignore any GoLand files
+.idea/
