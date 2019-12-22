@@ -1,7 +1,7 @@
 package main
 
-var versionTagName string
-var versionCommitHash string
+// Variables set from linker flags
+var versionTagName, versionCommitHash string
 
 func main() {
 	// Create window and main app
@@ -11,12 +11,12 @@ func main() {
 	CreateLayout(window)
 	AddToolBar(window)
 
-	// make the window visible
+	// Show the main window
 	window.Show()
 
 	// Create example project
 	NewProject("project.orq")
 
-	// start the main Qt event loop
+	// Main Qt event loop
 	app.Exec()
 }

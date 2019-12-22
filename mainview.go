@@ -42,7 +42,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	itemSize := 64.0
 	view.ConnectDropEvent(func(event *gui.QDropEvent) {
 		pos := view.MapToScene(event.Pos())
-		scene.AddItem(AddGraphicsItem(view, fmt.Sprintf("Item %v", itemID), pos.X()-(itemSize/2.0), pos.Y()-(itemSize/2.0), itemSize, itemSize))
+		scene.AddItem(AddGraphicsItem(fmt.Sprintf("Item %v", itemID), pos.X()-(itemSize/2.0), pos.Y()-(itemSize/2.0), itemSize, itemSize))
 		itemID = itemID + 1
 	})
 
@@ -185,7 +185,7 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 	}
 }
 
-func AddGraphicsItem(view *widgets.QGraphicsView, text string, x, y, width, height float64) *widgets.QGraphicsItemGroup {
+func AddGraphicsItem(text string, x, y, width, height float64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem2(text, nil)
 	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, width, height, nil)

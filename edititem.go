@@ -5,8 +5,8 @@ import (
 	"github.com/therecipe/qt/widgets"
 )
 
+// TextFormat enum (bold, italic, underline, strikethrough)
 type TextFormat int8
-
 const (
 	FormatBold          TextFormat = 0
 	FormatItalic        TextFormat = 1
@@ -14,43 +14,56 @@ const (
 	FormatStrikeThrough TextFormat = 3
 )
 
+// EntryType enum (description, rationale, fit criterion)
+type EntryType int8
+const (
+	Description  EntryType = 0
+	Rationale    EntryType = 1
+	FitCriterion EntryType = 2
+)
+
+// CreateGroupBox creates a new group box with children in a vertical layout
 func CreateGroupBox(title string, children ...widgets.QWidget_ITF) *widgets.QGroupBox {
 	layout := widgets.NewQVBoxLayout()
-	for _, child := range children {
-		layout.AddWidget(child, 1, 0)
+	layout.SetSpacing(0)
+	layout.SetContentsMargins(0, 0, 0, 0)
+	for i, child := range children {
+		layout.AddWidget(child, i, 0)
 	}
 	groupBox := widgets.NewQGroupBox2(title, nil)
 	groupBox.SetLayout(layout)
 	return groupBox
 }
 
-func CreateIconButton(icon string) *widgets.QPushButton {
-	button := widgets.NewQPushButton(nil)
-	button.SetCheckable(true)
-	button.SetIcon(gui.QIcon_FromTheme(icon))
-	button.SetFlat(true)
-	return button
-}
+// CreateTextOptions creates the buttons for the various formatting options
+func CreateTextOptions() *widgets.QToolBar {
+	toolBar := widgets.NewQToolBar2(nil)
 
-func CreateTextOptions() (*widgets.QWidget, []*widgets.QPushButton) {
-	layout := widgets.NewQHBoxLayout()
-
-	buttons := []*widgets.QPushButton{
-		CreateIconButton("format-text-bold"),
-		CreateIconButton("format-text-italic"),
-		CreateIconButton("format-text-underline"),
-		CreateIconButton("format-text-strikethrough"),
+	buttons := []string{
+		"format-text-bold",
+		"format-text-italic",
+		"format-text-underline",
+		"format-text-strikethrough",
 	}
 
 	for _, button := range buttons {
-		layout.AddWidget(button, 1, 0)
+		toolBar.AddAction2(gui.QIcon_FromTheme(button), button).SetCheckable(true)
 	}
 
-	widget := widgets.NewQWidget(nil, 0)
-	widget.SetLayout(layout)
-	return widget, buttons
+	return toolBar
 }
 
+// MergeFormat formats text in a text view
+func MergeFormat(textEdit *widgets.QTextEdit, format *gui.QTextCharFormat) {
+	cursor := textEdit.TextCursor()
+	if !cursor.HasSelection() {
+		cursor.Select(gui.QTextCursor__WordUnderCursor)
+	}
+	cursor.MergeCharFormat(format)
+	textEdit.MergeCurrentCharFormat(format)
+}
+
+// CreateEditWidget creates the main window for editing an item
 func CreateEditWidget() *widgets.QDockWidget {
 	// Main vertical layout
 	layout := widgets.NewQVBoxLayout()
@@ -58,6 +71,7 @@ func CreateEditWidget() *widgets.QDockWidget {
 	// Requirement/solution selection
 	itemType := widgets.NewQGroupBox2("Item Type", nil)
 	reqRadio := widgets.NewQRadioButton2("Requirement", nil)
+	reqRadio.SetChecked(true)
 	solRadio := widgets.NewQRadioButton2("Solution", nil)
 	itemTypeLayout := widgets.NewQHBoxLayout()
 	itemTypeLayout.AddWidget(reqRadio, 1, 0)
@@ -65,14 +79,46 @@ func CreateEditWidget() *widgets.QDockWidget {
 	itemType.SetLayout(itemTypeLayout)
 	layout.AddWidget(itemType, 0, 0)
 
-	textOptions := [3]*widgets.QWidget{}
-	textButtons := [3][]*widgets.QPushButton{}
+	textOptions := [3]*widgets.QToolBar{}
+	textEdits := [3]*widgets.QTextEdit{}
 
-	for i := 0; i < 3; i++ {
-		o, b := CreateTextOptions()
-		//o.SetVisible(false)
-		textOptions[i] = o
-		textButtons[i] = b
+	for i := 0; i < len(textOptions); i++ {
+		t := CreateTextOptions()
+		t.SetVisible(false)
+		textOptions[i] = t
+		// Attack tool bar buttons for actions
+		i2 := i
+		for format, action := range t.Actions() {
+			f := format
+			action.ConnectTriggered(func(checked bool) {
+				switch TextFormat(f) {
+				// Bold text
+				case FormatBold:
+					charFormat := gui.NewQTextCharFormat()
+					fontWeight := gui.QFont__Normal
+					if checked {
+						fontWeight = gui.QFont__Bold
+					}
+					charFormat.SetFontWeight(int(fontWeight))
+					MergeFormat(textEdits[i2], charFormat)
+				// Italic text
+				case FormatItalic:
+					charFormat := gui.NewQTextCharFormat()
+					charFormat.SetFontItalic(checked)
+					MergeFormat(textEdits[i2], charFormat)
+				// Strike through text
+				case FormatStrikeThrough:
+					charFormat := gui.NewQTextCharFormat()
+					charFormat.SetFontStrikeOut(checked)
+					MergeFormat(textEdits[i2], charFormat)
+				// Underlined text
+				case FormatUnderline:
+					charFormat := gui.NewQTextCharFormat()
+					charFormat.SetFontUnderline(checked)
+					MergeFormat(textEdits[i2], charFormat)
+				}
+			})
+		}
 	}
 
 	updateTextOptions := func(index int) {
@@ -82,26 +128,32 @@ func CreateEditWidget() *widgets.QDockWidget {
 		textOptions[index].SetVisible(true)
 	}
 
-	// Description
-	descText := widgets.NewQTextEdit(nil)
-	descText.ConnectFocusInEvent(func(event *gui.QFocusEvent) {
-		updateTextOptions(0)
-	})
-	layout.AddWidget(CreateGroupBox("Description", textOptions[0], descText), 1, 0)
-
-	// Rationale
-	ratText := widgets.NewQTextEdit(nil)
-	ratText.ConnectFocusInEvent(func(event *gui.QFocusEvent) {
-		updateTextOptions(1)
-	})
-	layout.AddWidget(CreateGroupBox("Rationale", textOptions[1], ratText), 1, 0)
-
-	// Fit criterion
-	fitText := widgets.NewQTextEdit(nil)
-	fitText.ConnectFocusInEvent(func(event *gui.QFocusEvent) {
-		updateTextOptions(2)
-	})
-	layout.AddWidget(CreateGroupBox("Fit Criterion", textOptions[2], fitText), 1, 0)
+	// Looping through Description, Rationale, Fit Criterion.
+	titles := []string{
+		"Description",
+		"Rationale",
+		"Fit Criterion",
+	}
+	for i := 0; i < len(titles); i++ {
+		textEdits[i] = widgets.NewQTextEdit(nil)
+		// Local copy of i
+		i2 := i
+		// Show/hide font options on selection
+		textEdits[i].ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
+			updateTextOptions(i2)
+		})
+		// Update font options when selecting new text
+		textEdits[i].ConnectCurrentCharFormatChanged(func(charFormat *gui.QTextCharFormat) {
+			actions := textOptions[i2].Actions()
+			font := charFormat.Font()
+			actions[FormatBold].SetChecked(font.Bold())
+			actions[FormatItalic].SetChecked(font.Italic())
+			actions[FormatUnderline].SetChecked(font.Underline())
+			actions[FormatStrikeThrough].SetChecked(font.StrikeOut())
+		})
+		// Add text edit in group box to main layout
+		layout.AddWidget(CreateGroupBox(titles[i], textOptions[i], textEdits[i]), 1, 0)
+	}
 
 	// Save and dismiss
 	layout.AddWidget(widgets.NewQPushButton2("Save", nil), 1, 0)
