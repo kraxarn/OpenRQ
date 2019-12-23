@@ -122,7 +122,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 			// Edit option
 			editAction := menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit")
 			editAction.ConnectTriggered(func(checked bool) {
-				if editWidget, ok := CreateEditWidgetFromPos(event.Pos()); ok {
+				if editWidget, ok := CreateEditWidgetFromPos(view.MapToScene(event.Pos()).ToPoint()); ok {
 					window.AddDockWidget(core.Qt__RightDockWidgetArea, editWidget)
 				}
 			})
