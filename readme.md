@@ -1,6 +1,6 @@
 # OpenRQ
 ### Requirement management application for Windows, Linux and macOS
-### [Next version currently in development (v0.2)](https://github.com/kraxarn/OpenRQ/projects/3)
+### [Next version currently in development (v0.3)](https://github.com/kraxarn/OpenRQ/projects/4)
 
 ## Rules for Comitting
 * Make sure you use the provided Visual Studio Code settings **before comitting any code**.
