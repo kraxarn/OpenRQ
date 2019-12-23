@@ -8,18 +8,6 @@ import (
 	"github.com/therecipe/qt/widgets"
 )
 
-type Direction int8
-const (
-	DirAbove Direction = 0
-	DirRight Direction = 1
-	DirBelow Direction = 2
-	DirLeft  Direction = 3
-)
-
-func (d Direction) Flip() Direction {
-	return d + 2 % 4
-}
-
 type Line struct {
 	parent int64
 	child  int64
@@ -194,46 +182,6 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 
 func GetGroupUID(group *widgets.QGraphicsItemGroup) int64 {
 	return group.Data(0).ToLongLong(nil)
-}
-
-func WhereIsChild(parent, child *core.QPointF) Direction {
-	// Above (childY < parentY)
-	if child.Y() < parent.Y() {
-		return DirAbove
-	}
-	// Below (childY > parentY)
-	if child.Y() > parent.Y() {
-		return DirBelow
-	}
-	// Left (childX < parentX)
-	if child.X() < parent.X() {
-		return DirLeft
-	}
-	// Right (childX > parentX)
-	if child.X() > parent.X() {
-		return DirRight
-	}
-	// By default, assume below
-	return DirBelow
-}
-
-func GetLinkOffset(parent, child *core.QPointF) (fromX, fromY, toX, toY float64) {
-	switch WhereIsChild(parent, child) {
-	case DirAbove:
-		// Center X, parent Y top, child Y bottom
-		return 64, 32, 0, 64
-	case DirBelow:
-		// Center X, parent Y bottom, child Y top
-		return 64, 32, 64, 0
-	case DirRight:
-		// parent X right, child X left, center Y
-		return 128, 0, 32, 32
-	case DirLeft:
-		// parent X left, child X right, center Y
-		return 0, 128, 32, 32
-	}
-	// Default
-	return 0, 0, 0, 0
 }
 
 func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineItem {
