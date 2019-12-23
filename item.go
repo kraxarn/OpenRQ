@@ -17,6 +17,12 @@ type Item interface {
 
 	GetChildren() []Item
 
+	Pos() (int, int)
+	SetPos(x, y int)
+
+	Size() (int, int)
+	SetSize(w, h int)
+
 	AddChild(child Item)
 	RemoveChild(child Item)
 }

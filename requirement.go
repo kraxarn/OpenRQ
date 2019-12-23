@@ -28,9 +28,7 @@ func (req Requirement) RemoveChild(child Item) {
 
 // GetHash get hash of requirement
 func (req *Requirement) GetHash() [16]byte {
-	h := md5.Sum([]byte(fmt.Sprintf("%v", req)))
-	fmt.Println("req hash of '", req, "': ", h)
-	return h
+	return md5.Sum([]byte(fmt.Sprintf("%v", req)))
 }
 
 // GetValue gets a value from the database
@@ -95,4 +93,22 @@ func (req Requirement) GetDescription() string {
 // AddChild
 func (req Requirement) AddChild(child Item) {
 
+}
+
+func (req Requirement) Pos() (int, int) {
+	return req.GetValue("x").(int), req.GetValue("y").(int)
+}
+
+func (req Requirement) SetPos(x, y int) {
+	req.SetValue("x", x)
+	req.SetValue("y", y)
+}
+
+func (req Requirement) Size() (int, int) {
+	return req.GetValue("width").(int), req.GetValue("height").(int)
+}
+
+func (req Requirement) SetSize(w, h int) {
+	req.SetValue("width", w)
+	req.SetValue("height", h)
 }

@@ -19,14 +19,13 @@ func (link *Link) GetHash() [16]byte {
 }
 
 type Solution struct {
-	id int
 	Item
+	id int
+}
 }
 
 func (sol *Solution) GetHash() [16]byte {
-	h := md5.Sum([]byte(fmt.Sprintf("%v", sol)))
-	fmt.Println("sol hash of '", sol, "': ", h)
-	return h
+	return md5.Sum([]byte(fmt.Sprintf("%v", sol)))
 }
 
 func (sol *Solution) SaveChanges() error {
@@ -95,4 +94,22 @@ func (sol Solution) GetDescription() string {
 // AddChild adds child to solution
 func (sol Solution) AddChild(child Item) {
 
+}
+
+func (sol Solution) Pos() (int, int) {
+	return sol.GetValue("x").(int), sol.GetValue("y").(int)
+}
+
+func (sol Solution) SetPos(x, y int) {
+	sol.SetValue("x", x)
+	sol.SetValue("y", y)
+}
+
+func (sol Solution) Size() (int, int) {
+	return sol.GetValue("width").(int), sol.GetValue("height").(int)
+}
+
+func (sol Solution) SetSize(w, h int) {
+	sol.SetValue("width", w)
+	sol.SetValue("height", h)
 }
