@@ -82,6 +82,10 @@ func (data *DataContext) Create(projectName string) error {
 	return err
 }
 
+func (data *DataContext) AddEmptyRequirement() (int64, error) {
+	return data.AddRequirement("", "", "")
+}
+
 // AddRequirement adds a requirement to the current database
 func (data *DataContext) AddRequirement(description, rationale, fitCriterion string) (int64, error) {
 	// Generate a new random UID
