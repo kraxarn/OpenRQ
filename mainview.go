@@ -169,16 +169,6 @@ func GetGroupUID(group *widgets.QGraphicsItemGroup) int64 {
 	return group.Data(0).ToLongLong(nil)
 }
 
-func GetGroupFromUID(id int64) *widgets.QGraphicsItemGroup {
-	// TODO: This needs to be done in a quicker way
-	for _, item := range view.Items() {
-		if group := item.Group(); group != nil && GetGroupUID(group) == id {
-			return group
-		}
-	}
-	return nil
-}
-
 func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineItem {
 	// Check if map needs to be created
 	if links == nil {
@@ -220,11 +210,11 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 		isParent := l.parent == itemID
 		// Update position of either parent or child
 		if isParent {
-			pos := GetGroupFromUID(l.child).Pos()
-			l.line.SetLine2(x+64, y+32, pos.X()+64, pos.Y()+32)
+			pos := l.line.Line().P2()
+			l.line.SetLine2(x+64, y+32, pos.X(), pos.Y())
 		} else {
-			pos := GetGroupFromUID(l.parent).Pos()
-			l.line.SetLine2(pos.X()+64, pos.Y()+32, x+64, y+32)
+			pos := l.line.Line().P1()
+			l.line.SetLine2(pos.X(), pos.Y(), x+64, y+32)
 		}
 	}
 }
