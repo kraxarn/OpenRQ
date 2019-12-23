@@ -44,7 +44,7 @@ func NewDataContext(path string) *DataContext {
 	if !fileExists {
 		fileName := filepath.Base(path)
 		if strings.Contains(fileName, ".") {
-			fileName = strings.TrimLeft(fileName, ".")
+			fileName = fileName[0:strings.LastIndex(fileName, ".")]
 		}
 		if err := data.Create(fileName); err != nil {
 			fmt.Fprintln(os.Stderr, "error: failed to create database:", err)
