@@ -65,7 +65,7 @@ func MergeFormat(textEdit *widgets.QTextEdit, format *gui.QTextCharFormat) {
 }
 
 // CreateEditWidget creates the main window for editing an item
-func CreateEditWidget(uid int64) *widgets.QDockWidget {
+func CreateEditWidget(uid int64, item ItemType) *widgets.QDockWidget {
 	// Main vertical layout
 	layout := widgets.NewQVBoxLayout()
 	// Item UID (for debugging)
@@ -75,8 +75,9 @@ func CreateEditWidget(uid int64) *widgets.QDockWidget {
 	// Requirement/solution selection
 	itemType := widgets.NewQGroupBox2("Item Type", nil)
 	reqRadio := widgets.NewQRadioButton2("Problem", nil)
-	reqRadio.SetChecked(true)
+	reqRadio.SetChecked(item == TypeRequirement)
 	solRadio := widgets.NewQRadioButton2("Solution", nil)
+	solRadio.SetChecked(item == TypeSolution)
 	itemTypeLayout := widgets.NewQHBoxLayout()
 	itemTypeLayout.AddWidget(reqRadio, 1, 0)
 	itemTypeLayout.AddWidget(solRadio, 1, 0)

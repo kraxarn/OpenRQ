@@ -39,7 +39,8 @@ func CreateEditWidgetFromPos(pos core.QPoint_ITF) (*widgets.QDockWidget, bool) {
 		return nil, false
 	}
 	// Open item
-	editWindow := CreateEditWidget(uid)
+	// TODO: For now, assume requirement
+	editWindow := CreateEditWidget(uid, TypeRequirement)
 	editWindow.ConnectCloseEvent(func(event *gui.QCloseEvent) {
 		CloseItem(uid)
 	})
