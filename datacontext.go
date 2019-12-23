@@ -224,13 +224,13 @@ func (data *DataContext) GetItemValue(itemID int, tableName, name string) interf
 	// Prepare query
 	stmt, err := data.Database.Prepare("select ? from ? where id = ?")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "warning: failed to get property", name, "from requirement:", err)
+		fmt.Fprintln(os.Stderr, "warning: failed to get property", name, "from item:", err)
 		return nil
 	}
 	// Execute and return it
 	var value interface{}
 	if err := stmt.QueryRow(itemID, tableName, name).Scan(&value); err != nil {
-		fmt.Fprintln(os.Stderr, "warning: failed to get property", name, "from requirement:", err)
+		fmt.Fprintln(os.Stderr, "warning: failed to get property", name, "from item:", err)
 		return nil
 	}
 	return value
