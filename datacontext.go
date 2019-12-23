@@ -83,31 +83,31 @@ func (data *DataContext) Create(projectName string) error {
 }
 
 // AddRequirement adds a requirement to the current database
-func (data *DataContext) AddRequirement(description, rationale, fitCriterion string) error {
+func (data *DataContext) AddRequirement(description, rationale, fitCriterion string) (int64, error) {
 	// Generate a new random UID
 	reqUID := data.GetItemUid()
 	// Try to add the requirement to the database
 	if _, err := data.Database.Exec(
 		"insert into Requirements (uid, description, rationale, fitCriterion) values (?, ?, ?, ?)",
 		reqUID, description, rationale, fitCriterion); err != nil {
-		return err
+		return 0, err
 	}
 	// Try to version it and return the result of it
-	return data.AddItemVersion(reqUID, TypeRequirement)
+	return reqUID, data.AddItemVersion(reqUID, TypeRequirement)
 }
 
 // AddSolution adds a solution to the database
-func (data *DataContext) AddSolution(description string) error {
+func (data *DataContext) AddSolution(description string) (int64, error) {
 	// Generate a new random UID
 	solUID := data.GetItemUid()
 	// Try to add the solution to the database
 	if _, err := data.Database.Exec(
 		"insert into Solutions (uid, description) values (?, ?)",
 		solUID, description); err != nil {
-		return err
+		return 0, err
 	}
 	// Try to version it and return the result of it
-	return data.AddItemVersion(solUID, TypeSolution)
+	return solUID, data.AddItemVersion(solUID, TypeSolution)
 }
 
 // AddItemVersion versions an item
