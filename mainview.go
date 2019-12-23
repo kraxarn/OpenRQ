@@ -30,6 +30,9 @@ var links map[int64][]*Line
 
 var view *widgets.QGraphicsView
 
+var backgroundColor *gui.QColor
+var fontColor *gui.QColor
+
 // Items opened in an edit window
 var openItems map[int64]*widgets.QDockWidget
 
@@ -73,6 +76,9 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	// Create scene and view
 	scene := widgets.NewQGraphicsScene(nil)
 	view = widgets.NewQGraphicsView2(scene, nil)
+
+	backgroundColor = window.Palette().Color2(window.BackgroundRole())
+	fontColor = window.Palette().Text().Color()
 
 	// Create open items map
 	openItems = make(map[int64]*widgets.QDockWidget)
@@ -283,10 +289,13 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 func AddGraphicsItem(text string, x, y, width, height float64, uid int64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem2(text, nil)
+	textItem.SetZValue(15)
 	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, width, height, nil)
+	shapeItem.SetBrush(gui.NewQBrush3(backgroundColor, 1))
 	group.AddToGroup(textItem)
 	group.AddToGroup(shapeItem)
 	group.SetPos2(x, y)
 	group.SetData(0, core.NewQVariant1(uid))
+	group.SetZValue(10)
 	return group
 }
