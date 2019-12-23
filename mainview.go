@@ -78,7 +78,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 		// For now, we assume all items are requirements
 		db := currentProject.GetData()
 		defer db.Close()
-		uid, err := db.AddRequirement("", "", "")
+		uid, err := db.AddEmptyRequirement()
 		if err != nil {
 			widgets.QMessageBox_Warning(
 				window, "Failed to add item", err.Error(),
