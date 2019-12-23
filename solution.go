@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"os"
 )
 
 type Link struct {
@@ -26,7 +27,14 @@ type Solution struct {
 func NewSolution(id int) Solution {
 	sol := Solution{}
 	sol.id = id
+	if sol.IsNull() {
+		fmt.Fprintln(os.Stderr, "warning: solution", id, "not found")
+	}
 	return sol
+}
+
+func (sol Solution) IsNull() bool {
+	return sol.GetValue("count(*)").(int) <= 0
 }
 
 func (sol *Solution) GetHash() [16]byte {

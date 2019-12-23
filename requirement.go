@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"os"
 )
 
 // Requirement with ItemProprties
@@ -15,7 +16,14 @@ type Requirement struct {
 func NewRequirement(id int) Requirement {
 	req := Requirement{}
 	req.id = id
+	if req.IsNull() {
+		fmt.Fprintln(os.Stderr, "warning: requirement", id, "not found")
+	}
 	return req
+}
+
+func (req Requirement) IsNull() bool {
+	return req.GetValue("count(*)").(int) <= 0
 }
 
 // SaveChanges saves all changes to database
