@@ -13,7 +13,8 @@
 
 ## Code Style
 * Structs uses pascal case (`StructName`).
-* **All** variables, methods and functions use dromedary case (`variableName`).
+* All functions and methods use pascal case (`FunctionName`)
+* All variables use dromedary case (`variableName`).
 * File names should be the **same as the struct name**, but in **all lower case** (`structname.go`)
 * Keep everything under package `main`.
 * Never leave more than one lines empty.
