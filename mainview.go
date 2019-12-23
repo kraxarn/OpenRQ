@@ -238,12 +238,10 @@ func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineIt
 	// Get from (parent) and to (child)
 	fromPos := parent.Pos()
 	toPos := child.Pos()
-	// Get where links should start from
-	fromX, fromY, toX, toY := GetLinkOffset(parent.Pos(), child.Pos())
 	// Create graphics line
 	line := widgets.NewQGraphicsLineItem3(
-		fromPos.X()+fromX, fromPos.Y()+fromY,
-		toPos.X()+toX, toPos.Y()+toY,
+		fromPos.X()+64, fromPos.Y()+32,
+		toPos.X()+64, toPos.Y()+32,
 		nil,
 	)
 	// Set the color of it
@@ -271,15 +269,13 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 	for _, l := range link {
 		// If the item is the parent
 		isParent := l.parent == itemID
-		// Get where links should start from
-		fromX, fromY, toX, toY := GetLinkOffset(l.line.Line().P1(), l.line.Line().P2())
 		// Update position of either parent or child
 		if isParent {
 			pos := l.line.Line().P2()
-			l.line.SetLine2(x+fromX, y+fromY, pos.X(), pos.Y())
+			l.line.SetLine2(x+64, y+32, pos.X(), pos.Y())
 		} else {
 			pos := l.line.Line().P1()
-			l.line.SetLine2(pos.X(), pos.Y(), x+toX, y+toY)
+			l.line.SetLine2(pos.X(), pos.Y(), x+64, y+32)
 		}
 	}
 }
