@@ -96,8 +96,13 @@ func (data *DataContext) AddRequirement(description, rationale, fitCriterion str
 		reqUID, description, rationale, fitCriterion); err != nil {
 		return 0, err
 	}
+	// Get item ID
+	var id int64
+	if err := data.Database.QueryRow("select id from Requirements where uid = ?", reqUID).Scan(&id); err != nil {
+		return 0, err
+	}
 	// Try to version it and return the result of it
-	return reqUID, data.AddItemVersion(reqUID, TypeRequirement)
+	return id, data.AddItemVersion(reqUID, TypeRequirement)
 }
 
 // AddSolution adds a solution to the database
