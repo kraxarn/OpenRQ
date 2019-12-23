@@ -24,7 +24,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	scene := widgets.NewQGraphicsScene(nil)
 	view = widgets.NewQGraphicsView2(scene, nil)
 
-	// Add example item
+	// Setup drag-and-drop
 	view.SetAcceptDrops(true)
 	view.SetAlignment(core.Qt__AlignTop | core.Qt__AlignLeft)
 	view.ConnectDragMoveEvent(func(event *gui.QDragMoveEvent) {
@@ -52,8 +52,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 				widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
 			return
 		}
-
-		scene.AddItem(AddGraphicsItem(fmt.Sprintf("Item %v", uid), pos.X()-(itemSize/2.0), pos.Y()-(itemSize/2.0), itemSize, itemSize))
+		scene.AddItem(AddGraphicsItem(fmt.Sprintf("%x", uid), pos.X()-(itemSize/2.0), pos.Y()-(itemSize/2.0), itemSize * 2, itemSize))
 	})
 
 	view.ConnectMousePressEvent(func(event *gui.QMouseEvent) {
@@ -76,7 +75,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	})
 	view.ConnectMouseMoveEvent(func(event *gui.QMouseEvent) {
 		if movingItem != nil {
-			movingItem.SetPos(view.MapToScene5(event.Pos().X()-32, event.Pos().Y()-32))
+			movingItem.SetPos(view.MapToScene5(event.Pos().X()-64, event.Pos().Y()-32))
 		}
 	})
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
@@ -150,8 +149,8 @@ func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineIt
 	toPos := child.Pos()
 	// Create graphics line
 	line := widgets.NewQGraphicsLineItem3(
-		fromPos.X()+32, fromPos.Y()+32,
-		toPos.X()+32, toPos.Y()+32,
+		fromPos.X()+64, fromPos.Y()+32,
+		toPos.X()+64, toPos.Y()+32,
 		nil,
 	)
 	// Set the color of it
@@ -187,10 +186,10 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 		// Update position of either parent or child
 		if isParent {
 			pos := GetGroupFromUID(l.child).Pos()
-			l.line.SetLine2(x+32, y+32, pos.X()+32, pos.Y()+32)
+			l.line.SetLine2(x+64, y+32, pos.X()+64, pos.Y()+32)
 		} else {
 			pos := GetGroupFromUID(l.parent).Pos()
-			l.line.SetLine2(pos.X()+32, pos.Y()+32, x+32, y+32)
+			l.line.SetLine2(pos.X()+64, pos.Y()+32, x+64, y+32)
 		}
 	}
 }
