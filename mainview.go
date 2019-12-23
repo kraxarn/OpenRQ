@@ -32,8 +32,6 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 			event.AcceptProposedAction()
 		}
 	})
-	// ID of item to add next
-	var itemID int
 	// What item we're currently moving, if any
 	var movingItem *widgets.QGraphicsItemGroup
 	// Start position of link
@@ -42,8 +40,20 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	itemSize := 64.0
 	view.ConnectDropEvent(func(event *gui.QDropEvent) {
 		pos := view.MapToScene(event.Pos())
-		scene.AddItem(AddGraphicsItem(fmt.Sprintf("Item %v", itemID), pos.X()-(itemSize/2.0), pos.Y()-(itemSize/2.0), itemSize, itemSize))
-		itemID = itemID + 1
+
+		// Add item to database
+		// For now, we assume all items are requirements
+		db := currentProject.GetData()
+		defer db.Close()
+		uid, err := db.AddRequirement("", "", "")
+		if err != nil {
+			widgets.QMessageBox_Warning(
+				window, "Failed to add item", err.Error(),
+				widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+			return
+		}
+
+		scene.AddItem(AddGraphicsItem(fmt.Sprintf("Item %v", uid), pos.X()-(itemSize/2.0), pos.Y()-(itemSize/2.0), itemSize, itemSize))
 	})
 
 	view.ConnectMousePressEvent(func(event *gui.QMouseEvent) {
