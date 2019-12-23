@@ -22,6 +22,11 @@ type Solution struct {
 	Item
 	id int
 }
+
+func NewSolution(id int) Solution {
+	sol := Solution{}
+	sol.id = id
+	return sol
 }
 
 func (sol *Solution) GetHash() [16]byte {

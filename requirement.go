@@ -12,6 +12,12 @@ type Requirement struct {
 	id int
 }
 
+func NewRequirement(id int) Requirement {
+	req := Requirement{}
+	req.id = id
+	return req
+}
+
 // SaveChanges saves all changes to database
 func (req *Requirement) SaveChanges() error {
 	return errors.New("error: not implemented")
