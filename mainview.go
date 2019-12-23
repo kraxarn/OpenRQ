@@ -116,7 +116,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 		}
 	})
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
-		if event.Button() == core.Qt__RightButton {
+		if event.Button() == core.Qt__RightButton && view.ItemAt(event.Pos()).Group() != nil {
 			// When right clicking item, show edit/delete options
 			menu := widgets.NewQMenu(nil)
 			// Edit option
