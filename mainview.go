@@ -18,6 +18,23 @@ var links map[int64][]*Line
 
 var view *widgets.QGraphicsView
 
+// Items opened in an edit window
+var openItems map[int64]*widgets.QDockWidget
+
+func IsItemOpen(uid int64) bool {
+	if openItems == nil {
+		openItems = make(map[int64]*widgets.QDockWidget)
+	}
+	_, ok := openItems[uid]
+	return ok
+}
+
+func CloseItem(uid int64) {
+	if openItems != nil {
+		delete(openItems, uid)
+	}
+}
+
 func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *widgets.QGraphicsView {
 	// Create scene and view
 	scene := widgets.NewQGraphicsScene(nil)
@@ -84,8 +101,21 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 			// Edit option
 			editAction := menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit")
 			editAction.ConnectTriggered(func(checked bool) {
-				window.AddDockWidget(core.Qt__RightDockWidgetArea,
-					CreateEditWidget(GetGroupUID(view.ItemAt(event.Pos()).Group())))
+				// Get UID
+				uid := GetGroupUID(view.ItemAt(event.Pos()).Group())
+				// Check if already opened
+				if IsItemOpen(uid) {
+					// We probably want to put it in focus here or something
+					return
+				}
+				// Open item
+				editWindow := CreateEditWidget(uid)
+				editWindow.ConnectCloseEvent(func(event *gui.QCloseEvent) {
+					CloseItem(uid)
+				})
+				window.AddDockWidget(core.Qt__RightDockWidgetArea, editWindow)
+				// Set item as being opened
+				openItems[uid] = editWindow
 			})
 			// Delete option
 			deleteAction := menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete")
