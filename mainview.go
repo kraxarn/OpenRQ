@@ -8,6 +8,18 @@ import (
 	"github.com/therecipe/qt/widgets"
 )
 
+type Direction int8
+const (
+	DirAbove Direction = 0
+	DirRight Direction = 1
+	DirBelow Direction = 2
+	DirLeft  Direction = 3
+)
+
+func (d Direction) Flip() Direction {
+	return d + 2 % 4
+}
+
 type Line struct {
 	parent int64
 	child  int64
@@ -178,6 +190,46 @@ func GetGroupUID(group *widgets.QGraphicsItemGroup) int64 {
 	return group.Data(0).ToLongLong(nil)
 }
 
+func WhereIsChild(parent, child *core.QPointF) Direction {
+	// Above (childY < parentY)
+	if child.Y() < parent.Y() {
+		return DirAbove
+	}
+	// Below (childY > parentY)
+	if child.Y() > parent.Y() {
+		return DirBelow
+	}
+	// Left (childX < parentX)
+	if child.X() < parent.X() {
+		return DirLeft
+	}
+	// Right (childX > parentX)
+	if child.X() > parent.X() {
+		return DirRight
+	}
+	// By default, assume below
+	return DirBelow
+}
+
+func GetLinkOffset(parent, child *core.QPointF) (fromX, fromY, toX, toY float64) {
+	switch WhereIsChild(parent, child) {
+	case DirAbove:
+		// Center X, parent Y top, child Y bottom
+		return 64, 32, 0, 64
+	case DirBelow:
+		// Center X, parent Y bottom, child Y top
+		return 64, 32, 64, 0
+	case DirRight:
+		// parent X right, child X left, center Y
+		return 128, 0, 32, 32
+	case DirLeft:
+		// parent X left, child X right, center Y
+		return 0, 128, 32, 32
+	}
+	// Default
+	return 0, 0, 0, 0
+}
+
 func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineItem {
 	// Check if map needs to be created
 	if links == nil {
@@ -186,10 +238,12 @@ func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineIt
 	// Get from (parent) and to (child)
 	fromPos := parent.Pos()
 	toPos := child.Pos()
+	// Get where links should start from
+	fromX, fromY, toX, toY := GetLinkOffset(parent.Pos(), child.Pos())
 	// Create graphics line
 	line := widgets.NewQGraphicsLineItem3(
-		fromPos.X()+64, fromPos.Y()+32,
-		toPos.X()+64, toPos.Y()+32,
+		fromPos.X()+fromX, fromPos.Y()+fromY,
+		toPos.X()+toX, toPos.Y()+toY,
 		nil,
 	)
 	// Set the color of it
@@ -217,13 +271,15 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 	for _, l := range link {
 		// If the item is the parent
 		isParent := l.parent == itemID
+		// Get where links should start from
+		fromX, fromY, toX, toY := GetLinkOffset(l.line.Line().P1(), l.line.Line().P2())
 		// Update position of either parent or child
 		if isParent {
 			pos := l.line.Line().P2()
-			l.line.SetLine2(x+64, y+32, pos.X(), pos.Y())
+			l.line.SetLine2(x+fromX, y+fromY, pos.X(), pos.Y())
 		} else {
 			pos := l.line.Line().P1()
-			l.line.SetLine2(pos.X(), pos.Y(), x+64, y+32)
+			l.line.SetLine2(pos.X(), pos.Y(), x+toX, y+toY)
 		}
 	}
 }
