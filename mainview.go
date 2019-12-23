@@ -30,6 +30,13 @@ func CloseItem(uid int64) {
 	delete(openItems, uid)
 }
 
+// SnapToGrid naps the specified position to the grid
+func SnapToGrid(pos *core.QPoint) *core.QPoint {
+	// 2^5=32
+	const gridSize = 5
+	return core.NewQPoint2((pos.X()>>gridSize<<gridSize)-64, (pos.Y()>>gridSize<<gridSize)-32)
+}
+
 func CreateEditWidgetFromPos(pos core.QPoint_ITF) (*widgets.QDockWidget, bool) {
 	// Get UID
 	uid := GetGroupUID(view.ItemAt(pos).Group())
@@ -86,9 +93,11 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 				widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
 			return
 		}
-		scene.AddItem(AddGraphicsItem(fmt.Sprintf("%x", uid), pos.X()-(itemSize/2.0), pos.Y()-(itemSize/2.0), itemSize * 2, itemSize, uid))
+		gridPos := SnapToGrid(pos.ToPoint())
+		scene.AddItem(AddGraphicsItem(
+			fmt.Sprintf("%x", uid), float64(gridPos.X()), float64(gridPos.Y()), itemSize * 2, itemSize, uid))
 		if len(openItems) <= 0 {
-			openItems[uid], _ = CreateEditWidgetFromPos(event.Pos())
+			openItems[uid], _ = CreateEditWidgetFromPos(gridPos)
 			window.AddDockWidget(core.Qt__RightDockWidgetArea, openItems[uid])
 		}
 	})
@@ -113,7 +122,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	})
 	view.ConnectMouseMoveEvent(func(event *gui.QMouseEvent) {
 		if movingItem != nil {
-			movingItem.SetPos(view.MapToScene5(event.Pos().X()-64, event.Pos().Y()-32))
+			movingItem.SetPos(view.MapToScene(SnapToGrid(event.Pos())))
 		}
 	})
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
