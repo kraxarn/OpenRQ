@@ -86,8 +86,10 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 			return
 		}
 		scene.AddItem(AddGraphicsItem(fmt.Sprintf("%x", uid), pos.X()-(itemSize/2.0), pos.Y()-(itemSize/2.0), itemSize * 2, itemSize, uid))
-		openItems[uid], _ = CreateEditWidgetFromPos(event.Pos())
-		window.AddDockWidget(core.Qt__RightDockWidgetArea, openItems[uid])
+		if len(openItems) <= 0 {
+			openItems[uid], _ = CreateEditWidgetFromPos(event.Pos())
+			window.AddDockWidget(core.Qt__RightDockWidgetArea, openItems[uid])
+		}
 	})
 
 	view.ConnectMousePressEvent(func(event *gui.QMouseEvent) {
