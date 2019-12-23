@@ -114,11 +114,11 @@ func (data *DataContext) AddSolution(description string) (int64, error) {
 func (data *DataContext) AddItemVersion(itemUID int64, itemType ItemType) error {
 	// Find item ID
 	var itemID int
-	stmt, err := data.Database.Prepare("select id from ? where uid = ?")
+	stmt, err := data.Database.Prepare(fmt.Sprintf("select id from %v where uid = ?", GetItemTableName(itemType)))
 	if err != nil {
 		return fmt.Errorf("failed to get item id: %v", err)
 	}
-	stmt.QueryRow(GetItemTableName(itemType), itemUID).Scan(&itemID)
+	stmt.QueryRow(itemUID).Scan(&itemID)
 	// Insert into item versions
 	_, err = data.Database.Exec(
 		"insert into ItemVersions (version, item, type) values (1, ?, ?)",
