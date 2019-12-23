@@ -84,7 +84,8 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 			// Edit option
 			editAction := menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit")
 			editAction.ConnectTriggered(func(checked bool) {
-				window.AddDockWidget(core.Qt__RightDockWidgetArea, CreateEditWidget())
+				window.AddDockWidget(core.Qt__RightDockWidgetArea,
+					CreateEditWidget(GetGroupUID(view.ItemAt(event.Pos()).Group())))
 			})
 			// Delete option
 			deleteAction := menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete")
