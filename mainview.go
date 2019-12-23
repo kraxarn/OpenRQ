@@ -22,23 +22,22 @@ var view *widgets.QGraphicsView
 var openItems map[int64]*widgets.QDockWidget
 
 func IsItemOpen(uid int64) bool {
-	if openItems == nil {
-		openItems = make(map[int64]*widgets.QDockWidget)
-	}
 	_, ok := openItems[uid]
 	return ok
 }
 
 func CloseItem(uid int64) {
-	if openItems != nil {
-		delete(openItems, uid)
-	}
+	delete(openItems, uid)
+}
 }
 
 func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *widgets.QGraphicsView {
 	// Create scene and view
 	scene := widgets.NewQGraphicsScene(nil)
 	view = widgets.NewQGraphicsView2(scene, nil)
+
+	// Create open items map
+	openItems = make(map[int64]*widgets.QDockWidget)
 
 	// Setup drag-and-drop
 	view.SetAcceptDrops(true)
