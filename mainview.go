@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
@@ -10,12 +9,12 @@ import (
 )
 
 type Line struct {
-	parent uint64
-	child  uint64
+	parent int64
+	child  int64
 	line   *widgets.QGraphicsLineItem
 }
 
-var links map[uint64][]*Line
+var links map[int64][]*Line
 
 var view *widgets.QGraphicsView
 
@@ -52,7 +51,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 				widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
 			return
 		}
-		scene.AddItem(AddGraphicsItem(fmt.Sprintf("%x", uid), pos.X()-(itemSize/2.0), pos.Y()-(itemSize/2.0), itemSize * 2, itemSize))
+		scene.AddItem(AddGraphicsItem(fmt.Sprintf("%x", uid), pos.X()-(itemSize/2.0), pos.Y()-(itemSize/2.0), itemSize * 2, itemSize, uid))
 	})
 
 	view.ConnectMousePressEvent(func(event *gui.QMouseEvent) {
@@ -125,11 +124,11 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	return view
 }
 
-func GetGroupUID(group *widgets.QGraphicsItemGroup) uint64 {
-	return group.Data(0).ToULongLong(nil)
+func GetGroupUID(group *widgets.QGraphicsItemGroup) int64 {
+	return group.Data(0).ToLongLong(nil)
 }
 
-func GetGroupFromUID(id uint64) *widgets.QGraphicsItemGroup {
+func GetGroupFromUID(id int64) *widgets.QGraphicsItemGroup {
 	// TODO: This needs to be done in a quicker way
 	for _, item := range view.Items() {
 		if group := item.Group(); group != nil && GetGroupUID(group) == id {
@@ -142,7 +141,7 @@ func GetGroupFromUID(id uint64) *widgets.QGraphicsItemGroup {
 func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineItem {
 	// Check if map needs to be created
 	if links == nil {
-		links = make(map[uint64][]*Line)
+		links = make(map[int64][]*Line)
 	}
 	// Get from (parent) and to (child)
 	fromPos := parent.Pos()
@@ -167,11 +166,6 @@ func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineIt
 	return line
 }
 
-func GetRandomItemUID() uint64 {
-	// TODO: This should guarantee unique, for now, just return random uint64
-	return rand.Uint64()
-}
-
 func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 	// Get link
 	itemID := GetGroupUID(item)
@@ -194,13 +188,13 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 	}
 }
 
-func AddGraphicsItem(text string, x, y, width, height float64) *widgets.QGraphicsItemGroup {
+func AddGraphicsItem(text string, x, y, width, height float64, uid int64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem2(text, nil)
 	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, width, height, nil)
 	group.AddToGroup(textItem)
 	group.AddToGroup(shapeItem)
 	group.SetPos2(x, y)
-	group.SetData(0, core.NewQVariant1(GetRandomItemUID()))
+	group.SetData(0, core.NewQVariant1(uid))
 	return group
 }
