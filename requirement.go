@@ -10,10 +10,10 @@ import (
 // Requirement with ItemProprties
 type Requirement struct {
 	Item
-	id int64
+	id int
 }
 
-func NewRequirement(id int64) Requirement {
+func NewRequirement(id int) Requirement {
 	req := Requirement{}
 	req.id = id
 	if req.IsNull() {
