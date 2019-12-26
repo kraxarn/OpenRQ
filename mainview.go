@@ -73,7 +73,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	view.SetAcceptDrops(true)
 	view.SetAlignment(core.Qt__AlignTop | core.Qt__AlignLeft)
 	view.ConnectDragMoveEvent(func(event *gui.QDragMoveEvent) {
-		if event.Source() != nil {
+		if event.Source() != nil && event.Source().IsWidgetType() {
 			event.AcceptProposedAction()
 		}
 	})
