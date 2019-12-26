@@ -19,7 +19,6 @@ var links map[int64][]*Line
 var view *widgets.QGraphicsView
 
 var backgroundColor *gui.QColor
-var fontColor *gui.QColor
 
 // Items opened in an edit window
 var openItems map[int64]*widgets.QDockWidget
@@ -101,7 +100,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 		}
 		gridPos := SnapToGrid(pos.ToPoint())
 		scene.AddItem(AddGraphicsItem(
-			fmt.Sprintf("%x", uid), float64(gridPos.X()), float64(gridPos.Y()), itemSize * 2, itemSize, uid))
+			fmt.Sprintf("%x", uid), float64(gridPos.X()), float64(gridPos.Y()), itemSize*2, itemSize, uid))
 		if len(openItems) <= 0 {
 			openItems[uid], _ = CreateEditWidgetFromPos(gridPos)
 			window.AddDockWidget(core.Qt__RightDockWidgetArea, openItems[uid])
