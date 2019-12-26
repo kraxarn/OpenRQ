@@ -213,6 +213,39 @@ func GetItemTableName(itemType ItemType) string {
 	}
 }
 
+// GetAllItems gets all requirements and solutions stored in the database
+func (data *DataContext) GetAllItems() ([]Item, error) {
+	// Connect to database
+	db := currentProject.GetData()
+	defer db.Close()
+	// Temporary slice
+	items := make([]Item, 0)
+	// Get all requirements
+	stmt, err := data.Database.Prepare("select _rowid_ from Requirements")
+	if err != nil {
+		return items, fmt.Errorf("failed to get requirements: %v", err)
+	}
+	rows, _ := stmt.Query()
+	var itemID int64
+	for rows.Next() {
+		if err = rows.Scan(&itemID); err == nil {
+			items = append(items, NewRequirement(itemID))
+		}
+	}
+	// Get all solutions
+	stmt, err = data.Database.Prepare("select _rowid_ from Solutions")
+	if err != nil {
+		return items, fmt.Errorf("failed to get solutions: %v", err)
+	}
+	rows, _ = stmt.Query()
+	for rows.Next() {
+		if err := rows.Scan(&itemID); err == nil {
+			items = append(items, NewRequirement(itemID))
+		}
+	}
+	return items, nil
+}
+
 // GetItemChildren gets all children of a specific item
 func (data *DataContext) GetItemChildren(itemID int) {
 	stmt, err := data.Database.Prepare("select parent from (select parent from Requirements union select parent from Solutions) where parent = ? and parentType = ?")
