@@ -98,7 +98,7 @@ func (data *DataContext) AddRequirement(description, rationale, fitCriterion str
 	}
 	// Get item ID
 	var id int64
-	if err := data.Database.QueryRow("select id from Requirements where uid = ?", reqUID).Scan(&id); err != nil {
+	if err := data.Database.QueryRow("select _rowid_ from Requirements where uid = ?", reqUID).Scan(&id); err != nil {
 		return 0, err
 	}
 	// Try to version it and return the result of it
@@ -123,7 +123,7 @@ func (data *DataContext) AddSolution(description string) (int64, error) {
 func (data *DataContext) AddItemVersion(itemUID int64, itemType ItemType) error {
 	// Find item ID
 	var itemID int
-	stmt, err := data.Database.Prepare(fmt.Sprintf("select id from %v where uid = ?", GetItemTableName(itemType)))
+	stmt, err := data.Database.Prepare(fmt.Sprintf("select _rowid_ from %v where uid = ?", GetItemTableName(itemType)))
 	if err != nil {
 		return fmt.Errorf("failed to get item id: %v", err)
 	}
@@ -145,7 +145,7 @@ func (data *DataContext) UpdateItemVersion() error {
 func (data *DataContext) RemoveItem(itemType ItemType, itemID int) error {
 	// Execute SQL
 	_, err := data.Database.Exec(
-		"delete from ? where id = ?",
+		"delete from ? where _rowid_ = ?",
 		GetItemTableName(itemType), itemID)
 	return err
 }
@@ -178,7 +178,7 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 	}
 
 	// Find item id
-	stmt, err := data.Database.Prepare("select id from Requirements where uid = ?")
+	stmt, err := data.Database.Prepare("select _rowid_ from Requirements where uid = ?")
 	if err != nil {
 		return fmt.Errorf("failed to get item id: %v", err)
 	}
@@ -227,7 +227,7 @@ func (data *DataContext) GetItemChildren(itemID int) {
 // GetItemValue gets a value from the specified column in the database
 func (data *DataContext) GetItemValue(itemID int, tableName, name string) interface{} {
 	// Prepare query
-	stmt, err := data.Database.Prepare("select ? from ? where id = ?")
+	stmt, err := data.Database.Prepare("select ? from ? where _rowid_ = ?")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "warning: failed to get property", name, "from item:", err)
 		return nil
@@ -250,7 +250,7 @@ func (data *DataContext) AddItemChild(parent, child Item) error {
 	}
 	// Execute update
 	_, err := data.Database.Exec(
-		"update ? set parent = ? and parentType = ? where id = ?",
+		"update ? set parent = ? and parentType = ? where _rowid_ = ?",
 		childTable, parent.GetId(), GetItemType(parent), child.GetId())
 	return err
 }
@@ -264,7 +264,7 @@ func (data *DataContext) RemoveItemParent(child Item) error {
 	}
 	// Execute update
 	_, err := data.Database.Exec(
-		"update ? set parent = null and parentType = null where id = ?",
+		"update ? set parent = null and parentType = null where _rowid_ = ?",
 		childTable, child.GetId())
 	return err
 }
@@ -272,7 +272,7 @@ func (data *DataContext) RemoveItemParent(child Item) error {
 // SetItemValue updates a value in the database
 func (data *DataContext) SetItemValue(itemID int, tableName, name string, value interface{}) {
 	// Prepare query
-	stmt, err := data.Database.Prepare("update ? set ? = ? where id = ?")
+	stmt, err := data.Database.Prepare("update ? set ? = ? where _rowid_ = ?")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "warning: failed to set property", name, "in requirement:", err)
 		return
