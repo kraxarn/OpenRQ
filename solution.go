@@ -21,10 +21,10 @@ func (link *Link) GetHash() [16]byte {
 
 type Solution struct {
 	Item
-	id int
+	id int64
 }
 
-func NewSolution(id int) Solution {
+func NewSolution(id int64) Solution {
 	sol := Solution{}
 	sol.id = id
 	if sol.IsNull() {
@@ -70,8 +70,8 @@ func (sol *Solution) GetFitCriterion() string {
 }
 
 // GetId gets the row ID in the database
-func (sol Solution) GetId() int {
-	return sol.GetValue("id").(int)
+func (sol Solution) GetId() int64 {
+	return sol.GetValue("id").(int64)
 }
 
 // GetUid gets the row Uid in the database

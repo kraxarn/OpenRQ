@@ -2,7 +2,7 @@ package main
 
 // Item that is either a solutions or a requirement
 type Item interface {
-	GetId() int
+	GetId() int64
 
 	GetUid() int64
 	SetUid(uid int64)

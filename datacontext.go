@@ -225,7 +225,7 @@ func (data *DataContext) GetItemChildren(itemID int) {
 }
 
 // GetItemValue gets a value from the specified column in the database
-func (data *DataContext) GetItemValue(itemID int, tableName, name string) interface{} {
+func (data *DataContext) GetItemValue(itemID int64, tableName, name string) interface{} {
 	// Prepare query
 	stmt, err := data.Database.Prepare("select ? from ? where _rowid_ = ?")
 	if err != nil {
@@ -270,7 +270,7 @@ func (data *DataContext) RemoveItemParent(child Item) error {
 }
 
 // SetItemValue updates a value in the database
-func (data *DataContext) SetItemValue(itemID int, tableName, name string, value interface{}) {
+func (data *DataContext) SetItemValue(itemID int64, tableName, name string, value interface{}) {
 	// Prepare query
 	stmt, err := data.Database.Prepare("update ? set ? = ? where _rowid_ = ?")
 	if err != nil {

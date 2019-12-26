@@ -10,10 +10,10 @@ import (
 // Requirement with ItemProprties
 type Requirement struct {
 	Item
-	id int
+	id int64
 }
 
-func NewRequirement(id int) Requirement {
+func NewRequirement(id int64) Requirement {
 	req := Requirement{}
 	req.id = id
 	if req.IsNull() {
@@ -70,7 +70,7 @@ func (req *Requirement) GetFitCriterion() string {
 }
 
 // GetId gets the row ID in the database
-func (req Requirement) GetId() int {
+func (req Requirement) GetId() int64 {
 	return req.id
 }
 
