@@ -68,6 +68,23 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	// Create open items map
 	openItems = make(map[int64]*widgets.QDockWidget)
 
+	// Load items from database
+	{
+		db := currentProject.GetData()
+		defer db.Close()
+		items, err := db.GetAllItems()
+		if err != nil {
+			fmt.Println("error: failed to get saved items:", err)
+		} else {
+			var x, y, w, h int
+			for _, item := range items {
+				x, y = item.Pos()
+				w, h = item.Size()
+				scene.AddItem(AddGraphicsItem(fmt.Sprintf("%x\n%v", item.GetId(), item.GetDescription()), float64(x), float64(y), float64(w), float64(h), item.GetId()))
+			}
+		}
+	}
+
 	// Setup drag-and-drop
 	view.SetAcceptDrops(true)
 	view.SetAlignment(core.Qt__AlignTop | core.Qt__AlignLeft)
