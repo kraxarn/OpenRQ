@@ -21,10 +21,10 @@ func (link *Link) GetHash() [16]byte {
 
 type Solution struct {
 	Item
-	id int
+	id int64
 }
 
-func NewSolution(id int) Solution {
+func NewSolution(id int64) Solution {
 	sol := Solution{}
 	sol.id = id
 	if sol.IsNull() {
