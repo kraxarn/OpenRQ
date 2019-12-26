@@ -225,14 +225,15 @@ func (data *DataContext) GetItemChildren(itemID int) {
 }
 
 // GetItemValue gets a value from the specified column in the database
+// (value is assumed to be a pointer)
 func (data *DataContext) GetItemValue(itemID int64, tableName, name string, value interface{}) error {
 	// Prepare query
-	stmt, err := data.Database.Prepare(fmt.Sprintf("select ? from %v where _rowid_ = ?", tableName))
+	stmt, err := data.Database.Prepare(fmt.Sprintf("select %v from %v where _rowid_ = ?", name, tableName))
 	if err != nil {
 		return fmt.Errorf("failed to get property %v from item %v: %v", name, itemID, err)
 	}
 	// Execute and return it
-	if err := stmt.QueryRow(name, itemID).Scan(&value); err != nil {
+	if err := stmt.QueryRow(itemID).Scan(value); err != nil {
 		return fmt.Errorf("failed to get property %v from item %v: %v", name, itemID, err)
 	}
 	return nil
@@ -269,13 +270,13 @@ func (data *DataContext) RemoveItemParent(child Item) error {
 // SetItemValue updates a value in the database
 func (data *DataContext) SetItemValue(itemID int64, tableName, name string, value interface{}) {
 	// Prepare query
-	stmt, err := data.Database.Prepare(fmt.Sprintf("update %v set ? = ? where _rowid_ = ?", tableName))
+	stmt, err := data.Database.Prepare(fmt.Sprintf("update %v set %v = ? where _rowid_ = ?", tableName, name))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "warning: failed to set property", name, "in requirement:", err)
 		return
 	}
 	// Execute and return it
-	if _, err := stmt.Exec(name, value, itemID); err != nil {
+	if _, err := stmt.Exec(value, itemID); err != nil {
 		fmt.Fprintln(os.Stderr, "warning: failed to set property", name, "in requirement:", err)
 	}
 }
