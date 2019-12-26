@@ -1,6 +1,6 @@
 # OpenRQ
 ### Requirement management application for Windows, Linux and macOS
-### [Next version currently in development (v0.2)](https://github.com/kraxarn/OpenRQ/projects/3)
+### [Next version currently in development (v0.3)](https://github.com/kraxarn/OpenRQ/projects/4)
 
 ## Rules for Comitting
 * Make sure you use the provided Visual Studio Code settings **before comitting any code**.
@@ -13,7 +13,8 @@
 
 ## Code Style
 * Structs uses pascal case (`StructName`).
-* **All** variables, methods and functions use dromedary case (`variableName`).
+* All functions and methods use pascal case (`FunctionName`)
+* All variables use dromedary case (`variableName`).
 * File names should be the **same as the struct name**, but in **all lower case** (`structname.go`)
 * Keep everything under package `main`.
 * Never leave more than one lines empty.

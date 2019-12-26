@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
@@ -10,30 +9,90 @@ import (
 )
 
 type Line struct {
-	parent uint64
-	child  uint64
+	parent int64
+	child  int64
 	line   *widgets.QGraphicsLineItem
 }
 
-var links map[uint64][]*Line
+var links map[int64][]*Line
 
 var view *widgets.QGraphicsView
+
+var backgroundColor *gui.QColor
+
+// Items opened in an edit window
+var openItems map[int64]*widgets.QDockWidget
+
+func IsItemOpen(uid int64) bool {
+	_, ok := openItems[uid]
+	return ok
+}
+
+func CloseItem(uid int64) {
+	delete(openItems, uid)
+}
+
+// SnapToGrid naps the specified position to the grid
+func SnapToGrid(pos *core.QPoint) *core.QPoint {
+	// 2^5=32
+	const gridSize = 5
+	return core.NewQPoint2((pos.X()>>gridSize<<gridSize)-64, (pos.Y()>>gridSize<<gridSize)-32)
+}
+
+func CreateEditWidgetFromPos(pos core.QPoint_ITF) (*widgets.QDockWidget, bool) {
+	// Get UID
+	uid := GetGroupUID(view.ItemAt(pos).Group())
+	// Check if already opened
+	if IsItemOpen(uid) {
+		// We probably want to put it in focus here or something
+		return nil, false
+	}
+	// Open item
+	// TODO: For now, assume requirement
+	editWindow := CreateEditWidget(uid, TypeRequirement)
+	editWindow.ConnectCloseEvent(func(event *gui.QCloseEvent) {
+		CloseItem(uid)
+	})
+	// Set item as being opened
+	openItems[uid] = editWindow
+	// Return new window
+	return editWindow, true
+}
 
 func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *widgets.QGraphicsView {
 	// Create scene and view
 	scene := widgets.NewQGraphicsScene(nil)
 	view = widgets.NewQGraphicsView2(scene, nil)
+	// Get default window background color
+	backgroundColor = window.Palette().Color2(window.BackgroundRole())
+	// Create open items map
+	openItems = make(map[int64]*widgets.QDockWidget)
 
-	// Add example item
+	// Load items from database
+	{
+		db := currentProject.GetData()
+		defer db.Close()
+		items, err := db.GetAllItems()
+		if err != nil {
+			fmt.Println("error: failed to get saved items:", err)
+		} else {
+			var x, y, w, h int
+			for _, item := range items {
+				x, y = item.Pos()
+				w, h = item.Size()
+				scene.AddItem(AddGraphicsItem(fmt.Sprintf("%x\n%v", item.GetId(), item.GetDescription()), float64(x), float64(y), float64(w), float64(h), item.GetId()))
+			}
+		}
+	}
+
+	// Setup drag-and-drop
 	view.SetAcceptDrops(true)
 	view.SetAlignment(core.Qt__AlignTop | core.Qt__AlignLeft)
 	view.ConnectDragMoveEvent(func(event *gui.QDragMoveEvent) {
-		if event.Source() != nil {
+		if event.Source() != nil && event.Source().IsWidgetType() {
 			event.AcceptProposedAction()
 		}
 	})
-	// ID of item to add next
-	var itemID int
 	// What item we're currently moving, if any
 	var movingItem *widgets.QGraphicsItemGroup
 	// Start position of link
@@ -42,8 +101,25 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	itemSize := 64.0
 	view.ConnectDropEvent(func(event *gui.QDropEvent) {
 		pos := view.MapToScene(event.Pos())
-		scene.AddItem(AddGraphicsItem(fmt.Sprintf("Item %v", itemID), pos.X()-(itemSize/2.0), pos.Y()-(itemSize/2.0), itemSize, itemSize))
-		itemID = itemID + 1
+
+		// Add item to database
+		// For now, we assume all items are requirements
+		db := currentProject.GetData()
+		defer db.Close()
+		uid, err := db.AddEmptyRequirement()
+		if err != nil {
+			widgets.QMessageBox_Warning(
+				window, "Failed to add item", err.Error(),
+				widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+			return
+		}
+		gridPos := SnapToGrid(pos.ToPoint())
+		scene.AddItem(AddGraphicsItem(
+			fmt.Sprintf("%x", uid), float64(gridPos.X()), float64(gridPos.Y()), itemSize*2, itemSize, uid))
+		if len(openItems) <= 0 {
+			openItems[uid], _ = CreateEditWidgetFromPos(gridPos)
+			window.AddDockWidget(core.Qt__RightDockWidgetArea, openItems[uid])
+		}
 	})
 
 	view.ConnectMousePressEvent(func(event *gui.QMouseEvent) {
@@ -66,17 +142,22 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	})
 	view.ConnectMouseMoveEvent(func(event *gui.QMouseEvent) {
 		if movingItem != nil {
-			movingItem.SetPos(view.MapToScene5(event.Pos().X()-32, event.Pos().Y()-32))
+			// Update item position
+			movingItem.SetPos(view.MapToScene(SnapToGrid(event.Pos())))
+			// Update link
+			UpdateLinkPos(movingItem, movingItem.Pos().X(), movingItem.Pos().Y())
 		}
 	})
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
-		if event.Button() == core.Qt__RightButton {
+		if event.Button() == core.Qt__RightButton && view.ItemAt(event.Pos()).Group() != nil {
 			// When right clicking item, show edit/delete options
 			menu := widgets.NewQMenu(nil)
 			// Edit option
 			editAction := menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit")
 			editAction.ConnectTriggered(func(checked bool) {
-				window.AddDockWidget(core.Qt__RightDockWidgetArea, CreateEditWidget())
+				if editWidget, ok := CreateEditWidgetFromPos(view.MapToScene(event.Pos()).ToPoint()); ok {
+					window.AddDockWidget(core.Qt__RightDockWidgetArea, editWidget)
+				}
 			})
 			// Delete option
 			deleteAction := menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete")
@@ -90,9 +171,13 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 
 		// We released a button while moving an item
 		if movingItem != nil {
+			pos := movingItem.Pos()
 			// Update link if needed
 			// Error handling is already taken care of in UpdateLinkPos
-			UpdateLinkPos(movingItem, movingItem.Pos().X(), movingItem.Pos().Y())
+			UpdateLinkPos(movingItem, pos.X(), pos.Y())
+			// Update position in database
+			// TODO: Assuming Requirement
+			NewItem(GetGroupUID(movingItem), TypeRequirement).SetPos(int(pos.X()), int(pos.Y()))
 			// Reset opacity and remove as moving
 			movingItem.SetOpacity(1.0)
 			movingItem = nil
@@ -116,32 +201,22 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	return view
 }
 
-func GetGroupUID(group *widgets.QGraphicsItemGroup) uint64 {
-	return group.Data(0).ToULongLong(nil)
-}
-
-func GetGroupFromUID(id uint64) *widgets.QGraphicsItemGroup {
-	// TODO: This needs to be done in a quicker way
-	for _, item := range view.Items() {
-		if group := item.Group(); group != nil && GetGroupUID(group) == id {
-			return group
-		}
-	}
-	return nil
+func GetGroupUID(group *widgets.QGraphicsItemGroup) int64 {
+	return group.Data(0).ToLongLong(nil)
 }
 
 func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineItem {
 	// Check if map needs to be created
 	if links == nil {
-		links = make(map[uint64][]*Line)
+		links = make(map[int64][]*Line)
 	}
 	// Get from (parent) and to (child)
 	fromPos := parent.Pos()
 	toPos := child.Pos()
 	// Create graphics line
 	line := widgets.NewQGraphicsLineItem3(
-		fromPos.X()+32, fromPos.Y()+32,
-		toPos.X()+32, toPos.Y()+32,
+		fromPos.X()+64, fromPos.Y()+32,
+		toPos.X()+64, toPos.Y()+32,
 		nil,
 	)
 	// Set the color of it
@@ -158,11 +233,6 @@ func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineIt
 	return line
 }
 
-func GetRandomItemUID() uint64 {
-	// TODO: This should guarantee unique, for now, just return random uint64
-	return rand.Uint64()
-}
-
 func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 	// Get link
 	itemID := GetGroupUID(item)
@@ -176,22 +246,25 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 		isParent := l.parent == itemID
 		// Update position of either parent or child
 		if isParent {
-			pos := GetGroupFromUID(l.child).Pos()
-			l.line.SetLine2(x+32, y+32, pos.X()+32, pos.Y()+32)
+			pos := l.line.Line().P2()
+			l.line.SetLine2(x+64, y+32, pos.X(), pos.Y())
 		} else {
-			pos := GetGroupFromUID(l.parent).Pos()
-			l.line.SetLine2(pos.X()+32, pos.Y()+32, x+32, y+32)
+			pos := l.line.Line().P1()
+			l.line.SetLine2(pos.X(), pos.Y(), x+64, y+32)
 		}
 	}
 }
 
-func AddGraphicsItem(text string, x, y, width, height float64) *widgets.QGraphicsItemGroup {
+func AddGraphicsItem(text string, x, y, width, height float64, uid int64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem2(text, nil)
+	textItem.SetZValue(15)
 	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, width, height, nil)
+	shapeItem.SetBrush(gui.NewQBrush3(backgroundColor, 1))
 	group.AddToGroup(textItem)
 	group.AddToGroup(shapeItem)
 	group.SetPos2(x, y)
-	group.SetData(0, core.NewQVariant1(GetRandomItemUID()))
+	group.SetData(0, core.NewQVariant1(uid))
+	group.SetZValue(10)
 	return group
 }

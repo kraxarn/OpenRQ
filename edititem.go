@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 )
@@ -64,15 +65,19 @@ func MergeFormat(textEdit *widgets.QTextEdit, format *gui.QTextCharFormat) {
 }
 
 // CreateEditWidget creates the main window for editing an item
-func CreateEditWidget() *widgets.QDockWidget {
+func CreateEditWidget(uid int64, item ItemType) *widgets.QDockWidget {
 	// Main vertical layout
 	layout := widgets.NewQVBoxLayout()
+	// Item UID (for debugging)
+	layout.AddWidget(CreateGroupBox("Item UID",
+		widgets.NewQLabel2(fmt.Sprintf("%x", uid), nil, 0)), 0, 0)
 
 	// Requirement/solution selection
 	itemType := widgets.NewQGroupBox2("Item Type", nil)
-	reqRadio := widgets.NewQRadioButton2("Requirement", nil)
-	reqRadio.SetChecked(true)
+	reqRadio := widgets.NewQRadioButton2("Problem", nil)
+	reqRadio.SetChecked(item == TypeRequirement)
 	solRadio := widgets.NewQRadioButton2("Solution", nil)
+	solRadio.SetChecked(item == TypeSolution)
 	itemTypeLayout := widgets.NewQHBoxLayout()
 	itemTypeLayout.AddWidget(reqRadio, 1, 0)
 	itemTypeLayout.AddWidget(solRadio, 1, 0)
