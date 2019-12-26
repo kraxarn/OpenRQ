@@ -26,3 +26,13 @@ type Item interface {
 	AddChild(child Item)
 	RemoveChild(child Item)
 }
+
+func NewItem(id int64, itemType ItemType) Item {
+	var item Item
+	if itemType == TypeRequirement {
+		item = NewRequirement(id)
+	} else {
+		item = NewSolution(id)
+	}
+	return item
+}
