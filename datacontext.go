@@ -225,20 +225,17 @@ func (data *DataContext) GetItemChildren(itemID int) {
 }
 
 // GetItemValue gets a value from the specified column in the database
-func (data *DataContext) GetItemValue(itemID int64, tableName, name string) interface{} {
+func (data *DataContext) GetItemValue(itemID int64, tableName, name string, value interface{}) error {
 	// Prepare query
 	stmt, err := data.Database.Prepare(fmt.Sprintf("select ? from %v where _rowid_ = ?", tableName))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "warning: failed to get property", name, "from item:", err)
-		return nil
+		return fmt.Errorf("failed to get property %v from item %v: %v", name, itemID, err)
 	}
 	// Execute and return it
-	var value interface{}
 	if err := stmt.QueryRow(name, itemID).Scan(&value); err != nil {
-		fmt.Fprintln(os.Stderr, "warning: failed to get property", name, "from item:", err)
-		return nil
+		return fmt.Errorf("failed to get property %v from item %v: %v", name, itemID, err)
 	}
-	return value
+	return nil
 }
 
 // AddItemChild creates a link between parent and child

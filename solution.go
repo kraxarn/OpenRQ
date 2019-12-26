@@ -34,7 +34,9 @@ func NewSolution(id int64) Solution {
 }
 
 func (sol Solution) IsNull() bool {
-	return sol.GetValue("count(*)").(int) <= 0
+	var val int
+	sol.GetValue("count(*)", &val)
+	return val <= 0
 }
 
 func (sol *Solution) GetHash() [16]byte {
@@ -46,10 +48,31 @@ func (sol *Solution) SaveChanges() error {
 }
 
 // GetValue gets a value from the database
-func (sol *Solution) GetValue(name string) interface{} {
+func (sol *Solution) GetValue(name string, value interface{}) {
 	db := currentProject.GetData()
 	defer db.Close()
-	return db.GetItemValue(sol.GetId(), "Solutions", name)
+	err := db.GetItemValue(sol.GetId(), "Solutions", name, value)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "database error:", err)
+	}
+}
+
+func (sol *Solution) GetValueString(name string) string {
+	var val string
+	sol.GetValue(name, &val)
+	return val
+}
+
+func (sol *Solution) GetValueInt(name string) int {
+	var val int
+	sol.GetValue(name, &val)
+	return val
+}
+
+func (sol *Solution) GetValueInt64(name string) int64 {
+	var val int64
+	sol.GetValue(name, &val)
+	return val
 }
 
 // SetValue sets a value to the database
@@ -61,22 +84,22 @@ func (sol *Solution) SetValue(name string, value interface{}) {
 
 // GetRationale gets the rationale property of the solution
 func (sol *Solution) GetRationale() string {
-	return sol.GetValue("rationale").(string)
+	return sol.GetValueString("rationale")
 }
 
 // GetFitCriterion of solution
 func (sol *Solution) GetFitCriterion() string {
-	return sol.GetValue("fitCriterion").(string)
+	return sol.GetValueString("fitCriterion")
 }
 
 // GetId gets the row ID in the database
 func (sol Solution) GetId() int64 {
-	return sol.GetValue("id").(int64)
+	return sol.GetValueInt64("id")
 }
 
 // GetUid gets the row Uid in the database
 func (sol Solution) GetUid() int64 {
-	return sol.GetValue("uid").(int64)
+	return sol.GetValueInt64("uid")
 }
 
 // SetUid sets the Uid in the database
@@ -86,12 +109,14 @@ func (sol Solution) SetUid(uid int64) {
 
 // GetVersion of Solution
 func (sol Solution) GetVersion() int {
-	return sol.GetValue("version").(int)
+	return sol.GetValueInt("version")
 }
 
 // GetShown gets the root as hidden or shown
 func (sol Solution) GetShown() bool {
-	return sol.GetValue("shown").(bool)
+	var val bool
+	sol.GetValue("shown", &val)
+	return val
 }
 
 // SetShown sets the root as hidden or shown
@@ -101,7 +126,7 @@ func (sol Solution) SetShown(shown bool) {
 
 // GetDescription gets the description from the database
 func (sol Solution) GetDescription() string {
-	return sol.GetValue("description").(string)
+	return sol.GetValueString("description")
 }
 
 // AddChild adds child to solution
@@ -110,7 +135,10 @@ func (sol Solution) AddChild(child Item) {
 }
 
 func (sol Solution) Pos() (int, int) {
-	return sol.GetValue("x").(int), sol.GetValue("y").(int)
+	var x, y int
+	sol.GetValue("x", &x)
+	sol.GetValue("y", &y)
+	return x, y
 }
 
 func (sol Solution) SetPos(x, y int) {
@@ -119,7 +147,10 @@ func (sol Solution) SetPos(x, y int) {
 }
 
 func (sol Solution) Size() (int, int) {
-	return sol.GetValue("width").(int), sol.GetValue("height").(int)
+	var width, height int
+	sol.GetValue("width", &width)
+	sol.GetValue("height", &height)
+	return width, height
 }
 
 func (sol Solution) SetSize(w, h int) {
