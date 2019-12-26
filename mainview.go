@@ -65,7 +65,6 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	view = widgets.NewQGraphicsView2(scene, nil)
 
 	backgroundColor = window.Palette().Color2(window.BackgroundRole())
-	fontColor = window.Palette().Text().Color()
 
 	// Create open items map
 	openItems = make(map[int64]*widgets.QDockWidget)
