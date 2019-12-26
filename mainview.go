@@ -154,9 +154,13 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 
 		// We released a button while moving an item
 		if movingItem != nil {
+			pos := movingItem.Pos()
 			// Update link if needed
 			// Error handling is already taken care of in UpdateLinkPos
-			UpdateLinkPos(movingItem, movingItem.Pos().X(), movingItem.Pos().Y())
+			UpdateLinkPos(movingItem, pos.X(), pos.Y())
+			// Update position in database
+			// TODO: Assuming Requirement
+			NewItem(GetGroupUID(movingItem), TypeRequirement).SetPos(int(pos.X()), int(pos.Y()))
 			// Reset opacity and remove as moving
 			movingItem.SetOpacity(1.0)
 			movingItem = nil
