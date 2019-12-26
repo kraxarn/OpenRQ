@@ -63,9 +63,8 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	// Create scene and view
 	scene := widgets.NewQGraphicsScene(nil)
 	view = widgets.NewQGraphicsView2(scene, nil)
-
+	// Get default window background color
 	backgroundColor = window.Palette().Color2(window.BackgroundRole())
-
 	// Create open items map
 	openItems = make(map[int64]*widgets.QDockWidget)
 
@@ -126,7 +125,10 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	})
 	view.ConnectMouseMoveEvent(func(event *gui.QMouseEvent) {
 		if movingItem != nil {
+			// Update item position
 			movingItem.SetPos(view.MapToScene(SnapToGrid(event.Pos())))
+			// Update link
+			UpdateLinkPos(movingItem, movingItem.Pos().X(), movingItem.Pos().Y())
 		}
 	})
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
