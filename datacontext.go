@@ -234,7 +234,7 @@ func (data *DataContext) GetItemValue(itemID int64, tableName, name string) inte
 	}
 	// Execute and return it
 	var value interface{}
-	if err := stmt.QueryRow(itemID, name).Scan(&value); err != nil {
+	if err := stmt.QueryRow(name, itemID).Scan(&value); err != nil {
 		fmt.Fprintln(os.Stderr, "warning: failed to get property", name, "from item:", err)
 		return nil
 	}
