@@ -96,53 +96,56 @@ func AddToolBar(window *widgets.QMainWindow) {
 	aboutBar.SetText("Help")
 	// Add menu options
 	aboutMenu := widgets.NewQMenu2("", aboutBar)
-	aboutMenu.AddAction2(gui.QIcon_FromTheme("help-about"), "About OpenRQ").ConnectTriggered(func(checked bool) {
-		// Add app version information
-		aboutMessage := "This version was compiled without proper version information.\nNo version info available."
-		if len(versionTagName) > 0 && len(versionCommitHash) > 0 {
-			aboutMessage = fmt.Sprintf("Version\t%v\nCommit\t%v", versionTagName[1:], versionCommitHash)
-		}
-		// Add useless version and memory information
-		var mem runtime.MemStats
-		runtime.ReadMemStats(&mem)
-		aboutMessage += fmt.Sprintf("\n\nQt %v, Go %v, %v\nMemory usage: %.2f mb (%.2f mb allocated)",
-			core.QLibraryInfo_Version().ToString(), runtime.Version()[2:], runtime.GOARCH, float64(mem.TotalAlloc)/1000000, float64(mem.Sys)/1000000)
-		// Show simple dialog for now
-		widgets.QMessageBox_About(window, "About OpenRQ", aboutMessage)
-	})
+	aboutMenu.AddAction2(
+		gui.QIcon_FromTheme("help-about"), "About OpenRQ").ConnectTriggered(func(checked bool) {
+			// Add app version information
+			aboutMessage := "This version was compiled without version information."
+			if len(versionTagName) > 0 && len(versionCommitHash) > 0 {
+				aboutMessage = fmt.Sprintf("Version\t%v\nCommit\t%v", versionTagName[1:], versionCommitHash)
+			}
+			// Add useless version and memory information
+			var mem runtime.MemStats
+			runtime.ReadMemStats(&mem)
+			aboutMessage += fmt.Sprintf("\n\nQt %v, Go %v, %v\nMemory usage: %.2f mb (%.2f mb allocated)",
+				core.QLibraryInfo_Version().ToString(), runtime.Version()[2:], runtime.GOARCH,
+				float64(mem.TotalAlloc)/1000000, float64(mem.Sys)/1000000)
+			// Show simple dialog for now
+			widgets.QMessageBox_About(window, "About OpenRQ", aboutMessage)
+		})
 	aboutMenu.AddAction2(gui.QIcon_FromTheme("qt"), "About Qt").ConnectTriggered(func(checked bool) {
 		widgets.QMessageBox_AboutQt(window, "About Qt")
 	})
 	aboutMenu.AddSeparator()
-	aboutMenu.AddAction2(gui.QIcon_FromTheme("download"), "Check for updates").ConnectTriggered(func(checked bool) {
-		// Check if version was compiled with version information
-		if len(versionCommitHash) <= 0 {
-			widgets.QMessageBox_About(window, "Updater", "This version was compiled without version information, updater is not available")
-			return
-		}
-		// Actually check for updates
-		if IsLatestVersion() {
-			widgets.QMessageBox_Information(
-				window, "Updater", "You are running the latest version",
-				widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
-			return
-		}
-		// New update was found
-		if widgets.QMessageBox_Question(
-			window, "Updater",
-			"New update found, do you want to update now?",
-			widgets.QMessageBox__Yes|widgets.QMessageBox__No, widgets.QMessageBox__Yes) == widgets.QMessageBox__Yes {
-			if err := Update(); err != nil {
-				widgets.QMessageBox_Warning(
-					window, "Updater", fmt.Sprintf("Failed to update: %v", err),
-					widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
-			} else {
-				widgets.QMessageBox_Information(
-					window, "Updater", "Update successful, restart application to apply changes",
-					widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+	aboutMenu.AddAction2(
+		gui.QIcon_FromTheme("download"), "Check for updates").ConnectTriggered(func(checked bool) {
+			// Check if version was compiled with version information
+			if len(versionCommitHash) <= 0 {
+				widgets.QMessageBox_About(window, "Updater", "This version was compiled without version information, updater is not available")
+				return
 			}
-		}
-	})
+			// Actually check for updates
+			if IsLatestVersion() {
+				widgets.QMessageBox_Information(
+					window, "Updater", "You are running the latest version",
+					widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+				return
+			}
+			// New update was found
+			if widgets.QMessageBox_Question(
+				window, "Updater",
+				"New update found, do you want to update now?",
+				widgets.QMessageBox__Yes|widgets.QMessageBox__No, widgets.QMessageBox__Yes) == widgets.QMessageBox__Yes {
+				if err := Update(); err != nil {
+					widgets.QMessageBox_Warning(
+						window, "Updater", fmt.Sprintf("Failed to update: %v", err),
+						widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+				} else {
+					widgets.QMessageBox_Information(
+						window, "Updater", "Update successful, restart application to apply changes",
+						widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+				}
+			}
+		})
 	aboutMenu.AddAction2(gui.QIcon_FromTheme("run-clean"), "Run GC").ConnectTriggered(func(checked bool) {
 		// Get memory information
 		var mem runtime.MemStats
