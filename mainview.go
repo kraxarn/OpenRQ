@@ -36,7 +36,9 @@ func CloseItem(uid int64) {
 func SnapToGrid(pos *core.QPoint) *core.QPoint {
 	// 2^5=32
 	const gridSize = 5
-	return core.NewQPoint2((pos.X()>>gridSize<<gridSize)-64, (pos.Y()>>gridSize<<gridSize)-32)
+	scenePos := view.MapToScene(pos).ToPoint()
+	return view.MapFromScene(core.NewQPointF3(
+		float64((scenePos.X()>>gridSize<<gridSize)-64), float64((scenePos.Y()>>gridSize<<gridSize)-32)))
 }
 
 func CreateEditWidgetFromPos(pos core.QPoint_ITF) (*widgets.QDockWidget, bool) {
