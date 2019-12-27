@@ -70,6 +70,24 @@ func AddToolBar(window *widgets.QMainWindow) {
 	fileTool.SetPopupMode(widgets.QToolButton__InstantPopup)
 	fileToolBar.AddWidget(fileTool)
 
+	// Edit menu
+	editBar := widgets.NewQToolButton(fileToolBar)
+	editBar.SetIcon(gui.QIcon_FromTheme("edit"))
+	editBar.SetToolButtonStyle(core.Qt__ToolButtonTextBesideIcon)
+	editBar.SetPopupMode(widgets.QToolButton__InstantPopup)
+	editBar.SetText("Edit")
+	editMenu := widgets.NewQMenu2("", editBar)
+	// Insert menu
+	editInsertMenu := widgets.NewQMenu2("Insert", editBar)
+	editInsertMenu.SetIcon(gui.QIcon_FromTheme("add"))
+	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-polygon"), "Problem")
+	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-polygon-star"), "Solution")
+	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-line"), "Link")
+	editMenu.AddMenu(editInsertMenu)
+	// Add to main toolbar
+	editBar.SetMenu(editMenu)
+	fileToolBar.AddWidget(editBar)
+
 	// Add about button
 	aboutBar := widgets.NewQToolButton(fileToolBar)
 	aboutBar.SetIcon(gui.QIcon_FromTheme("help"))
@@ -143,9 +161,6 @@ func AddToolBar(window *widgets.QMainWindow) {
 	// Add menu to main toolbar
 	fileToolBar.AddWidget(aboutBar)
 
-	// Add requirement/solution buttons
-	fileToolBar.AddAction2(gui.QIcon_FromTheme("add"), "New Requirement")
-	fileToolBar.AddAction2(gui.QIcon_FromTheme("add"), "New Solution")
 	// Add a spacer to show the button to the far right
 	spacer := widgets.NewQWidget(nil, 0)
 	spacer.SetSizePolicy2(widgets.QSizePolicy__Expanding, widgets.QSizePolicy__Expanding)
