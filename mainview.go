@@ -116,7 +116,13 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 				widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
 			return
 		}
+		// Snap to grid
 		gridPos := SnapToGrid(pos.ToPoint())
+		// Set size and position, TODO: Temporary, not needed later
+		req := NewRequirement(uid)
+		req.SetPos(gridPos.Y(), gridPos.Y())
+		req.SetSize(itemSize*2, itemSize)
+		// Add item to view
 		scene.AddItem(NewGraphicsItem(
 			fmt.Sprintf("%x", uid), gridPos.X(), gridPos.Y(), itemSize*2, itemSize, uid))
 		if len(openItems) <= 0 {
