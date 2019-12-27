@@ -154,17 +154,17 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 			// When right clicking item, show edit/delete options
 			menu := widgets.NewQMenu(nil)
 			// Edit option
-			editAction := menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit")
-			editAction.ConnectTriggered(func(checked bool) {
-				if editWidget, ok := CreateEditWidgetFromPos(view.MapToScene(event.Pos()).ToPoint()); ok {
-					window.AddDockWidget(core.Qt__RightDockWidgetArea, editWidget)
-				}
-			})
+			menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit").
+				ConnectTriggered(func(checked bool) {
+					if editWidget, ok := CreateEditWidgetFromPos(view.MapToScene(event.Pos()).ToPoint()); ok {
+						window.AddDockWidget(core.Qt__RightDockWidgetArea, editWidget)
+					}
+				})
 			// Delete option
-			deleteAction := menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete")
-			deleteAction.ConnectTriggered(func(checked bool) {
-				// Hakke write ur delete here
-			})
+			menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete").
+				ConnectTriggered(func(checked bool) {
+					// Hakke write ur delete here
+				})
 			// Show menu at cursor
 			menu.Popup(view.MapToGlobal(event.Pos()), nil)
 			return
