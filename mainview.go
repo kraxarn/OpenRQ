@@ -80,7 +80,8 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 			for _, item := range items {
 				x, y = item.Pos()
 				w, h = item.Size()
-				scene.AddItem(NewGraphicsItem(fmt.Sprintf("%x\n%v", item.GetId(), item.GetDescription()), float64(x), float64(y), float64(w), float64(h), item.GetId()))
+				scene.AddItem(NewGraphicsItem(
+					fmt.Sprintf("%x\n%v", item.GetId(), item.GetDescription()), x, y, w, h, item.GetId()))
 			}
 		}
 	}
@@ -98,7 +99,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	// Start position of link
 	var linkStart *widgets.QGraphicsItemGroup
 
-	itemSize := 64.0
+	itemSize := 64
 	view.ConnectDropEvent(func(event *gui.QDropEvent) {
 		pos := view.MapToScene(event.Pos())
 
@@ -115,7 +116,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 		}
 		gridPos := SnapToGrid(pos.ToPoint())
 		scene.AddItem(NewGraphicsItem(
-			fmt.Sprintf("%x", uid), float64(gridPos.X()), float64(gridPos.Y()), itemSize*2, itemSize, uid))
+			fmt.Sprintf("%x", uid), gridPos.X(), gridPos.Y(), itemSize*2, itemSize, uid))
 		if len(openItems) <= 0 {
 			openItems[uid], _ = CreateEditWidgetFromPos(gridPos)
 			window.AddDockWidget(core.Qt__RightDockWidgetArea, openItems[uid])
@@ -255,15 +256,15 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 	}
 }
 
-func NewGraphicsItem(text string, x, y, width, height float64, uid int64) *widgets.QGraphicsItemGroup {
+func NewGraphicsItem(text string, x, y, width, height int, uid int64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem2(text, nil)
 	textItem.SetZValue(15)
-	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, width, height, nil)
+	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, float64(width), float64(height), nil)
 	shapeItem.SetBrush(gui.NewQBrush3(backgroundColor, 1))
 	group.AddToGroup(textItem)
 	group.AddToGroup(shapeItem)
-	group.SetPos2(x, y)
+	group.SetPos2(float64(x), float64(y))
 	group.SetData(0, core.NewQVariant1(uid))
 	group.SetZValue(10)
 	return group
