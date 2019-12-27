@@ -80,7 +80,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 			for _, item := range items {
 				x, y = item.Pos()
 				w, h = item.Size()
-				scene.AddItem(AddGraphicsItem(fmt.Sprintf("%x\n%v", item.GetId(), item.GetDescription()), float64(x), float64(y), float64(w), float64(h), item.GetId()))
+				scene.AddItem(NewGraphicsItem(fmt.Sprintf("%x\n%v", item.GetId(), item.GetDescription()), float64(x), float64(y), float64(w), float64(h), item.GetId()))
 			}
 		}
 	}
@@ -114,7 +114,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 			return
 		}
 		gridPos := SnapToGrid(pos.ToPoint())
-		scene.AddItem(AddGraphicsItem(
+		scene.AddItem(NewGraphicsItem(
 			fmt.Sprintf("%x", uid), float64(gridPos.X()), float64(gridPos.Y()), itemSize*2, itemSize, uid))
 		if len(openItems) <= 0 {
 			openItems[uid], _ = CreateEditWidgetFromPos(gridPos)
@@ -255,7 +255,7 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 	}
 }
 
-func AddGraphicsItem(text string, x, y, width, height float64, uid int64) *widgets.QGraphicsItemGroup {
+func NewGraphicsItem(text string, x, y, width, height float64, uid int64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem2(text, nil)
 	textItem.SetZValue(15)
