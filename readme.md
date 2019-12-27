@@ -16,9 +16,10 @@
 * All functions and methods use pascal case (`FunctionName`)
 * All variables use dromedary case (`variableName`).
 * File names should be the **same as the struct name**, but in **all lower case** (`structname.go`)
-* Keep everything under package `main`.
 * Never leave more than one lines empty.
 * `//` comment for **every method and function** (with name) as documentation.
+* Do not use lines longer than 120 columns.
+* Always use LF (\n) line endings.
 
 ## Directories
 * `.vscode`: VS Code settings, **do not modify**.
