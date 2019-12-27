@@ -152,11 +152,12 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
 		if event.Button() == core.Qt__RightButton && view.ItemAt(event.Pos()).Group() != nil {
 			// When right clicking item, show edit/delete options
+			pos := event.Pos()
 			menu := widgets.NewQMenu(nil)
 			// Edit option
 			menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit").
 				ConnectTriggered(func(checked bool) {
-					if editWidget, ok := CreateEditWidgetFromPos(view.MapToScene(event.Pos()).ToPoint()); ok {
+					if editWidget, ok := CreateEditWidgetFromPos(pos); ok {
 						window.AddDockWidget(core.Qt__RightDockWidgetArea, editWidget)
 					}
 				})
