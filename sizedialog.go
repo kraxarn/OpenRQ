@@ -26,7 +26,7 @@ func OpenSizeDialog(parent widgets.QWidget_ITF, initial *core.QPoint, accepted f
 	// Grid for width and height selections
 	grid := widgets.NewQGridLayout(nil)
 	// Width spin box
-	grid.AddWidget2(widgets.NewQLabel2("Width:", nil, 0), 0, 0, 0)
+	grid.AddWidget(widgets.NewQLabel2("Width:", nil, 0), 0, 0, 0)
 	width.SetSuffix(" tiles")
 	width.SetMinimum(1)
 	width.SetMaximum(100)
@@ -34,9 +34,9 @@ func OpenSizeDialog(parent widgets.QWidget_ITF, initial *core.QPoint, accepted f
 	width.ConnectValueChanged(func(i int) {
 		sizeLabel.SetText(fmt.Sprintf("Actual size: %vx%v", i*32, height.Value()*32))
 	})
-	grid.AddWidget2(width, 0, 1, 0)
+	grid.AddWidget(width, 0, 1, 0)
 	// Height spin box
-	grid.AddWidget2(widgets.NewQLabel2("Height:", nil, 0), 1, 0, 0)
+	grid.AddWidget(widgets.NewQLabel2("Height:", nil, 0), 1, 0, 0)
 	height.SetSuffix(" tiles")
 	height.SetMinimum(1)
 	height.SetMaximum(100)
@@ -44,7 +44,7 @@ func OpenSizeDialog(parent widgets.QWidget_ITF, initial *core.QPoint, accepted f
 	height.ConnectValueChanged(func(i int) {
 		sizeLabel.SetText(fmt.Sprintf("Actual size: %vx%v", width.Value()*32, i*32))
 	})
-	grid.AddWidget2(height, 1, 1, 0)
+	grid.AddWidget(height, 1, 1, 0)
 	// Add grid layout to main layout
 	gridWidget := widgets.NewQWidget(nil, 0)
 	gridWidget.SetLayout(grid)
