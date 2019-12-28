@@ -24,10 +24,6 @@ func IsLatestVersion() bool {
 }
 
 func Update() error {
-	// Check if running from 'go run'
-	if strings.HasPrefix(os.Args[0], "/tmp") {
-		//return fmt.Errorf("cannot update from temporary folder")
-	}
 	// Download to buffer
 	resp, err := http.Get(fmt.Sprintf("https://kraxarn.com/openrq/updater/%v", runtime.GOOS))
 	if err != nil {
