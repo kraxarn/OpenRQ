@@ -204,7 +204,11 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 			if toPos.X() == 0 && toPos.Y() == 0 {
 				return
 			}
-			scene.AddItem(AddLink(linkStart, view.ItemAt(event.Pos()).Group()))
+			// Create and add link
+			link := AddLink(linkStart, view.ItemAt(event.Pos()).Group())
+			scene.AddItem(link)
+			// Add direction indicator
+			scene.AddItem(CreateTriangle(link.Line().Center(), link.Line().Angle()))
 			linkStart = nil
 		}
 	})
@@ -277,4 +281,22 @@ func NewGraphicsItem(text string, x, y, width, height int, uid int64) *widgets.Q
 	group.SetData(0, core.NewQVariant1(uid))
 	group.SetZValue(10)
 	return group
+}
+
+// CreateTriangle creates a new 16x16 triangle pointing downwards
+func CreateTriangle(pos *core.QPointF, angle float64) *widgets.QGraphicsPolygonItem {
+	// Total width/height for triangle
+	const size = 16
+	// Create each point
+	points := []*core.QPointF{
+		core.NewQPointF3(0, 0),
+		core.NewQPointF3(size, 0),
+		core.NewQPointF3(8, size),
+	}
+	// Create polygon and return it
+	poly := widgets.NewQGraphicsPolygonItem2(gui.NewQPolygonF3(points), nil)
+	poly.SetPos2(pos.X()-(size>>1), pos.Y()-(size>>1))
+	poly.SetPen(gui.NewQPen3(gui.NewQColor3(0, 255, 0, 255)))
+	poly.SetRotation((-angle)-90)
+	return poly
 }
