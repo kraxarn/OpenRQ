@@ -267,6 +267,10 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 			pos := l.line.Line().P1()
 			l.line.SetLine2(pos.X(), pos.Y(), x+64, y+32)
 		}
+		// Update direction
+		center := l.line.Line().Center()
+		l.dir.SetPos2(center.X()-8, center.Y()-8)
+		l.dir.SetRotation((-l.line.Line().Angle()) - 90)
 	}
 }
 
