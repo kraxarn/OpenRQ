@@ -1,6 +1,7 @@
 The OpenRQ application makes use of the following third-party libraries:
 
 ## Go
+[github.com/golang/go](https://github.com/golang/go)
 ```
 Copyright (c) 2009 The Go Authors. All rights reserved.
 
@@ -32,6 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
 ## Qt
+[code.qt.io](https://code.qt.io)
 ```
   GNU LESSER GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
@@ -200,6 +202,7 @@ Library.
 ```
 
 ## qt
+[github.com/therecipe/qt](https://github.com/therecipe/qt)
 ```
                    GNU LESSER GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
