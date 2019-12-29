@@ -62,7 +62,7 @@ func CreateEditWidgetFromPos(pos core.QPoint_ITF) (*widgets.QDockWidget, bool) {
 	return editWindow, true
 }
 
-func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *widgets.QGraphicsView {
+func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widgets.QGraphicsView {
 	// Create scene and view
 	scene := widgets.NewQGraphicsScene(nil)
 	view = widgets.NewQGraphicsView2(scene, nil)
@@ -139,7 +139,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 		item := view.ItemAt(event.Pos())
 		// If an item was found
 		if item != nil && item.Group() != nil {
-			if linkRadio.IsChecked() {
+			if linkBtn.IsChecked() {
 				// We're creating a link
 				linkStart = item.Group()
 

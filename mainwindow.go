@@ -192,8 +192,8 @@ func AddToolBar(window *widgets.QMainWindow) {
 // CreateLayout creates the main layout widgets
 func CreateLayout(window *widgets.QMainWindow) {
 	// Set view as central widget
-	linkRadio := widgets.NewQRadioButton2("Link", nil)
-	view := CreateView(window, linkRadio)
+	linkBtn := widgets.NewQToolButton(nil)
+	view := CreateView(window, linkBtn)
 	window.SetCentralWidget(view)
 	view.Show()
 	// Create validation engine dock widget
@@ -207,8 +207,8 @@ func CreateLayout(window *widgets.QMainWindow) {
 	window.AddDockWidget(core.Qt__RightDockWidgetArea, dockValidation)
 
 	// Create item type dock widget
-	dockItemType := widgets.NewQDockWidget("Item Type", window, 0)
-	dockItemType.SetWidget(CreateItemTypeCreator(linkRadio))
+	dockItemType := widgets.NewQDockWidget("Tools", window, 0)
+	dockItemType.SetWidget(CreateItemTypeCreator(linkBtn))
 	// Hide close button as there's no reason to close it
 	dockItemType.SetFeatures(widgets.QDockWidget__DockWidgetMovable | widgets.QDockWidget__DockWidgetFloatable)
 	// Add dock to main window
@@ -255,17 +255,34 @@ func LayoutToWidget(vbox *widgets.QVBoxLayout) *widgets.QWidget {
 	return widget
 }
 
-//CreateItemTypeCreator
-func CreateItemTypeCreator(linkRadio *widgets.QRadioButton) *widgets.QWidget {
-	layout := widgets.NewQVBoxLayout()
+func CreateItemTypeCreator(linkBtn *widgets.QToolButton) *widgets.QToolBar {
+	layout := widgets.NewQToolBar2(nil)
 	// Requirement/solution selection
-	reqRadio := widgets.NewQRadioButton2("Requirement", nil)
-	reqRadio.SetChecked(true)
-	layout.AddWidget(CreateVBoxWidget(
-		reqRadio,
-		widgets.NewQRadioButton2("Solution", nil),
-		linkRadio), 1, core.Qt__AlignTop)
-	return LayoutToWidget(layout)
+	moveBtn := widgets.NewQToolButton(nil)
+	moveBtn.SetIcon(gui.QIcon_FromTheme("object-move-symbolic"))
+	moveBtn.SetCheckable(true)
+	moveBtn.SetChecked(true)
+	layout.AddWidget(moveBtn)
+	linkBtn.SetIcon(gui.QIcon_FromTheme("draw-line"))
+	linkBtn.SetCheckable(true)
+	layout.AddWidget(linkBtn)
+
+	moveBtn.ConnectHitButton(func(pos *core.QPoint) bool {
+		if moveBtn.IsChecked() {
+			return false
+		}
+		linkBtn.SetChecked(false)
+		return true
+	})
+	linkBtn.ConnectHitButton(func(pos *core.QPoint) bool {
+		if linkBtn.IsChecked() {
+			return false
+		}
+		moveBtn.SetChecked(false)
+		return true
+	})
+
+	return layout
 }
 
 //CreateItemShapeCreator
