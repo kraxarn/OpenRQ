@@ -157,3 +157,7 @@ func (req Requirement) SetSize(w, h int) {
 	req.SetValue("width", w)
 	req.SetValue("height", h)
 }
+
+func (req Requirement) Parent() (parentID int64, parentType ItemType, found bool) {
+	return req.GetValueInt64("parent"), ItemType(req.GetValueInt("parentType")), !req.IsPropertyNull("parent")
+}
