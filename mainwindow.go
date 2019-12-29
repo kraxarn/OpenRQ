@@ -70,6 +70,31 @@ func AddToolBar(window *widgets.QMainWindow) {
 	fileTool.SetPopupMode(widgets.QToolButton__InstantPopup)
 	fileToolBar.AddWidget(fileTool)
 
+	// Edit menu
+	editBar := widgets.NewQToolButton(fileToolBar)
+	editBar.SetIcon(gui.QIcon_FromTheme("edit"))
+	editBar.SetToolButtonStyle(core.Qt__ToolButtonTextBesideIcon)
+	editBar.SetPopupMode(widgets.QToolButton__InstantPopup)
+	editBar.SetText("Edit")
+	editMenu := widgets.NewQMenu2("", editBar)
+	// Insert menu
+	editInsertMenu := widgets.NewQMenu2("Insert", editBar)
+	editInsertMenu.SetIcon(gui.QIcon_FromTheme("add"))
+	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-polygon"), "Problem")
+	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-polygon-star"), "Solution")
+	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-line"), "Link")
+	editMenu.AddMenu(editInsertMenu)
+	// Other edit menu options
+	editMenu.AddAction2(
+		gui.QIcon_FromTheme("zoom-draw"), "Canvas Size...").ConnectTriggered(func(checked bool) {
+			OpenSizeDialog(window, core.NewQPoint2(32, 32), func(w, h int) {
+				fmt.Println("new size:", w, h)
+			})
+		})
+	// Add to main toolbar
+	editBar.SetMenu(editMenu)
+	fileToolBar.AddWidget(editBar)
+
 	// Add about button
 	aboutBar := widgets.NewQToolButton(fileToolBar)
 	aboutBar.SetIcon(gui.QIcon_FromTheme("help"))
@@ -78,53 +103,56 @@ func AddToolBar(window *widgets.QMainWindow) {
 	aboutBar.SetText("Help")
 	// Add menu options
 	aboutMenu := widgets.NewQMenu2("", aboutBar)
-	aboutMenu.AddAction2(gui.QIcon_FromTheme("help-about"), "About OpenRQ").ConnectTriggered(func(checked bool) {
-		// Add app version information
-		aboutMessage := "This version was compiled without proper version information.\nNo version info available."
-		if len(versionTagName) > 0 && len(versionCommitHash) > 0 {
-			aboutMessage = fmt.Sprintf("Version\t%v\nCommit\t%v", versionTagName[1:], versionCommitHash)
-		}
-		// Add useless version and memory information
-		var mem runtime.MemStats
-		runtime.ReadMemStats(&mem)
-		aboutMessage += fmt.Sprintf("\n\nQt %v, Go %v, %v\nMemory usage: %.2f mb (%.2f mb allocated)",
-			core.QLibraryInfo_Version().ToString(), runtime.Version()[2:], runtime.GOARCH, float64(mem.TotalAlloc)/1000000, float64(mem.Sys)/1000000)
-		// Show simple dialog for now
-		widgets.QMessageBox_About(window, "About OpenRQ", aboutMessage)
-	})
+	aboutMenu.AddAction2(
+		gui.QIcon_FromTheme("help-about"), "About OpenRQ").ConnectTriggered(func(checked bool) {
+			// Add app version information
+			aboutMessage := "This version was compiled without version information."
+			if len(versionTagName) > 0 && len(versionCommitHash) > 0 {
+				aboutMessage = fmt.Sprintf("Version\t%v\nCommit\t%v", versionTagName[1:], versionCommitHash)
+			}
+			// Add useless version and memory information
+			var mem runtime.MemStats
+			runtime.ReadMemStats(&mem)
+			aboutMessage += fmt.Sprintf("\n\nQt %v, Go %v, %v\nMemory usage: %.2f mb (%.2f mb allocated)",
+				core.QLibraryInfo_Version().ToString(), runtime.Version()[2:], runtime.GOARCH,
+				float64(mem.TotalAlloc)/1000000, float64(mem.Sys)/1000000)
+			// Show simple dialog for now
+			widgets.QMessageBox_About(window, "About OpenRQ", aboutMessage)
+		})
 	aboutMenu.AddAction2(gui.QIcon_FromTheme("qt"), "About Qt").ConnectTriggered(func(checked bool) {
 		widgets.QMessageBox_AboutQt(window, "About Qt")
 	})
 	aboutMenu.AddSeparator()
-	aboutMenu.AddAction2(gui.QIcon_FromTheme("download"), "Check for updates").ConnectTriggered(func(checked bool) {
-		// Check if version was compiled with version information
-		if len(versionCommitHash) <= 0 {
-			widgets.QMessageBox_About(window, "Updater", "This version was compiled without version information, updater is not available")
-			return
-		}
-		// Actually check for updates
-		if IsLatestVersion() {
-			widgets.QMessageBox_Information(
-				window, "Updater", "You are running the latest version",
-				widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
-			return
-		}
-		// New update was found
-		if widgets.QMessageBox_Question(
-			window, "Updater",
-			"New update found, do you want to update now?",
-			widgets.QMessageBox__Yes|widgets.QMessageBox__No, widgets.QMessageBox__Yes) == widgets.QMessageBox__Yes {
-			if err := Update(); err != nil {
-				widgets.QMessageBox_Warning(
-					window, "Updater", fmt.Sprintf("Failed to update: %v", err),
-					widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
-			} else {
-				widgets.QMessageBox_Information(
-					window, "Updater", "Update successful, restart application to apply changes",
-					widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+	aboutMenu.AddAction2(
+		gui.QIcon_FromTheme("download"), "Check for updates").ConnectTriggered(func(checked bool) {
+			// Check if version was compiled with version information
+			if len(versionCommitHash) <= 0 {
+				widgets.QMessageBox_About(window, "Updater", "This version was compiled without version information, updater is not available")
+				return
 			}
-		}
-	})
+			// Actually check for updates
+			if IsLatestVersion() {
+				widgets.QMessageBox_Information(
+					window, "Updater", "You are running the latest version",
+					widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+				return
+			}
+			// New update was found
+			if widgets.QMessageBox_Question(
+				window, "Updater",
+				"New update found, do you want to update now?",
+				widgets.QMessageBox__Yes|widgets.QMessageBox__No, widgets.QMessageBox__Yes) == widgets.QMessageBox__Yes {
+				if err := Update(); err != nil {
+					widgets.QMessageBox_Warning(
+						window, "Updater", fmt.Sprintf("Failed to update: %v", err),
+						widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+				} else {
+					widgets.QMessageBox_Information(
+						window, "Updater", "Update successful, restart application to apply changes",
+						widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+				}
+			}
+		})
 	aboutMenu.AddAction2(gui.QIcon_FromTheme("run-clean"), "Run GC").ConnectTriggered(func(checked bool) {
 		// Get memory information
 		var mem runtime.MemStats
@@ -143,9 +171,6 @@ func AddToolBar(window *widgets.QMainWindow) {
 	// Add menu to main toolbar
 	fileToolBar.AddWidget(aboutBar)
 
-	// Add requirement/solution buttons
-	fileToolBar.AddAction2(gui.QIcon_FromTheme("add"), "New Requirement")
-	fileToolBar.AddAction2(gui.QIcon_FromTheme("add"), "New Solution")
 	// Add a spacer to show the button to the far right
 	spacer := widgets.NewQWidget(nil, 0)
 	spacer.SetSizePolicy2(widgets.QSizePolicy__Expanding, widgets.QSizePolicy__Expanding)
@@ -167,8 +192,8 @@ func AddToolBar(window *widgets.QMainWindow) {
 // CreateLayout creates the main layout widgets
 func CreateLayout(window *widgets.QMainWindow) {
 	// Set view as central widget
-	linkRadio := widgets.NewQRadioButton2("Link", nil)
-	view := CreateView(window, linkRadio)
+	linkBtn := widgets.NewQToolButton(nil)
+	view := CreateView(window, linkBtn)
 	window.SetCentralWidget(view)
 	view.Show()
 	// Create validation engine dock widget
@@ -182,8 +207,8 @@ func CreateLayout(window *widgets.QMainWindow) {
 	window.AddDockWidget(core.Qt__RightDockWidgetArea, dockValidation)
 
 	// Create item type dock widget
-	dockItemType := widgets.NewQDockWidget("Item Type", window, 0)
-	dockItemType.SetWidget(CreateItemTypeCreator(linkRadio))
+	dockItemType := widgets.NewQDockWidget("Tools", window, 0)
+	dockItemType.SetWidget(CreateItemTypeCreator(linkBtn))
 	// Hide close button as there's no reason to close it
 	dockItemType.SetFeatures(widgets.QDockWidget__DockWidgetMovable | widgets.QDockWidget__DockWidgetFloatable)
 	// Add dock to main window
@@ -230,17 +255,34 @@ func LayoutToWidget(vbox *widgets.QVBoxLayout) *widgets.QWidget {
 	return widget
 }
 
-//CreateItemTypeCreator
-func CreateItemTypeCreator(linkRadio *widgets.QRadioButton) *widgets.QWidget {
-	layout := widgets.NewQVBoxLayout()
+func CreateItemTypeCreator(linkBtn *widgets.QToolButton) *widgets.QToolBar {
+	layout := widgets.NewQToolBar2(nil)
 	// Requirement/solution selection
-	reqRadio := widgets.NewQRadioButton2("Requirement", nil)
-	reqRadio.SetChecked(true)
-	layout.AddWidget(CreateVBoxWidget(
-		reqRadio,
-		widgets.NewQRadioButton2("Solution", nil),
-		linkRadio), 1, core.Qt__AlignTop)
-	return LayoutToWidget(layout)
+	moveBtn := widgets.NewQToolButton(nil)
+	moveBtn.SetIcon(gui.QIcon_FromTheme("object-move-symbolic"))
+	moveBtn.SetCheckable(true)
+	moveBtn.SetChecked(true)
+	layout.AddWidget(moveBtn)
+	linkBtn.SetIcon(gui.QIcon_FromTheme("draw-line"))
+	linkBtn.SetCheckable(true)
+	layout.AddWidget(linkBtn)
+
+	moveBtn.ConnectHitButton(func(pos *core.QPoint) bool {
+		if moveBtn.IsChecked() {
+			return false
+		}
+		linkBtn.SetChecked(false)
+		return true
+	})
+	linkBtn.ConnectHitButton(func(pos *core.QPoint) bool {
+		if linkBtn.IsChecked() {
+			return false
+		}
+		moveBtn.SetChecked(false)
+		return true
+	})
+
+	return layout
 }
 
 //CreateItemShapeCreator

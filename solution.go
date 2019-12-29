@@ -157,3 +157,13 @@ func (sol Solution) SetSize(w, h int) {
 	sol.SetValue("width", w)
 	sol.SetValue("height", h)
 }
+
+func (sol Solution) Parent() (parentID int64, parentType ItemType, found bool) {
+	return sol.GetValueInt64("parent"), ItemType(sol.GetValueInt("parentType")), !sol.IsPropertyNull("parent")
+}
+
+func (sol Solution) IsPropertyNull(columnName string) bool {
+	db := currentProject.GetData()
+	defer db.Close()
+	return db.IsPropertyNull("Solutions", columnName, sol.id)
+}

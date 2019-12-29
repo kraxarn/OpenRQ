@@ -12,6 +12,7 @@ type Line struct {
 	parent int64
 	child  int64
 	line   *widgets.QGraphicsLineItem
+	dir    *widgets.QGraphicsPolygonItem
 }
 
 var links map[int64][]*Line
@@ -36,7 +37,9 @@ func CloseItem(uid int64) {
 func SnapToGrid(pos *core.QPoint) *core.QPoint {
 	// 2^5=32
 	const gridSize = 5
-	return core.NewQPoint2((pos.X()>>gridSize<<gridSize)-64, (pos.Y()>>gridSize<<gridSize)-32)
+	scenePos := view.MapToScene(pos).ToPoint()
+	return view.MapFromScene(core.NewQPointF3(
+		float64((scenePos.X()>>gridSize<<gridSize)-64), float64((scenePos.Y()>>gridSize<<gridSize)-32)))
 }
 
 func CreateEditWidgetFromPos(pos core.QPoint_ITF) (*widgets.QDockWidget, bool) {
@@ -59,7 +62,7 @@ func CreateEditWidgetFromPos(pos core.QPoint_ITF) (*widgets.QDockWidget, bool) {
 	return editWindow, true
 }
 
-func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *widgets.QGraphicsView {
+func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widgets.QGraphicsView {
 	// Create scene and view
 	scene := widgets.NewQGraphicsScene(nil)
 	view = widgets.NewQGraphicsView2(scene, nil)
@@ -80,7 +83,38 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 			for _, item := range items {
 				x, y = item.Pos()
 				w, h = item.Size()
-				scene.AddItem(AddGraphicsItem(fmt.Sprintf("%x\n%v", item.GetId(), item.GetDescription()), float64(x), float64(y), float64(w), float64(h), item.GetId()))
+				scene.AddItem(NewGraphicsItem(
+					fmt.Sprintf("%x\n%v", item.GetId(), item.GetDescription()), x, y, w, h, item.GetId()))
+			}
+		}
+		// Get links
+		links, err := db.Links()
+		if err != nil {
+			fmt.Println("error: failed to get saved links:", err)
+		} else {
+			for parent, child := range links {
+				// Find parent and child
+				var parentItem, childItem *widgets.QGraphicsItemGroup
+				for _, item := range view.Items() {
+					group := item.Group()
+					if group == nil {
+						continue
+					}
+					groupID := GetGroupUID(group)
+					if groupID == child.GetId() {
+						childItem = group
+					} else if groupID == parent.GetId() {
+						parentItem = group
+					}
+					// Stop loop if we found everything
+					if parentItem != nil && childItem != nil {
+						break
+					}
+				}
+				// Create and add link
+				link := AddLink(parentItem, childItem)
+				scene.AddItem(link.line)
+				scene.AddItem(link.dir)
 			}
 		}
 	}
@@ -98,7 +132,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	// Start position of link
 	var linkStart *widgets.QGraphicsItemGroup
 
-	itemSize := 64.0
+	itemSize := 64
 	view.ConnectDropEvent(func(event *gui.QDropEvent) {
 		pos := view.MapToScene(event.Pos())
 
@@ -113,9 +147,15 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 				widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
 			return
 		}
+		// Snap to grid
 		gridPos := SnapToGrid(pos.ToPoint())
-		scene.AddItem(AddGraphicsItem(
-			fmt.Sprintf("%x", uid), float64(gridPos.X()), float64(gridPos.Y()), itemSize*2, itemSize, uid))
+		// Set size and position, TODO: Temporary, not needed later
+		req := NewRequirement(uid)
+		req.SetPos(gridPos.Y(), gridPos.Y())
+		req.SetSize(itemSize*2, itemSize)
+		// Add item to view
+		scene.AddItem(NewGraphicsItem(
+			fmt.Sprintf("%x", uid), gridPos.X(), gridPos.Y(), itemSize*2, itemSize, uid))
 		if len(openItems) <= 0 {
 			openItems[uid], _ = CreateEditWidgetFromPos(gridPos)
 			window.AddDockWidget(core.Qt__RightDockWidgetArea, openItems[uid])
@@ -129,7 +169,7 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 		item := view.ItemAt(event.Pos())
 		// If an item was found
 		if item != nil && item.Group() != nil {
-			if linkRadio.IsChecked() {
+			if linkBtn.IsChecked() {
 				// We're creating a link
 				linkStart = item.Group()
 
@@ -151,19 +191,20 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
 		if event.Button() == core.Qt__RightButton && view.ItemAt(event.Pos()).Group() != nil {
 			// When right clicking item, show edit/delete options
+			pos := event.Pos()
 			menu := widgets.NewQMenu(nil)
 			// Edit option
-			editAction := menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit")
-			editAction.ConnectTriggered(func(checked bool) {
-				if editWidget, ok := CreateEditWidgetFromPos(view.MapToScene(event.Pos()).ToPoint()); ok {
-					window.AddDockWidget(core.Qt__RightDockWidgetArea, editWidget)
-				}
-			})
+			menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit").
+				ConnectTriggered(func(checked bool) {
+					if editWidget, ok := CreateEditWidgetFromPos(pos); ok {
+						window.AddDockWidget(core.Qt__RightDockWidgetArea, editWidget)
+					}
+				})
 			// Delete option
-			deleteAction := menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete")
-			deleteAction.ConnectTriggered(func(checked bool) {
-				// Hakke write ur delete here
-			})
+			menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete").
+				ConnectTriggered(func(checked bool) {
+					// Hakke write ur delete here
+				})
 			// Show menu at cursor
 			menu.Popup(view.MapToGlobal(event.Pos()), nil)
 			return
@@ -194,7 +235,10 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 			if toPos.X() == 0 && toPos.Y() == 0 {
 				return
 			}
-			scene.AddItem(AddLink(linkStart, view.ItemAt(event.Pos()).Group()))
+			// Create and add link
+			link := AddLink(linkStart, view.ItemAt(event.Pos()).Group())
+			scene.AddItem(link.line)
+			scene.AddItem(link.dir)
 			linkStart = nil
 		}
 	})
@@ -205,11 +249,20 @@ func GetGroupUID(group *widgets.QGraphicsItemGroup) int64 {
 	return group.Data(0).ToLongLong(nil)
 }
 
-func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineItem {
+func AddLink(parent, child *widgets.QGraphicsItemGroup) Line {
 	// Check if map needs to be created
 	if links == nil {
 		links = make(map[int64][]*Line)
 	}
+	// Add to database
+	db := currentProject.GetData()
+	defer db.Close()
+	// TODO: Assuming requirement
+	if err := db.AddItemChild(
+		NewItem(GetGroupUID(parent), TypeRequirement), NewItem(GetGroupUID(child), TypeRequirement)); err != nil {
+			fmt.Println("error: failed to add link to database:", err)
+	}
+
 	// Get from (parent) and to (child)
 	fromPos := parent.Pos()
 	toPos := child.Pos()
@@ -226,11 +279,12 @@ func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineIt
 	childID := GetGroupUID(child)
 	lineData := Line{
 		parentID, childID, line,
+		CreateTriangle(line.Line().Center(), line.Line().Angle()),
 	}
 	links[parentID] = append(links[parentID], &lineData)
 	links[childID] = append(links[childID], &lineData)
 	// Return the graphics line to add to scene
-	return line
+	return lineData
 }
 
 func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
@@ -252,19 +306,42 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 			pos := l.line.Line().P1()
 			l.line.SetLine2(pos.X(), pos.Y(), x+64, y+32)
 		}
+		// Update direction
+		center := l.line.Line().Center()
+		l.dir.SetPos2(center.X()-8, center.Y()-8)
+		l.dir.SetRotation((-l.line.Line().Angle()) - 90)
 	}
 }
 
-func AddGraphicsItem(text string, x, y, width, height float64, uid int64) *widgets.QGraphicsItemGroup {
+func NewGraphicsItem(text string, x, y, width, height int, uid int64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem2(text, nil)
 	textItem.SetZValue(15)
-	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, width, height, nil)
+	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, float64(width), float64(height), nil)
 	shapeItem.SetBrush(gui.NewQBrush3(backgroundColor, 1))
 	group.AddToGroup(textItem)
 	group.AddToGroup(shapeItem)
-	group.SetPos2(x, y)
+	group.SetPos2(float64(x), float64(y))
 	group.SetData(0, core.NewQVariant1(uid))
 	group.SetZValue(10)
 	return group
+}
+
+// CreateTriangle creates a new 16x16 triangle pointing downwards
+func CreateTriangle(pos *core.QPointF, angle float64) *widgets.QGraphicsPolygonItem {
+	// Total width/height for triangle
+	const size = 16
+	// Create each point
+	points := []*core.QPointF{
+		core.NewQPointF3(0, 0),
+		core.NewQPointF3(size, 0),
+		core.NewQPointF3(size>>1, size),
+	}
+	// Create polygon and return it
+	poly := widgets.NewQGraphicsPolygonItem2(gui.NewQPolygonF3(points), nil)
+	poly.SetPos2(pos.X()-(size>>1), pos.Y()-(size>>1))
+	poly.SetPen(gui.NewQPen3(gui.NewQColor3(0, 255, 0, 255)))
+	poly.SetTransformOriginPoint2(size>>1, size>>1)
+	poly.SetRotation((-angle) - 90)
+	return poly
 }

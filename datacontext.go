@@ -246,6 +246,31 @@ func (data *DataContext) GetAllItems() ([]Item, error) {
 	return items, nil
 }
 
+func (data *DataContext) Links() (items map[Item]Item, err error) {
+	// Connect to database
+	db := currentProject.GetData()
+	defer db.Close()
+	// Create map
+	items = make(map[Item]Item)
+	// Get all requirements
+	// TODO: Only child and parent as requirement
+	rows, err := db.Database.Query("select _rowid_, parent from Requirements where parent is not null")
+	if err != nil {
+		return items, fmt.Errorf("failed to get requirement links: %v", err)
+	}
+	defer rows.Close()
+	// Get requirement links
+	var itemID, parentID int64
+	for rows.Next() {
+		if err = rows.Scan(&itemID, &parentID); err == nil {
+			items[NewRequirement(parentID)] = NewRequirement(itemID)
+		} else {
+			return items, fmt.Errorf("failed to get requirement %v link: %v", itemID, err)
+		}
+	}
+	return items, nil
+}
+
 // GetItemChildren gets all children of a specific item
 func (data *DataContext) GetItemChildren(itemID int) {
 	stmt, err := data.Database.Prepare("select parent from (select parent from Requirements union select parent from Solutions) where parent = ? and parentType = ?")
@@ -275,14 +300,11 @@ func (data *DataContext) GetItemValue(itemID int64, tableName, name string, valu
 // AddItemChild creates a link between parent and child
 func (data *DataContext) AddItemChild(parent, child Item) error {
 	// Get what table name child has
-	childTable := "Solutions"
-	if GetItemType(child) == TypeRequirement {
-		childTable = "Requirements"
-	}
+	childTable := GetItemTableName(GetItemType(child))
 	// Execute update
 	_, err := data.Database.Exec(
-		"update ? set parent = ? and parentType = ? where _rowid_ = ?",
-		childTable, parent.GetId(), GetItemType(parent), child.GetId())
+		fmt.Sprintf("update %v set parent = ?, parentType = ? where _rowid_ = ?", childTable),
+		parent.GetId(), GetItemType(parent), child.GetId())
 	return err
 }
 
@@ -312,6 +334,20 @@ func (data *DataContext) SetItemValue(itemID int64, tableName, name string, valu
 	if _, err := stmt.Exec(value, itemID); err != nil {
 		fmt.Fprintln(os.Stderr, "warning: failed to set property", name, "in requirement:", err)
 	}
+}
+
+func (data *DataContext) IsPropertyNull(tableName, columnName string, id int64) bool {
+	// Prepare query
+	stmt, err := data.Database.Prepare(
+		fmt.Sprintf("select count(*) from %v where %v is null and _rowid_ = %v", tableName, columnName, id))
+	if err != nil {
+		fmt.Println("error: failed to check for null property:", err)
+		return true
+	}
+	// Execute and return it
+	var value int
+	_ = stmt.QueryRow(0).Scan(&value)
+	return value >= 0
 }
 
 // UidExists checking if the specified uid is already taken

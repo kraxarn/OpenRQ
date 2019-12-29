@@ -15,8 +15,6 @@ type Item interface {
 	GetDescription() string
 	SetDescription(description string)
 
-	GetChildren() []Item
-
 	Pos() (int, int)
 	SetPos(x, y int)
 
@@ -25,6 +23,11 @@ type Item interface {
 
 	AddChild(child Item)
 	RemoveChild(child Item)
+
+	GetChildren() []Item
+	Parent() (parentID int64, parentType ItemType, found bool)
+
+	IsPropertyNull(columnName string) bool
 }
 
 func NewItem(id int64, itemType ItemType) Item {

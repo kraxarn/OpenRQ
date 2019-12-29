@@ -27,6 +27,8 @@ var tableData = map[string][]string{
 		"uid integer",
 		"name text",
 		"created integer default current_timestamp",
+		"width integer",
+		"height integer",
 	},
 	"ItemVersions": {
 		"version integer",
