@@ -224,6 +224,15 @@ func AddLink(parent, child *widgets.QGraphicsItemGroup) Line {
 	if links == nil {
 		links = make(map[int64][]*Line)
 	}
+	// Add to database
+	db := currentProject.GetData()
+	defer db.Close()
+	// TODO: Assuming requirement
+	if err := db.AddItemChild(
+		NewItem(GetGroupUID(parent), TypeRequirement), NewItem(GetGroupUID(child), TypeRequirement)); err != nil {
+			fmt.Println("error: failed to add link to database:", err)
+	}
+
 	// Get from (parent) and to (child)
 	fromPos := parent.Pos()
 	toPos := child.Pos()
