@@ -275,14 +275,11 @@ func (data *DataContext) GetItemValue(itemID int64, tableName, name string, valu
 // AddItemChild creates a link between parent and child
 func (data *DataContext) AddItemChild(parent, child Item) error {
 	// Get what table name child has
-	childTable := "Solutions"
-	if GetItemType(child) == TypeRequirement {
-		childTable = "Requirements"
-	}
+	childTable := GetItemTableName(GetItemType(child))
 	// Execute update
 	_, err := data.Database.Exec(
-		"update ? set parent = ? and parentType = ? where _rowid_ = ?",
-		childTable, parent.GetId(), GetItemType(parent), child.GetId())
+		fmt.Sprintf("update %v set parent = ?, parentType = ? where _rowid_ = ?", childTable),
+		parent.GetId(), GetItemType(parent), child.GetId())
 	return err
 }
 
