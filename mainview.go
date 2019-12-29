@@ -292,7 +292,7 @@ func CreateTriangle(pos *core.QPointF, angle float64) *widgets.QGraphicsPolygonI
 	points := []*core.QPointF{
 		core.NewQPointF3(0, 0),
 		core.NewQPointF3(size, 0),
-		core.NewQPointF3(8, size),
+		core.NewQPointF3(size>>1, size),
 	}
 	// Create polygon and return it
 	poly := widgets.NewQGraphicsPolygonItem2(gui.NewQPolygonF3(points), nil)
