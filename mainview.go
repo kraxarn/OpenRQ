@@ -12,6 +12,7 @@ type Line struct {
 	parent int64
 	child  int64
 	line   *widgets.QGraphicsLineItem
+	dir    *widgets.QGraphicsPolygonItem
 }
 
 var links map[int64][]*Line
@@ -206,9 +207,8 @@ func CreateView(window *widgets.QMainWindow, linkRadio *widgets.QRadioButton) *w
 			}
 			// Create and add link
 			link := AddLink(linkStart, view.ItemAt(event.Pos()).Group())
-			scene.AddItem(link)
-			// Add direction indicator
-			scene.AddItem(CreateTriangle(link.Line().Center(), link.Line().Angle()))
+			scene.AddItem(link.line)
+			scene.AddItem(link.dir)
 			linkStart = nil
 		}
 	})
@@ -219,7 +219,7 @@ func GetGroupUID(group *widgets.QGraphicsItemGroup) int64 {
 	return group.Data(0).ToLongLong(nil)
 }
 
-func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineItem {
+func AddLink(parent, child *widgets.QGraphicsItemGroup) Line {
 	// Check if map needs to be created
 	if links == nil {
 		links = make(map[int64][]*Line)
@@ -240,11 +240,12 @@ func AddLink(parent, child *widgets.QGraphicsItemGroup) *widgets.QGraphicsLineIt
 	childID := GetGroupUID(child)
 	lineData := Line{
 		parentID, childID, line,
+		CreateTriangle(line.Line().Center(), line.Line().Angle()),
 	}
 	links[parentID] = append(links[parentID], &lineData)
 	links[childID] = append(links[childID], &lineData)
 	// Return the graphics line to add to scene
-	return line
+	return lineData
 }
 
 func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
