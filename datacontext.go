@@ -311,6 +311,20 @@ func (data *DataContext) SetItemValue(itemID int64, tableName, name string, valu
 	}
 }
 
+func (data *DataContext) IsPropertyNull(tableName, columnName string, id int64) bool {
+	// Prepare query
+	stmt, err := data.Database.Prepare(
+		fmt.Sprintf("select count(*) from %v where %v is null and _rowid_ = %v", tableName, columnName, id))
+	if err != nil {
+		fmt.Println("error: failed to check for null property:", err)
+		return true
+	}
+	// Execute and return it
+	var value int
+	_ = stmt.QueryRow(0).Scan(&value)
+	return value >= 0
+}
+
 // UidExists checking if the specified uid is already taken
 func UidExists(db *sql.DB, uid int64) bool {
 	// Prepare union query
