@@ -246,6 +246,31 @@ func (data *DataContext) GetAllItems() ([]Item, error) {
 	return items, nil
 }
 
+func (data *DataContext) Links() (items map[Item]Item, err error) {
+	// Connect to database
+	db := currentProject.GetData()
+	defer db.Close()
+	// Create map
+	items = make(map[Item]Item)
+	// Get all requirements
+	// TODO: Only child and parent as requirement
+	rows, err := db.Database.Query("select _rowid_, parent from Requirements where parent is not null")
+	if err != nil {
+		return items, fmt.Errorf("failed to get requirement links: %v", err)
+	}
+	defer rows.Close()
+	// Get requirement links
+	var itemID, parentID int64
+	for rows.Next() {
+		if err = rows.Scan(&itemID, &parentID); err == nil {
+			items[NewRequirement(parentID)] = NewRequirement(itemID)
+		} else {
+			return items, fmt.Errorf("failed to get requirement %v link: %v", itemID, err)
+		}
+	}
+	return items, nil
+}
+
 // GetItemChildren gets all children of a specific item
 func (data *DataContext) GetItemChildren(itemID int) {
 	stmt, err := data.Database.Prepare("select parent from (select parent from Requirements union select parent from Solutions) where parent = ? and parentType = ?")

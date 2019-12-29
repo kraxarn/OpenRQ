@@ -87,6 +87,36 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 					fmt.Sprintf("%x\n%v", item.GetId(), item.GetDescription()), x, y, w, h, item.GetId()))
 			}
 		}
+		// Get links
+		links, err := db.Links()
+		if err != nil {
+			fmt.Println("error: failed to get saved links:", err)
+		} else {
+			for parent, child := range links {
+				// Find parent and child
+				var parentItem, childItem *widgets.QGraphicsItemGroup
+				for _, item := range view.Items() {
+					group := item.Group()
+					if group == nil {
+						continue
+					}
+					groupID := GetGroupUID(group)
+					if groupID == child.GetId() {
+						childItem = group
+					} else if groupID == parent.GetId() {
+						parentItem = group
+					}
+					// Stop loop if we found everything
+					if parentItem != nil && childItem != nil {
+						break
+					}
+				}
+				// Create and add link
+				link := AddLink(parentItem, childItem)
+				scene.AddItem(link.line)
+				scene.AddItem(link.dir)
+			}
+		}
 	}
 
 	// Setup drag-and-drop
