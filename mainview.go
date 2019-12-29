@@ -298,6 +298,7 @@ func CreateTriangle(pos *core.QPointF, angle float64) *widgets.QGraphicsPolygonI
 	poly := widgets.NewQGraphicsPolygonItem2(gui.NewQPolygonF3(points), nil)
 	poly.SetPos2(pos.X()-(size>>1), pos.Y()-(size>>1))
 	poly.SetPen(gui.NewQPen3(gui.NewQColor3(0, 255, 0, 255)))
-	poly.SetRotation((-angle)-90)
+	poly.SetTransformOriginPoint2(size>>1, size>>1)
+	poly.SetRotation((-angle) - 90)
 	return poly
 }
