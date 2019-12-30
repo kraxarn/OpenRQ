@@ -77,16 +77,6 @@ func (sol *Solution) SetValue(name string, value interface{}) {
 	db.SetItemValue(sol.ID(), "Solutions", name, value)
 }
 
-// GetRationale gets the rationale property of the solution
-func (sol *Solution) Rationale() string {
-	return sol.GetValueString("rationale")
-}
-
-// GetFitCriterion of solution
-func (sol *Solution) FitCriterion() string {
-	return sol.GetValueString("fitCriterion")
-}
-
 // GetId gets the row ID in the database
 func (sol Solution) ID() int64 {
 	return sol.GetValueInt64("id")
