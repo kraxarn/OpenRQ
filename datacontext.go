@@ -128,12 +128,6 @@ func (data *DataContext) AddItemVersion(itemUID int64, itemType ItemType) error 
 	return err
 }
 
-// UpdateItemVersion increases the version of an item
-// TODO: Not yet implemented as version control isn't implemented
-func (data *DataContext) UpdateItemVersion() error {
-	return nil
-}
-
 // RemoveItem removes the item from the current version
 func (data *DataContext) RemoveItem(itemType ItemType, itemID int) error {
 	// Execute SQL
