@@ -350,7 +350,8 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 
 func NewGraphicsItem(text string, x, y, width, height int, uid int64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
-	textItem := widgets.NewQGraphicsTextItem2(text, nil)
+	textItem := widgets.NewQGraphicsTextItem(nil)
+	textItem.SetHtml(text)
 	textItem.SetZValue(15)
 	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, float64(width), float64(height), nil)
 	shapeItem.SetBrush(gui.NewQBrush3(backgroundColor, 1))
