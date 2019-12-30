@@ -92,8 +92,9 @@ func (data *DataContext) AddRequirement(description, rationale, fitCriterion str
 	}
 	// Get item ID
 	var id int64
-	if err := data.Database.QueryRow("select _rowid_ from Requirements where uid = ?", reqUID).Scan(&id); err != nil {
-		return 0, err
+	if err := data.Database.QueryRow(
+		"select _rowid_ from Requirements where uid = ?", reqUID).Scan(&id); err != nil {
+			return 0, err
 	}
 	// Try to version it and return the result of it
 	return id, data.AddItemVersion(reqUID, TypeRequirement)
@@ -117,7 +118,8 @@ func (data *DataContext) AddSolution(description string) (int64, error) {
 func (data *DataContext) AddItemVersion(itemUID int64, itemType ItemType) error {
 	// Find item ID
 	var itemID int
-	row := data.Database.QueryRow(fmt.Sprintf("select _rowid_ from %v where uid = ?", GetItemTableName(itemType)), itemUID)
+	row := data.Database.QueryRow(
+		fmt.Sprintf("select _rowid_ from %v where uid = ?", GetItemTableName(itemType)), itemUID)
 	if err := row.Scan(&itemID); err != nil {
 		return err
 	}
@@ -287,7 +289,8 @@ func (data *DataContext) RemoveItemParent(child Item) error {
 // SetItemValue updates a value in the database
 func (data *DataContext) SetItemValue(itemID int64, tableName, name string, value interface{}) {
 	// Prepare query
-	_, err := data.Database.Exec(fmt.Sprintf("update %v set %v = ? where _rowid_ = ?", tableName, name), value, itemID)
+	_, err := data.Database.Exec(
+		fmt.Sprintf("update %v set %v = ? where _rowid_ = ?", tableName, name), value, itemID)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "warning: failed to set property", name, "in requirement:", err)
 	}
