@@ -219,7 +219,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 						}
 					}
 					scene.RemoveItem(selectedItem)
-					newItem := NewItem(selectedUid,TypeRequirement)
+					newItem := NewItem(selectedUid, TypeRequirement)
 					db.RemoveChildrenLinks(newItem)
 					db.RemoveItem(selectedUid)
 				})
