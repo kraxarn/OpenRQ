@@ -240,9 +240,9 @@ func CreateVBoxWidget(children ...widgets.QWidget_ITF) *widgets.QWidget {
 	return widget
 }
 
-func LayoutToWidget(vbox *widgets.QVBoxLayout) *widgets.QWidget {
+func LayoutToWidget(vBox *widgets.QVBoxLayout) *widgets.QWidget {
 	widget := widgets.NewQWidget(nil, 0)
-	widget.SetLayout(vbox)
+	widget.SetLayout(vBox)
 	widget.SetMaximumWidth(200)
 	widget.SetMinimumWidth(150)
 	return widget
