@@ -112,7 +112,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 					}
 				}
 				// Create and add link
-				link := AddLink(parentItem, childItem)
+				link := CreateLink(parentItem, childItem)
 				scene.AddItem(link.line)
 				scene.AddItem(link.dir)
 			}
@@ -236,7 +236,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 				return
 			}
 			// Create and add link
-			link := AddLink(linkStart, view.ItemAt(event.Pos()).Group())
+			link := CreateLink(linkStart, view.ItemAt(event.Pos()).Group())
 			scene.AddItem(link.line)
 			scene.AddItem(link.dir)
 			linkStart = nil
@@ -249,7 +249,7 @@ func GetGroupUID(group *widgets.QGraphicsItemGroup) int64 {
 	return group.Data(0).ToLongLong(nil)
 }
 
-func AddLink(parent, child *widgets.QGraphicsItemGroup) Line {
+func CreateLink(parent, child *widgets.QGraphicsItemGroup) Line {
 	// Check if map needs to be created
 	if links == nil {
 		links = make(map[int64][]*Line)
