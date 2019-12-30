@@ -33,6 +33,21 @@ func CloseItem(uid int64) {
 	delete(openItems, uid)
 }
 
+func GetTextItem(group *widgets.QGraphicsItemGroup) *widgets.QGraphicsTextItem {
+	for _, item := range group.ChildItems() {
+		if item.Type() == 8 {
+			tp := (*widgets.QGraphicsTextItem)(item.Pointer())
+			textItem := widgets.NewQGraphicsTextItemFromPointer(item.Pointer())
+			fmt.Printf("text item: %p / %p / %p\n", textItem, tp, item.Pointer())
+			if textItem != nil {
+				return textItem
+			}
+		}
+	}
+	fmt.Println("warning: text item not found in group")
+	return nil
+}
+
 // SnapToGrid naps the specified position to the grid
 func SnapToGrid(pos *core.QPoint) *core.QPoint {
 	// 2^5=32
@@ -44,7 +59,8 @@ func SnapToGrid(pos *core.QPoint) *core.QPoint {
 
 func CreateEditWidgetFromPos(pos core.QPoint_ITF) (*widgets.QDockWidget, bool) {
 	// Get UID
-	uid := GetGroupUID(view.ItemAt(pos).Group())
+	group := view.ItemAt(pos).Group()
+	uid := GetGroupUID(group)
 	// Check if already opened
 	if IsItemOpen(uid) {
 		// We probably want to put it in focus here or something
@@ -52,7 +68,10 @@ func CreateEditWidgetFromPos(pos core.QPoint_ITF) (*widgets.QDockWidget, bool) {
 	}
 	// Open item
 	// TODO: For now, assume requirement
-	editWindow := CreateEditWidget(uid, TypeRequirement)
+	//p := group.Data(1).Pointer()
+	//t := (*widgets.QGraphicsTextItem)(unsafe.Pointer(p))
+	// *(*uint64)(unsafe.Pointer(&f))
+	editWindow := CreateEditWidget(NewItem(uid, TypeRequirement), GetTextItem(group))
 	editWindow.ConnectCloseEvent(func(event *gui.QCloseEvent) {
 		CloseItem(uid)
 	})
@@ -84,7 +103,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 				x, y = item.Pos()
 				w, h = item.Size()
 				scene.AddItem(NewGraphicsItem(
-					fmt.Sprintf("%x\n%v", item.ID(), item.Description()), x, y, w, h, item.ID()))
+					fmt.Sprintf("%v%v", item.ID(), item.Description()), x, y, w, h, item.ID()))
 			}
 		}
 		// Get links
