@@ -206,8 +206,9 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 					// Connect to database
 					db := currentProject.Data()
 					defer db.Close()
-					selectedItem := view.ItemAt(event.Pos())
-					selectedUid := GetGroupUID(selectedItem.Group())
+					// Get the clicked item
+					selectedItem := view.ItemAt(pos).Group()
+					selectedUid := GetGroupUID(selectedItem)
 					// Try to get all links
 					link, ok := links[selectedUid]
 					if !ok {
