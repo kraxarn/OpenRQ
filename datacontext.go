@@ -351,18 +351,13 @@ func (data *DataContext) IsPropertyNull(tableName, columnName string, id int64) 
 }
 
 // UidExists checking if the specified uid is already taken
-func UIDExists(db *sql.DB, uid int64) bool {
-	// Prepare union query
-	stmt, err := db.Prepare("select count(*) from (select uid from Requirements union select uid from Solutions) where uid = ?")
-	defer stmt.Close()
-	// Check for error
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "warning: failed to get uid:", err)
-	}
-	// Bind uid
+func (data *DataContext) UIDExists(uid int64) bool {
+	// Execute query
+	row := data.Database.QueryRow(
+		"select count(*) from (select uid from Requirements union select uid from Solutions) where uid = ?", uid)
+	// Get value from row
 	var count int
-	stmt.QueryRow(uid).Scan(&count)
-	// If count is above 0, row is found
+	row.Scan(&count)
 	return count > 0
 }
 
@@ -371,7 +366,7 @@ func (data *DataContext) ItemUID() int64 {
 	// Generate initial id
 	id := int64(rand.Uint64())
 	// Keep generating until unique
-	for UIDExists(data.Database, id) {
+	for data.UIDExists(id) {
 		id = int64(rand.Uint64())
 	}
 	// Return newly generated value
