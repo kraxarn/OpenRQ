@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/md5"
-	"errors"
 	"fmt"
 	"os"
 )
@@ -28,13 +27,8 @@ func (req Requirement) IsNull() bool {
 	return count <= 0
 }
 
-// SaveChanges saves all changes to database
-func (req *Requirement) SaveChanges() error {
-	return errors.New("error: not implemented")
-}
-
 // GetChildren get all children of requirement
-func (req Requirement) GetChildren() []Item {
+func (req Requirement) Children() []Item {
 	return nil
 }
 
@@ -43,15 +37,15 @@ func (req Requirement) RemoveChild(child Item) {
 }
 
 // GetHash get hash of requirement
-func (req *Requirement) GetHash() [16]byte {
+func (req Requirement) Hash() [16]byte {
 	return md5.Sum([]byte(fmt.Sprintf("%v", req)))
 }
 
 // GetValue gets a value from the database
 func (req *Requirement) GetValue(name string, value interface{}) {
-	db := currentProject.GetData()
+	db := currentProject.Data()
 	defer db.Close()
-	err := db.GetItemValue(req.GetId(), "Requirements", name, value)
+	err := db.GetItemValue(req.ID(), "Requirements", name, value)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "database error:", err)
 	}
@@ -77,43 +71,51 @@ func (req *Requirement) GetValueInt64(name string) int64 {
 
 // SetValue sets a value to the database
 func (req *Requirement) SetValue(name string, value interface{}) {
-	db := currentProject.GetData()
+	db := currentProject.Data()
 	defer db.Close()
-	db.SetItemValue(req.GetId(), "Requirements", name, value)
+	db.SetItemValue(req.ID(), "Requirements", name, value)
 }
 
 // GetRationale gets the rationale property of the requirement
-func (req *Requirement) GetRationale() string {
+func (req *Requirement) Rationale() string {
 	return req.GetValueString("rationale")
 }
 
+func (req *Requirement) SetRationale(value string)  {
+	req.SetValue("rationale", value)
+}
+
 // GetFitCriterion of Requirement
-func (req *Requirement) GetFitCriterion() string {
+func (req *Requirement) FitCriterion() string {
 	return req.GetValueString("fitCriterion")
 }
 
+func (req *Requirement) SetFitCriterion(value string)  {
+	req.SetValue("fitCriterion", value)
+}
+
 // GetId gets the row ID in the database
-func (req Requirement) GetId() int64 {
+func (req Requirement) ID() int64 {
 	return req.id
 }
 
 // GetUid gets the row Uid in the database
-func (req Requirement) GetUid() int64 {
+func (req Requirement) UID() int64 {
 	return req.GetValueInt64("uid")
 }
 
 // SetUid sets the Uid in the database
-func (req Requirement) SetUid(uid int64) {
+func (req Requirement) SetUID(uid int64) {
 	req.SetValue("uid", uid)
 }
 
 // GetVersion of Requirement
-func (req Requirement) GetVersion() int {
+func (req Requirement) Version() int {
 	return req.GetValueInt("version")
 }
 
 // GetShown gets the root as hidden or shown
-func (req Requirement) GetShown() bool {
+func (req Requirement) Shown() bool {
 	var val bool
 	req.GetValue("shown", &val)
 	return val
@@ -125,8 +127,12 @@ func (req Requirement) SetShown(shown bool) {
 }
 
 // GetDescription gets the description from the database
-func (req Requirement) GetDescription() string {
+func (req Requirement) Description() string {
 	return req.GetValueString("description")
+}
+
+func (req Requirement) SetDescription(value string)  {
+	req.SetValue("description", value)
 }
 
 // AddChild
@@ -156,14 +162,4 @@ func (req Requirement) Size() (int, int) {
 func (req Requirement) SetSize(w, h int) {
 	req.SetValue("width", w)
 	req.SetValue("height", h)
-}
-
-func (req Requirement) Parent() (parentID int64, parentType ItemType, found bool) {
-	return req.GetValueInt64("parent"), ItemType(req.GetValueInt("parentType")), !req.IsPropertyNull("parent")
-}
-
-func (req Requirement) IsPropertyNull(columnName string) bool {
-	db := currentProject.GetData()
-	defer db.Close()
-	return db.IsPropertyNull("Requirements", columnName, req.id)
 }

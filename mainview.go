@@ -33,6 +33,21 @@ func CloseItem(uid int64) {
 	delete(openItems, uid)
 }
 
+func GetTextItem(group *widgets.QGraphicsItemGroup) *widgets.QGraphicsTextItem {
+	for _, item := range group.ChildItems() {
+		if item.Type() == 8 {
+			tp := (*widgets.QGraphicsTextItem)(item.Pointer())
+			textItem := widgets.NewQGraphicsTextItemFromPointer(item.Pointer())
+			fmt.Printf("text item: %p / %p / %p\n", textItem, tp, item.Pointer())
+			if textItem != nil {
+				return textItem
+			}
+		}
+	}
+	fmt.Println("warning: text item not found in group")
+	return nil
+}
+
 // SnapToGrid naps the specified position to the grid
 func SnapToGrid(pos *core.QPoint) *core.QPoint {
 	// 2^5=32
@@ -42,9 +57,10 @@ func SnapToGrid(pos *core.QPoint) *core.QPoint {
 		float64((scenePos.X()>>gridSize<<gridSize)-64), float64((scenePos.Y()>>gridSize<<gridSize)-32)))
 }
 
-func CreateEditWidgetFromPos(pos core.QPoint_ITF) (*widgets.QDockWidget, bool) {
+func CreateEditWidgetFromPos(pos core.QPoint_ITF, scene *widgets.QGraphicsScene) (*widgets.QDockWidget, bool) {
 	// Get UID
-	uid := GetGroupUID(view.ItemAt(pos).Group())
+	group := view.ItemAt(pos).Group()
+	uid := GetGroupUID(group)
 	// Check if already opened
 	if IsItemOpen(uid) {
 		// We probably want to put it in focus here or something
@@ -52,7 +68,10 @@ func CreateEditWidgetFromPos(pos core.QPoint_ITF) (*widgets.QDockWidget, bool) {
 	}
 	// Open item
 	// TODO: For now, assume requirement
-	editWindow := CreateEditWidget(uid, TypeRequirement)
+	//p := group.Data(1).Pointer()
+	//t := (*widgets.QGraphicsTextItem)(unsafe.Pointer(p))
+	// *(*uint64)(unsafe.Pointer(&f))
+	editWindow := CreateEditWidget(NewItem(uid, TypeRequirement), group, scene)
 	editWindow.ConnectCloseEvent(func(event *gui.QCloseEvent) {
 		CloseItem(uid)
 	})
@@ -73,9 +92,9 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 
 	// Load items from database
 	{
-		db := currentProject.GetData()
+		db := currentProject.Data()
 		defer db.Close()
-		items, err := db.GetAllItems()
+		items, err := db.Items()
 		if err != nil {
 			fmt.Println("error: failed to get saved items:", err)
 		} else {
@@ -84,7 +103,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 				x, y = item.Pos()
 				w, h = item.Size()
 				scene.AddItem(NewGraphicsItem(
-					fmt.Sprintf("%x\n%v", item.GetId(), item.GetDescription()), x, y, w, h, item.GetId()))
+					fmt.Sprintf("%v%v", item.ID(), item.Description()), x, y, w, h, item.ID()))
 			}
 		}
 		// Get links
@@ -101,9 +120,9 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 						continue
 					}
 					groupID := GetGroupUID(group)
-					if groupID == child.GetId() {
+					if groupID == child.ID() {
 						childItem = group
-					} else if groupID == parent.GetId() {
+					} else if groupID == parent.ID() {
 						parentItem = group
 					}
 					// Stop loop if we found everything
@@ -112,7 +131,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 					}
 				}
 				// Create and add link
-				link := AddLink(parentItem, childItem)
+				link := CreateLink(parentItem, childItem)
 				scene.AddItem(link.line)
 				scene.AddItem(link.dir)
 			}
@@ -138,7 +157,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 
 		// Add item to database
 		// For now, we assume all items are requirements
-		db := currentProject.GetData()
+		db := currentProject.Data()
 		defer db.Close()
 		uid, err := db.AddEmptyRequirement()
 		if err != nil {
@@ -157,7 +176,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 		scene.AddItem(NewGraphicsItem(
 			fmt.Sprintf("%x", uid), gridPos.X(), gridPos.Y(), itemSize*2, itemSize, uid))
 		if len(openItems) <= 0 {
-			openItems[uid], _ = CreateEditWidgetFromPos(gridPos)
+			openItems[uid], _ = CreateEditWidgetFromPos(gridPos, scene)
 			window.AddDockWidget(core.Qt__RightDockWidgetArea, openItems[uid])
 		}
 	})
@@ -196,14 +215,46 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			// Edit option
 			menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit").
 				ConnectTriggered(func(checked bool) {
-					if editWidget, ok := CreateEditWidgetFromPos(pos); ok {
+					if editWidget, ok := CreateEditWidgetFromPos(pos, scene); ok {
 						window.AddDockWidget(core.Qt__RightDockWidgetArea, editWidget)
 					}
 				})
 			// Delete option
 			menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete").
 				ConnectTriggered(func(checked bool) {
-					// Hakke write ur delete here
+					// Connect to database
+					db := currentProject.Data()
+					defer db.Close()
+					// Get the clicked item
+					selectedItem := view.ItemAt(pos).Group()
+					selectedUid := GetGroupUID(selectedItem)
+					// Try to get all links
+					link, ok := links[selectedUid]
+					if !ok {
+						return
+					}
+					// Remove all links
+					for _, l := range link {
+						// It is the item we are trying to remove
+						if l.parent == selectedUid || l.child == selectedUid {
+							// Remove from scene
+							scene.RemoveItem(l.line)
+							scene.RemoveItem(l.dir)
+							// Remove from links map
+							delete(links, l.parent)
+							delete(links, l.child)
+						}
+					}
+					// Remove the group from the scene
+					scene.RemoveItem(selectedItem)
+					// Remove the links and the item itself from the database
+					newItem := NewItem(selectedUid, TypeRequirement)
+					if err := db.RemoveChildrenLinks(newItem); err != nil {
+						fmt.Println("warning: failed to remove children links:", err)
+					}
+					if err := db.RemoveItem(selectedUid); err != nil {
+						fmt.Println("warning: failed to remove item:", err)
+					}
 				})
 			// Show menu at cursor
 			menu.Popup(view.MapToGlobal(event.Pos()), nil)
@@ -236,7 +287,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 				return
 			}
 			// Create and add link
-			link := AddLink(linkStart, view.ItemAt(event.Pos()).Group())
+			link := CreateLink(linkStart, view.ItemAt(event.Pos()).Group())
 			scene.AddItem(link.line)
 			scene.AddItem(link.dir)
 			linkStart = nil
@@ -246,21 +297,24 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 }
 
 func GetGroupUID(group *widgets.QGraphicsItemGroup) int64 {
+	if group == nil {
+		fmt.Println("warning: no group to get uid from")
+	}
 	return group.Data(0).ToLongLong(nil)
 }
 
-func AddLink(parent, child *widgets.QGraphicsItemGroup) Line {
+func CreateLink(parent, child *widgets.QGraphicsItemGroup) Line {
 	// Check if map needs to be created
 	if links == nil {
 		links = make(map[int64][]*Line)
 	}
 	// Add to database
-	db := currentProject.GetData()
+	db := currentProject.Data()
 	defer db.Close()
 	// TODO: Assuming requirement
 	if err := db.AddItemChild(
 		NewItem(GetGroupUID(parent), TypeRequirement), NewItem(GetGroupUID(child), TypeRequirement)); err != nil {
-			fmt.Println("error: failed to add link to database:", err)
+		fmt.Println("error: failed to add link to database:", err)
 	}
 
 	// Get from (parent) and to (child)
@@ -315,7 +369,8 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 
 func NewGraphicsItem(text string, x, y, width, height int, uid int64) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
-	textItem := widgets.NewQGraphicsTextItem2(text, nil)
+	textItem := widgets.NewQGraphicsTextItem(nil)
+	textItem.SetHtml(text)
 	textItem.SetZValue(15)
 	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, float64(width), float64(height), nil)
 	shapeItem.SetBrush(gui.NewQBrush3(backgroundColor, 1))

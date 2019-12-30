@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 )
@@ -65,19 +66,19 @@ func MergeFormat(textEdit *widgets.QTextEdit, format *gui.QTextCharFormat) {
 }
 
 // CreateEditWidget creates the main window for editing an item
-func CreateEditWidget(uid int64, item ItemType) *widgets.QDockWidget {
+func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widgets.QGraphicsScene) *widgets.QDockWidget {
 	// Main vertical layout
 	layout := widgets.NewQVBoxLayout()
 	// Item UID (for debugging)
 	layout.AddWidget(CreateGroupBox("Item UID",
-		widgets.NewQLabel2(fmt.Sprintf("%x", uid), nil, 0)), 0, 0)
+		widgets.NewQLabel2(fmt.Sprintf("%v", item.ID()), nil, 0)), 0, 0)
 
 	// Requirement/solution selection
 	itemType := widgets.NewQGroupBox2("Item Type", nil)
 	reqRadio := widgets.NewQRadioButton2("Problem", nil)
-	reqRadio.SetChecked(item == TypeRequirement)
+	reqRadio.SetChecked(GetItemType(item) == TypeRequirement)
 	solRadio := widgets.NewQRadioButton2("Solution", nil)
-	solRadio.SetChecked(item == TypeSolution)
+	solRadio.SetChecked(GetItemType(item) == TypeSolution)
 	itemTypeLayout := widgets.NewQHBoxLayout()
 	itemTypeLayout.AddWidget(reqRadio, 1, 0)
 	itemTypeLayout.AddWidget(solRadio, 1, 0)
@@ -160,14 +161,36 @@ func CreateEditWidget(uid int64, item ItemType) *widgets.QDockWidget {
 		layout.AddWidget(CreateGroupBox(titles[i], textOptions[i], textEdits[i]), 1, 0)
 	}
 
-	// Save and dismiss
-	layout.AddWidget(widgets.NewQPushButton2("Save", nil), 1, 0)
+	// Dock for button connections
+	dock := widgets.NewQDockWidget("Edit Item", nil, 0)
+
+	// Discard button
+	buttons := widgets.NewQHBoxLayout()
+	discard := widgets.NewQPushButton2("Discard", nil)
+	discard.ConnectReleased(func() {
+		dock.Close()
+	})
+	buttons.AddWidget(discard, 1, 0)
+	// Save button
+	save := widgets.NewQPushButton2("Save", nil)
+	save.ConnectReleased(func() {
+		item.SetDescription(textEdits[Description].ToHtml())
+		scene.AddItem(NewGraphicsItem(
+			fmt.Sprintf("%v%v", item.ID(), textEdits[Description].ToHtml()),
+			int(group.X()), int(group.Y()), 128, 64, item.ID()))
+		scene.RemoveItem(group)
+
+		// save changes...
+		dock.Close()
+	})
+	buttons.AddWidget(save, 1, 0)
+	layout.AddLayout(buttons, 0)
 
 	// Put layout in a widget
 	widget := widgets.NewQWidget(nil, 0)
 	widget.SetLayout(layout)
 	// Set dock to the created widget and return it
-	dock := widgets.NewQDockWidget("Edit Item", nil, 0)
+
 	dock.SetWidget(widget)
 	return dock
 }

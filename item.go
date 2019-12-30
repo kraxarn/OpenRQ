@@ -2,17 +2,19 @@ package main
 
 // Item that is either a solutions or a requirement
 type Item interface {
-	GetId() int64
+	ID() int64
 
-	GetUid() int64
-	SetUid(uid int64)
+	UID() int64
+	SetUID(uid int64)
 
-	GetVersion() int
+	Version() int
 
-	GetShown() bool
+	Hash() [16]byte
+
+	Shown() bool
 	SetShown(shown bool)
 
-	GetDescription() string
+	Description() string
 	SetDescription(description string)
 
 	Pos() (int, int)
@@ -23,11 +25,7 @@ type Item interface {
 
 	AddChild(child Item)
 	RemoveChild(child Item)
-
-	GetChildren() []Item
-	Parent() (parentID int64, parentType ItemType, found bool)
-
-	IsPropertyNull(columnName string) bool
+	Children() []Item
 }
 
 func NewItem(id int64, itemType ItemType) Item {

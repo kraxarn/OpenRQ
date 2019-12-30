@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/md5"
-	"errors"
 	"fmt"
 	"os"
 )
@@ -13,7 +12,7 @@ type Link struct {
 }
 
 // GetHash gets the md5 hash of the item
-func (link *Link) GetHash() [16]byte {
+func (link Link) Hash() [16]byte {
 	h := md5.Sum([]byte(fmt.Sprintf("%v%v", link.name, link.color)))
 	fmt.Printf("%x", h)
 	return h
@@ -39,19 +38,15 @@ func (sol Solution) IsNull() bool {
 	return val <= 0
 }
 
-func (sol *Solution) GetHash() [16]byte {
+func (sol Solution) Hash() [16]byte {
 	return md5.Sum([]byte(fmt.Sprintf("%v", sol)))
-}
-
-func (sol *Solution) SaveChanges() error {
-	return errors.New("error: not implemented")
 }
 
 // GetValue gets a value from the database
 func (sol *Solution) GetValue(name string, value interface{}) {
-	db := currentProject.GetData()
+	db := currentProject.Data()
 	defer db.Close()
-	err := db.GetItemValue(sol.GetId(), "Solutions", name, value)
+	err := db.GetItemValue(sol.ID(), "Solutions", name, value)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "database error:", err)
 	}
@@ -77,43 +72,33 @@ func (sol *Solution) GetValueInt64(name string) int64 {
 
 // SetValue sets a value to the database
 func (sol *Solution) SetValue(name string, value interface{}) {
-	db := currentProject.GetData()
+	db := currentProject.Data()
 	defer db.Close()
-	db.SetItemValue(sol.GetId(), "Solutions", name, value)
-}
-
-// GetRationale gets the rationale property of the solution
-func (sol *Solution) GetRationale() string {
-	return sol.GetValueString("rationale")
-}
-
-// GetFitCriterion of solution
-func (sol *Solution) GetFitCriterion() string {
-	return sol.GetValueString("fitCriterion")
+	db.SetItemValue(sol.ID(), "Solutions", name, value)
 }
 
 // GetId gets the row ID in the database
-func (sol Solution) GetId() int64 {
+func (sol Solution) ID() int64 {
 	return sol.GetValueInt64("id")
 }
 
 // GetUid gets the row Uid in the database
-func (sol Solution) GetUid() int64 {
+func (sol Solution) UID() int64 {
 	return sol.GetValueInt64("uid")
 }
 
 // SetUid sets the Uid in the database
-func (sol Solution) SetUid(uid int64) {
+func (sol Solution) SetUID(uid int64) {
 	sol.SetValue("uid", uid)
 }
 
 // GetVersion of Solution
-func (sol Solution) GetVersion() int {
+func (sol Solution) Version() int {
 	return sol.GetValueInt("version")
 }
 
 // GetShown gets the root as hidden or shown
-func (sol Solution) GetShown() bool {
+func (sol Solution) Shown() bool {
 	var val bool
 	sol.GetValue("shown", &val)
 	return val
@@ -125,7 +110,7 @@ func (sol Solution) SetShown(shown bool) {
 }
 
 // GetDescription gets the description from the database
-func (sol Solution) GetDescription() string {
+func (sol Solution) Description() string {
 	return sol.GetValueString("description")
 }
 
@@ -156,14 +141,4 @@ func (sol Solution) Size() (int, int) {
 func (sol Solution) SetSize(w, h int) {
 	sol.SetValue("width", w)
 	sol.SetValue("height", h)
-}
-
-func (sol Solution) Parent() (parentID int64, parentType ItemType, found bool) {
-	return sol.GetValueInt64("parent"), ItemType(sol.GetValueInt("parentType")), !sol.IsPropertyNull("parent")
-}
-
-func (sol Solution) IsPropertyNull(columnName string) bool {
-	db := currentProject.GetData()
-	defer db.Close()
-	return db.IsPropertyNull("Solutions", columnName, sol.id)
 }

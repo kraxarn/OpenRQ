@@ -22,6 +22,6 @@ func NewProject(path string) *Project {
 	return currentProject
 }
 
-func (proj *Project) GetData() *DataContext {
+func (proj *Project) Data() *DataContext {
 	return NewDataContext(proj.path)
 }

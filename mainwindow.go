@@ -84,13 +84,6 @@ func AddToolBar(window *widgets.QMainWindow) {
 	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-polygon-star"), "Solution")
 	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-line"), "Link")
 	editMenu.AddMenu(editInsertMenu)
-	// Other edit menu options
-	editMenu.AddAction2(
-		gui.QIcon_FromTheme("zoom-draw"), "Canvas Size...").ConnectTriggered(func(checked bool) {
-			OpenSizeDialog(window, core.NewQPoint2(32, 32), func(w, h int) {
-				fmt.Println("new size:", w, h)
-			})
-		})
 	// Add to main toolbar
 	editBar.SetMenu(editMenu)
 	fileToolBar.AddWidget(editBar)
@@ -247,9 +240,9 @@ func CreateVBoxWidget(children ...widgets.QWidget_ITF) *widgets.QWidget {
 	return widget
 }
 
-func LayoutToWidget(vbox *widgets.QVBoxLayout) *widgets.QWidget {
+func LayoutToWidget(vBox *widgets.QVBoxLayout) *widgets.QWidget {
 	widget := widgets.NewQWidget(nil, 0)
-	widget.SetLayout(vbox)
+	widget.SetLayout(vBox)
 	widget.SetMaximumWidth(200)
 	widget.SetMinimumWidth(150)
 	return widget
