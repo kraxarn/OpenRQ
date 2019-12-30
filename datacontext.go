@@ -71,14 +71,8 @@ func (data *DataContext) Create(projectName string) error {
 			return fmt.Errorf("error: failed to create %v table", key)
 		}
 	}
-
 	// Insert info table
-	stmt, err := data.Database.Prepare("insert into Info (name) values (?)")
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-	_, err = stmt.Exec(projectName)
+	_, err := data.Database.Query("insert into Info (name) values (?)", projectName)
 	return err
 }
 
@@ -123,13 +117,12 @@ func (data *DataContext) AddSolution(description string) (int64, error) {
 func (data *DataContext) AddItemVersion(itemUID int64, itemType ItemType) error {
 	// Find item ID
 	var itemID int
-	stmt, err := data.Database.Prepare(fmt.Sprintf("select _rowid_ from %v where uid = ?", GetItemTableName(itemType)))
-	if err != nil {
-		return fmt.Errorf("failed to get item id: %v", err)
+	row := data.Database.QueryRow(fmt.Sprintf("select _rowid_ from %v where uid = ?", GetItemTableName(itemType)), itemUID)
+	if err := row.Scan(&itemID); err != nil {
+		return err
 	}
-	stmt.QueryRow(itemUID).Scan(&itemID)
 	// Insert into item versions
-	_, err = data.Database.Exec(
+	_, err := data.Database.Exec(
 		"insert into ItemVersions (version, item, type) values (1, ?, ?)",
 		itemID, itemType)
 	return err
@@ -162,30 +155,21 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 	itemUID := data.ItemUID()
 	if isReq {
 		// Add requirement
-		stmt, err := data.Database.Prepare("insert into Requirements (uid) values (?)")
+		_, err := data.Database.Exec("insert into Requirements (uid) values (?)", itemUID)
 		if err != nil {
 			return fmt.Errorf("failed to insert requirement: %v", err)
 		}
-		_, err = stmt.Exec(itemUID)
-		defer stmt.Close()
 	} else {
 		// Add solution
-		stmt, err := data.Database.Prepare("insert into Solutions (uid, description) values (?, ?)")
-		if _, err = stmt.Exec(item.UID(), item.Description()); err != nil {
+		_, err := data.Database.Exec("insert into Solutions (uid, description) values (?, ?)")
+		if err != nil {
 			return fmt.Errorf("failed to insert solution: %v", err)
 		}
-		defer stmt.Close()
 	}
 
 	// Find item id
-	stmt, err := data.Database.Prepare("select _rowid_ from Requirements where uid = ?")
-	if err != nil {
-		return fmt.Errorf("failed to get item id: %v", err)
-	}
-	row := stmt.QueryRow(item.UID())
-	defer stmt.Close()
-	err = row.Scan(&req.id)
-	if err != nil || req.id == 0 {
+	row := data.Database.QueryRow("select _rowid_ from Requirements where uid = ?", item.UID())
+	if err := row.Scan(&req.id); err != nil || req.id == 0 {
 		return fmt.Errorf("failed to get item id: %v", err)
 	}
 
@@ -221,11 +205,10 @@ func (data *DataContext) Items() ([]Item, error) {
 	// Temporary slice
 	items := make([]Item, 0)
 	// Get all requirements
-	stmt, err := data.Database.Prepare("select _rowid_ from Requirements")
+	rows, err := data.Database.Query("select _rowid_ from Requirements")
 	if err != nil {
 		return items, fmt.Errorf("failed to get requirements: %v", err)
 	}
-	rows, _ := stmt.Query()
 	var itemID int64
 	for rows.Next() {
 		if err = rows.Scan(&itemID); err == nil {
@@ -233,11 +216,10 @@ func (data *DataContext) Items() ([]Item, error) {
 		}
 	}
 	// Get all solutions
-	stmt, err = data.Database.Prepare("select _rowid_ from Solutions")
+	rows, err = data.Database.Query("select _rowid_ from Solutions")
 	if err != nil {
 		return items, fmt.Errorf("failed to get solutions: %v", err)
 	}
-	rows, _ = stmt.Query()
 	for rows.Next() {
 		if err := rows.Scan(&itemID); err == nil {
 			items = append(items, NewRequirement(itemID))
@@ -272,12 +254,10 @@ func (data *DataContext) Links() (items map[Item]Item, err error) {
 }
 
 // GetItemChildren gets all children of a specific item
+// TODO: Not fully implemented yet
 func (data *DataContext) GetItemChildren(itemID int) {
-	stmt, err := data.Database.Prepare("select parent from (select parent from Requirements union select parent from Solutions) where parent = ? and parentType = ?")
+	_, err := data.Database.Query("select parent from (select parent from Requirements union select parent from Solutions) where parent = ? and parentType = ?")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "error: failed to prepare get of item", itemID, ":", err)
-	}
-	if _, err := stmt.Query(itemID); err != nil {
 		fmt.Fprintln(os.Stderr, "error: failed to get item", itemID, ":", err)
 	}
 }
@@ -286,12 +266,9 @@ func (data *DataContext) GetItemChildren(itemID int) {
 // (value is assumed to be a pointer)
 func (data *DataContext) GetItemValue(itemID int64, tableName, name string, value interface{}) error {
 	// Prepare query
-	stmt, err := data.Database.Prepare(fmt.Sprintf("select %v from %v where _rowid_ = ?", name, tableName))
-	if err != nil {
-		return fmt.Errorf("failed to get property %v from item %v: %v", name, itemID, err)
-	}
+	row := data.Database.QueryRow(fmt.Sprintf("select %v from %v where _rowid_ = ?", name, tableName), itemID)
 	// Execute and return it
-	if err := stmt.QueryRow(itemID).Scan(value); err != nil {
+	if err := row.Scan(value); err != nil {
 		return fmt.Errorf("failed to get property %v from item %v: %v", name, itemID, err)
 	}
 	return nil
@@ -325,28 +302,19 @@ func (data *DataContext) RemoveItemParent(child Item) error {
 // SetItemValue updates a value in the database
 func (data *DataContext) SetItemValue(itemID int64, tableName, name string, value interface{}) {
 	// Prepare query
-	stmt, err := data.Database.Prepare(fmt.Sprintf("update %v set %v = ? where _rowid_ = ?", tableName, name))
+	_, err := data.Database.Exec(fmt.Sprintf("update %v set %v = ? where _rowid_ = ?", tableName, name), value, itemID)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "warning: failed to set property", name, "in requirement:", err)
-		return
-	}
-	// Execute and return it
-	if _, err := stmt.Exec(value, itemID); err != nil {
 		fmt.Fprintln(os.Stderr, "warning: failed to set property", name, "in requirement:", err)
 	}
 }
 
 func (data *DataContext) IsPropertyNull(tableName, columnName string, id int64) bool {
 	// Prepare query
-	stmt, err := data.Database.Prepare(
+	row := data.Database.QueryRow(
 		fmt.Sprintf("select count(*) from %v where %v is null and _rowid_ = %v", tableName, columnName, id))
-	if err != nil {
-		fmt.Println("error: failed to check for null property:", err)
-		return true
-	}
 	// Execute and return it
 	var value int
-	_ = stmt.QueryRow(0).Scan(&value)
+	_ = row.Scan(&value)
 	return value >= 0
 }
 
