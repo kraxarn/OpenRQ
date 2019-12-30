@@ -203,22 +203,28 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			// Delete option
 			menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete").
 				ConnectTriggered(func(checked bool) {
+					// Connect to database
 					db := currentProject.Data()
 					defer db.Close()
 					selectedItem := view.ItemAt(event.Pos())
 					selectedUid := GetGroupUID(selectedItem.Group())
+					// Try to get all links
 					link, ok := links[selectedUid]
 					if !ok {
 						return
 					}
-
+					// Remove all links
 					for _, l := range link {
+						// It is the item we are trying to remove
 						if l.parent == selectedUid || l.child == selectedUid {
+							// Remove from scene
 							scene.RemoveItem(l.line)
 							scene.RemoveItem(l.dir)
 						}
 					}
+					// Remove the group from the scene
 					scene.RemoveItem(selectedItem)
+					// Remove the links and the item itself from the database
 					newItem := NewItem(selectedUid, TypeRequirement)
 					db.RemoveChildrenLinks(newItem)
 					db.RemoveItem(selectedUid)
