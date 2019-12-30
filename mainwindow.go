@@ -115,6 +115,10 @@ func AddToolBar(window *widgets.QMainWindow) {
 	aboutMenu.AddAction2(gui.QIcon_FromTheme("qt"), "About Qt").ConnectTriggered(func(checked bool) {
 		widgets.QMessageBox_AboutQt(window, "About Qt")
 	})
+	aboutMenu.AddAction2(gui.QIcon_FromTheme("license"), "Licenses").ConnectTriggered(func(checked bool) {
+		gui.QDesktopServices_OpenUrl(
+			core.NewQUrl3("https://github.com/kraxarn/OpenRQ/blob/golang/third_party.md", 0))
+	})
 	aboutMenu.AddSeparator()
 	aboutMenu.AddAction2(
 		gui.QIcon_FromTheme("download"), "Check for updates").ConnectTriggered(func(checked bool) {
