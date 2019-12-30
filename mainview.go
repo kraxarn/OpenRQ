@@ -221,6 +221,9 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 							// Remove from scene
 							scene.RemoveItem(l.line)
 							scene.RemoveItem(l.dir)
+							// Remove from links map
+							delete(links, l.parent)
+							delete(links, l.child)
 						}
 					}
 					// Remove the group from the scene
