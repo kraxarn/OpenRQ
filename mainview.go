@@ -73,9 +73,9 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 
 	// Load items from database
 	{
-		db := currentProject.GetData()
+		db := currentProject.Data()
 		defer db.Close()
-		items, err := db.GetAllItems()
+		items, err := db.Items()
 		if err != nil {
 			fmt.Println("error: failed to get saved items:", err)
 		} else {
@@ -84,7 +84,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 				x, y = item.Pos()
 				w, h = item.Size()
 				scene.AddItem(NewGraphicsItem(
-					fmt.Sprintf("%x\n%v", item.GetId(), item.GetDescription()), x, y, w, h, item.GetId()))
+					fmt.Sprintf("%x\n%v", item.ID(), item.Description()), x, y, w, h, item.ID()))
 			}
 		}
 		// Get links
@@ -101,9 +101,9 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 						continue
 					}
 					groupID := GetGroupUID(group)
-					if groupID == child.GetId() {
+					if groupID == child.ID() {
 						childItem = group
-					} else if groupID == parent.GetId() {
+					} else if groupID == parent.ID() {
 						parentItem = group
 					}
 					// Stop loop if we found everything
@@ -138,7 +138,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 
 		// Add item to database
 		// For now, we assume all items are requirements
-		db := currentProject.GetData()
+		db := currentProject.Data()
 		defer db.Close()
 		uid, err := db.AddEmptyRequirement()
 		if err != nil {
@@ -255,7 +255,7 @@ func AddLink(parent, child *widgets.QGraphicsItemGroup) Line {
 		links = make(map[int64][]*Line)
 	}
 	// Add to database
-	db := currentProject.GetData()
+	db := currentProject.Data()
 	defer db.Close()
 	// TODO: Assuming requirement
 	if err := db.AddItemChild(

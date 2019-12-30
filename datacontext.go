@@ -89,7 +89,7 @@ func (data *DataContext) AddEmptyRequirement() (int64, error) {
 // AddRequirement adds a requirement to the current database
 func (data *DataContext) AddRequirement(description, rationale, fitCriterion string) (int64, error) {
 	// Generate a new random UID
-	reqUID := data.GetItemUid()
+	reqUID := data.ItemUID()
 	// Try to add the requirement to the database
 	if _, err := data.Database.Exec(
 		"insert into Requirements (uid, description, rationale, fitCriterion) values (?, ?, ?, ?)",
@@ -108,7 +108,7 @@ func (data *DataContext) AddRequirement(description, rationale, fitCriterion str
 // AddSolution adds a solution to the database
 func (data *DataContext) AddSolution(description string) (int64, error) {
 	// Generate a new random UID
-	solUID := data.GetItemUid()
+	solUID := data.ItemUID()
 	// Try to add the solution to the database
 	if _, err := data.Database.Exec(
 		"insert into Solutions (uid, description) values (?, ?)",
@@ -155,11 +155,11 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 	// Try to cast item as requirement
 	req, isReq := item.(Requirement)
 	// Error checking
-	if item.GetId() == 0 || item.GetUid() == 0 {
+	if item.ID() == 0 || item.UID() == 0 {
 		return fmt.Errorf("failed to update item, does not exist")
 	}
 
-	itemUID := data.GetItemUid()
+	itemUID := data.ItemUID()
 	if isReq {
 		// Add requirement
 		stmt, err := data.Database.Prepare("insert into Requirements (uid) values (?)")
@@ -171,7 +171,7 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 	} else {
 		// Add solution
 		stmt, err := data.Database.Prepare("insert into Solutions (uid, description) values (?, ?)")
-		if _, err = stmt.Exec(item.GetUid(), item.GetDescription()); err != nil {
+		if _, err = stmt.Exec(item.UID(), item.Description()); err != nil {
 			return fmt.Errorf("failed to insert solution: %v", err)
 		}
 		defer stmt.Close()
@@ -182,7 +182,7 @@ func (data *DataContext) UpdateItem(item Item, projectVersion int) error {
 	if err != nil {
 		return fmt.Errorf("failed to get item id: %v", err)
 	}
-	row := stmt.QueryRow(item.GetUid())
+	row := stmt.QueryRow(item.UID())
 	defer stmt.Close()
 	err = row.Scan(&req.id)
 	if err != nil || req.id == 0 {
@@ -214,9 +214,9 @@ func GetItemTableName(itemType ItemType) string {
 }
 
 // GetAllItems gets all requirements and solutions stored in the database
-func (data *DataContext) GetAllItems() ([]Item, error) {
+func (data *DataContext) Items() ([]Item, error) {
 	// Connect to database
-	db := currentProject.GetData()
+	db := currentProject.Data()
 	defer db.Close()
 	// Temporary slice
 	items := make([]Item, 0)
@@ -248,7 +248,7 @@ func (data *DataContext) GetAllItems() ([]Item, error) {
 
 func (data *DataContext) Links() (items map[Item]Item, err error) {
 	// Connect to database
-	db := currentProject.GetData()
+	db := currentProject.Data()
 	defer db.Close()
 	// Create map
 	items = make(map[Item]Item)
@@ -304,7 +304,7 @@ func (data *DataContext) AddItemChild(parent, child Item) error {
 	// Execute update
 	_, err := data.Database.Exec(
 		fmt.Sprintf("update %v set parent = ?, parentType = ? where _rowid_ = ?", childTable),
-		parent.GetId(), GetItemType(parent), child.GetId())
+		parent.ID(), GetItemType(parent), child.ID())
 	return err
 }
 
@@ -318,7 +318,7 @@ func (data *DataContext) RemoveItemParent(child Item) error {
 	// Execute update
 	_, err := data.Database.Exec(
 		"update ? set parent = null and parentType = null where _rowid_ = ?",
-		childTable, child.GetId())
+		childTable, child.ID())
 	return err
 }
 
@@ -351,7 +351,7 @@ func (data *DataContext) IsPropertyNull(tableName, columnName string, id int64) 
 }
 
 // UidExists checking if the specified uid is already taken
-func UidExists(db *sql.DB, uid int64) bool {
+func UIDExists(db *sql.DB, uid int64) bool {
 	// Prepare union query
 	stmt, err := db.Prepare("select count(*) from (select uid from Requirements union select uid from Solutions) where uid = ?")
 	defer stmt.Close()
@@ -367,11 +367,11 @@ func UidExists(db *sql.DB, uid int64) bool {
 }
 
 // GetItemUid If the item uid doesn't exits we will get a uid
-func (data *DataContext) GetItemUid() int64 {
+func (data *DataContext) ItemUID() int64 {
 	// Generate initial id
 	id := int64(rand.Uint64())
 	// Keep generating until unique
-	for UidExists(data.Database, id) {
+	for UIDExists(data.Database, id) {
 		id = int64(rand.Uint64())
 	}
 	// Return newly generated value
