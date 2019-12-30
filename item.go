@@ -9,6 +9,8 @@ type Item interface {
 
 	Version() int
 
+	Hash() [16]byte
+
 	Shown() bool
 	SetShown(shown bool)
 
