@@ -176,7 +176,8 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 	save.ConnectReleased(func() {
 		item.SetDescription(textEdits[Description].ToHtml())
 		scene.AddItem(NewGraphicsItem(
-			fmt.Sprintf("%v%v", item.ID(), textEdits[Description].ToHtml()), int(group.X()), int(group.Y()), 128, 64, item.ID()))
+			fmt.Sprintf("%v%v", item.ID(), textEdits[Description].ToHtml()),
+			int(group.X()), int(group.Y()), 128, 64, item.ID()))
 		scene.RemoveItem(group)
 
 		// save changes...
