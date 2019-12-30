@@ -203,9 +203,10 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			// Delete option
 			menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete").
 				ConnectTriggered(func(checked bool) {
-					// Hakke write ur delete here
+					db := currentProject.Data()
+					defer db.Close()
 					selectedItem := view.ItemAt(event.Pos())
-					selectedUid := GetGroupUID(selectedItem)
+					selectedUid := GetGroupUID(selectedItem.Group())
 					link, ok := links[selectedUid]
 					if !ok {
 						return
@@ -218,6 +219,9 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 						}
 					}
 					scene.RemoveItem(selectedItem)
+					newItem := NewItem(selectedUid,TypeRequirement)
+					db.RemoveChildrenLinks(newItem)
+					db.RemoveItem(selectedUid)
 				})
 			// Show menu at cursor
 			menu.Popup(view.MapToGlobal(event.Pos()), nil)
