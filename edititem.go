@@ -89,6 +89,12 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 	textEdits := [3]*widgets.QTextEdit{}
 	// TODO: Assume requirement for now
 	req, _ := item.(Requirement)
+	// Get default values
+	textValues := []string{
+		req.Description(),
+		req.Rationale(),
+		req.FitCriterion(),
+	}
 
 	for i := 0; i < len(textOptions); i++ {
 		t := CreateTextOptions()
@@ -144,6 +150,7 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 	}
 	for i := 0; i < len(titles); i++ {
 		textEdits[i] = widgets.NewQTextEdit(nil)
+		textEdits[i].SetHtml(textValues[i])
 		// Local copy of i
 		i2 := i
 		// Show/hide font options on selection
