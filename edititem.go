@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 )
@@ -160,14 +161,33 @@ func CreateEditWidget(item Item, text *widgets.QGraphicsTextItem) *widgets.QDock
 		layout.AddWidget(CreateGroupBox(titles[i], textOptions[i], textEdits[i]), 1, 0)
 	}
 
-	// Save and dismiss
-	layout.AddWidget(widgets.NewQPushButton2("Save", nil), 1, 0)
+	// Dock for button connections
+	dock := widgets.NewQDockWidget("Edit Item", nil, 0)
+
+	// Discard button
+	buttons := widgets.NewQHBoxLayout()
+	discard := widgets.NewQPushButton2("Discard", nil)
+	discard.ConnectReleased(func() {
+		dock.Close()
+	})
+	buttons.AddWidget(discard, 1, 0)
+	// Save button
+	save := widgets.NewQPushButton2("Save", nil)
+	save.ConnectReleased(func() {
+		item.SetDescription(textEdits[Description].ToHtml())
+		text.SetHtml(textEdits[Description].ToHtml())
+
+		// save changes...
+		dock.Close()
+	})
+	buttons.AddWidget(save, 1, 0)
+	layout.AddLayout(buttons, 0)
 
 	// Put layout in a widget
 	widget := widgets.NewQWidget(nil, 0)
 	widget.SetLayout(layout)
 	// Set dock to the created widget and return it
-	dock := widgets.NewQDockWidget("Edit Item", nil, 0)
+
 	dock.SetWidget(widget)
 	return dock
 }
