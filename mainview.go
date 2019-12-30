@@ -270,6 +270,9 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 }
 
 func GetGroupUID(group *widgets.QGraphicsItemGroup) int64 {
+	if group == nil {
+		fmt.Println("warning: no group to get uid from")
+	}
 	return group.Data(0).ToLongLong(nil)
 }
 
