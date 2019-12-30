@@ -45,3 +45,6 @@ deploy/
 
 # Ignore any GoLand files
 .idea/
+
+# macOS temporary file
+*.DS_Store
