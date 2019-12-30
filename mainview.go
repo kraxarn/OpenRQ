@@ -204,6 +204,27 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete").
 				ConnectTriggered(func(checked bool) {
 					// Hakke write ur delete here
+					selectedUid := GetGroupUID(selectedItem)
+					link, ok := links[selectedUid]
+					if !ok {
+						return
+					}
+					fmt.Println(selectedUid)
+
+					for _, v := range link {
+						if v.parent == selectedUid {
+							scene.RemoveItem(v.line)
+							scene.RemoveItem(v.dir)
+							fmt.Println("%v parent", v)
+						}
+
+						if v.child == selectedUid {
+							scene.RemoveItem(v.line)
+							scene.RemoveItem(v.dir)
+							fmt.Println("%v child", v)
+						}
+					}
+					scene.RemoveItem(selectedItem)
 				})
 			// Show menu at cursor
 			menu.Popup(view.MapToGlobal(event.Pos()), nil)
@@ -260,7 +281,7 @@ func CreateLink(parent, child *widgets.QGraphicsItemGroup) Line {
 	// TODO: Assuming requirement
 	if err := db.AddItemChild(
 		NewItem(GetGroupUID(parent), TypeRequirement), NewItem(GetGroupUID(child), TypeRequirement)); err != nil {
-			fmt.Println("error: failed to add link to database:", err)
+		fmt.Println("error: failed to add link to database:", err)
 	}
 
 	// Get from (parent) and to (child)
