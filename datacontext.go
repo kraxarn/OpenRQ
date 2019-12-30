@@ -132,11 +132,10 @@ func (data *DataContext) AddItemVersion(itemUID int64, itemType ItemType) error 
 }
 
 // RemoveItem removes the item from the current version
-func (data *DataContext) RemoveItem(itemID int) error {
-	// TODO: make difference between solution and requriemnts
+func (data *DataContext) RemoveItem(itemID int64) error {
+	// TODO: Make difference between solution and requirements
 	// Execute SQL
-	_, err := data.Database.Exec(
-		"delete from Requirements where _rowid_ = ?", itemID)
+	_, err := data.Database.Exec("delete from Requirements where _rowid_ = ?", itemID)
 	return err
 }
 
