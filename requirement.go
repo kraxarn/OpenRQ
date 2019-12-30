@@ -81,9 +81,17 @@ func (req *Requirement) Rationale() string {
 	return req.GetValueString("rationale")
 }
 
+func (req *Requirement) SetRationale(value string)  {
+	req.SetValue("rationale", value)
+}
+
 // GetFitCriterion of Requirement
 func (req *Requirement) FitCriterion() string {
 	return req.GetValueString("fitCriterion")
+}
+
+func (req *Requirement) SetFitCriterion(value string)  {
+	req.SetValue("fitCriterion", value)
 }
 
 // GetId gets the row ID in the database
@@ -121,6 +129,10 @@ func (req Requirement) SetShown(shown bool) {
 // GetDescription gets the description from the database
 func (req Requirement) Description() string {
 	return req.GetValueString("description")
+}
+
+func (req Requirement) SetDescription(value string)  {
+	req.SetValue("description", value)
 }
 
 // AddChild
