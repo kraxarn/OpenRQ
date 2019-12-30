@@ -227,8 +227,12 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 					scene.RemoveItem(selectedItem)
 					// Remove the links and the item itself from the database
 					newItem := NewItem(selectedUid, TypeRequirement)
-					db.RemoveChildrenLinks(newItem)
-					db.RemoveItem(selectedUid)
+					if err := db.RemoveChildrenLinks(newItem); err != nil {
+						fmt.Println("warning: failed to remove children links:", err)
+					}
+					if err := db.RemoveItem(selectedUid); err != nil {
+						fmt.Println("warning: failed to remove item:", err)
+					}
 				})
 			// Show menu at cursor
 			menu.Popup(view.MapToGlobal(event.Pos()), nil)
