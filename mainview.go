@@ -204,24 +204,17 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete").
 				ConnectTriggered(func(checked bool) {
 					// Hakke write ur delete here
+					selectedItem := view.ItemAt(event.Pos())
 					selectedUid := GetGroupUID(selectedItem)
 					link, ok := links[selectedUid]
 					if !ok {
 						return
 					}
-					fmt.Println(selectedUid)
 
-					for _, v := range link {
-						if v.parent == selectedUid {
-							scene.RemoveItem(v.line)
-							scene.RemoveItem(v.dir)
-							fmt.Println("%v parent", v)
-						}
-
-						if v.child == selectedUid {
-							scene.RemoveItem(v.line)
-							scene.RemoveItem(v.dir)
-							fmt.Println("%v child", v)
+					for _, l := range link {
+						if l.parent == selectedUid || l.child == selectedUid {
+							scene.RemoveItem(l.line)
+							scene.RemoveItem(l.dir)
 						}
 					}
 					scene.RemoveItem(selectedItem)
