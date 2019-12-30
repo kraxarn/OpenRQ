@@ -274,8 +274,9 @@ func (data *DataContext) AddItemChild(parent, child Item) error {
 // RemoveItemParent removes the link between parent and child
 func (data *DataContext) RemoveChildrenLinks(parent Item) error {
 	// Execute update
+	// TODO: Assume requirement
 	_, err := data.Database.Exec(
-		"update Requirements set parent = null where parent = ?", parent.ID())
+		"update Requirements set parent = null, parentType = null where parent = ?", parent.ID())
 	return err
 }
 
