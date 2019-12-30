@@ -87,6 +87,8 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 
 	textOptions := [3]*widgets.QToolBar{}
 	textEdits := [3]*widgets.QTextEdit{}
+	// TODO: Assume requirement for now
+	req, _ := item.(Requirement)
 
 	for i := 0; i < len(textOptions); i++ {
 		t := CreateTextOptions()
@@ -174,13 +176,17 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 	// Save button
 	save := widgets.NewQPushButton2("Save", nil)
 	save.ConnectReleased(func() {
+		// Save description to database and recreate group
+		// TODO: Probably not the best solution, but it works
 		item.SetDescription(textEdits[Description].ToHtml())
 		scene.AddItem(NewGraphicsItem(
 			fmt.Sprintf("%v%v", item.ID(), textEdits[Description].ToHtml()),
 			int(group.X()), int(group.Y()), 128, 64, item.ID()))
 		scene.RemoveItem(group)
-
-		// save changes...
+		// Save other properties
+		req.SetRationale(textEdits[Rationale].ToHtml())
+		req.SetFitCriterion(textEdits[FitCriterion].ToHtml())
+		// Close window
 		dock.Close()
 	})
 	buttons.AddWidget(save, 1, 0)
