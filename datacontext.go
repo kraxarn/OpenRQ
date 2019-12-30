@@ -253,15 +253,6 @@ func (data *DataContext) Links() (items map[Item]Item, err error) {
 	return items, nil
 }
 
-// GetItemChildren gets all children of a specific item
-// TODO: Not fully implemented yet
-func (data *DataContext) GetItemChildren(itemID int) {
-	_, err := data.Database.Query("select parent from (select parent from Requirements union select parent from Solutions) where parent = ? and parentType = ?")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "error: failed to get item", itemID, ":", err)
-	}
-}
-
 // GetItemValue gets a value from the specified column in the database
 // (value is assumed to be a pointer)
 func (data *DataContext) GetItemValue(itemID int64, tableName, name string, value interface{}) error {
@@ -306,16 +297,6 @@ func (data *DataContext) SetItemValue(itemID int64, tableName, name string, valu
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "warning: failed to set property", name, "in requirement:", err)
 	}
-}
-
-func (data *DataContext) IsPropertyNull(tableName, columnName string, id int64) bool {
-	// Prepare query
-	row := data.Database.QueryRow(
-		fmt.Sprintf("select count(*) from %v where %v is null and _rowid_ = %v", tableName, columnName, id))
-	// Execute and return it
-	var value int
-	_ = row.Scan(&value)
-	return value >= 0
 }
 
 // UidExists checking if the specified uid is already taken
