@@ -48,3 +48,6 @@ deploy/
 
 # macOS temporary file
 *.DS_Store
+
+# Scripts
+*.sh
