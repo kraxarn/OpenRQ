@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/md5"
-	"errors"
 	"fmt"
 	"os"
 )
@@ -26,11 +25,6 @@ func (req Requirement) IsNull() bool {
 	var count int
 	req.GetValue("count(*)", &count)
 	return count <= 0
-}
-
-// SaveChanges saves all changes to database
-func (req *Requirement) SaveChanges() error {
-	return errors.New("error: not implemented")
 }
 
 // GetChildren get all children of requirement

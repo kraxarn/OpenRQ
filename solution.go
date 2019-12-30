@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/md5"
-	"errors"
 	"fmt"
 	"os"
 )
@@ -41,10 +40,6 @@ func (sol Solution) IsNull() bool {
 
 func (sol Solution) Hash() [16]byte {
 	return md5.Sum([]byte(fmt.Sprintf("%v", sol)))
-}
-
-func (sol *Solution) SaveChanges() error {
-	return errors.New("error: not implemented")
 }
 
 // GetValue gets a value from the database
