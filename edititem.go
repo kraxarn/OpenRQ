@@ -66,7 +66,7 @@ func MergeFormat(textEdit *widgets.QTextEdit, format *gui.QTextCharFormat) {
 }
 
 // CreateEditWidget creates the main window for editing an item
-func CreateEditWidget(item Item, text *widgets.QGraphicsTextItem) *widgets.QDockWidget {
+func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widgets.QGraphicsScene) *widgets.QDockWidget {
 	// Main vertical layout
 	layout := widgets.NewQVBoxLayout()
 	// Item UID (for debugging)
@@ -175,7 +175,9 @@ func CreateEditWidget(item Item, text *widgets.QGraphicsTextItem) *widgets.QDock
 	save := widgets.NewQPushButton2("Save", nil)
 	save.ConnectReleased(func() {
 		item.SetDescription(textEdits[Description].ToHtml())
-		text.SetHtml(textEdits[Description].ToHtml())
+		scene.AddItem(NewGraphicsItem(
+			fmt.Sprintf("%v%v", item.ID(), textEdits[Description].ToHtml()), int(group.X()), int(group.Y()), 128, 64, item.ID()))
+		scene.RemoveItem(group)
 
 		// save changes...
 		dock.Close()
