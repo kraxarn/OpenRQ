@@ -202,7 +202,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 		scene.AddItem(NewGraphicsItem(
 			fmt.Sprintf("%v", uid), gridPos.X(), gridPos.Y(), itemSize*2, itemSize, uid))
 		if len(openItems) <= 0 {
-			openItems[uid], _ = CreateEditWidgetFromPos(gridPos, scene)
+			openItems[uid], _ = CreateEditWidgetFromPos(event.Pos(), scene)
 			window.AddDockWidget(core.Qt__RightDockWidgetArea, openItems[uid])
 		}
 	})
