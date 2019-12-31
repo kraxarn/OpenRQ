@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
@@ -61,9 +62,27 @@ func AddToolBar(window *widgets.QMainWindow) {
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-open"), "Open...").ConnectTriggered(func(checked bool) {
 		fileName := widgets.QFileDialog_GetOpenFileName(window, "Open Project",
 			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
-			"OpenRQ Project(*.orq)", "", 0)
+			"OpenRQ Project(*.orq);;OpenRQ Compressed Project(*.orqz)", "", 0)
 		if len(fileName) > 0 {
-			NewProject(fileName)
+			if strings.HasSuffix(fileName, ".orqz") {
+				result := widgets.QMessageBox_Question(window, "Compressed Project",
+					"The project you are trying to load is compressed. " +
+							"In order to load the project, it first needs to be decompressed. " +
+							"This will replace the compressed project with a decompressed project.\n" +
+							"Are you sure you want to continue?",
+							widgets.QMessageBox__Yes | widgets.QMessageBox__No, widgets.QMessageBox__Yes)
+				if result == widgets.QMessageBox__No {
+					return
+				}
+				// Load compressed project
+				if _, err := NewCompressedProject(fileName); err != nil {
+					widgets.QMessageBox_Critical(window, "Failed to Load Project", err.Error(),
+						widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
+				}
+			} else {
+				// If not compressed, just load normal project
+				NewProject(fileName)
+			}
 			ReloadProject(window)
 		}
 	})
