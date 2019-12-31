@@ -36,6 +36,66 @@ func CloseItem(uid int64) {
 	delete(openItems, uid)
 }
 
+func ReloadProject(window *widgets.QMainWindow) {
+	// Delete all current items
+	scene.Clear()
+	// Clear links
+	links = make(map[int64][]*Line)
+	// Close all open items
+	for id := range openItems {
+		openItems[id].Close()
+		CloseItem(id)
+	}
+	// Connect to database to get new items
+	db := currentProject.Data()
+	defer db.Close()
+	// Load items
+	items, err := db.Items()
+	if err != nil {
+		fmt.Println("error: failed to get saved items:", err)
+	} else {
+		var x, y, w, h int
+		for item, description := range items {
+			x, y = item.Pos()
+			w, h = item.Size()
+			scene.AddItem(NewGraphicsItem(
+				fmt.Sprintf("%v%v", item.ID(), description), x, y, w, h, item.ID()))
+		}
+	}
+	// Load links
+	links, err := db.Links()
+	if err != nil {
+		fmt.Println("error: failed to get saved links:", err)
+	} else {
+		for parent, child := range links {
+			// Find parent and child
+			var parentItem, childItem *widgets.QGraphicsItemGroup
+			for _, item := range view.Items() {
+				group := item.Group()
+				if group == nil {
+					continue
+				}
+				groupID := GetGroupUID(group)
+				if groupID == child.ID() {
+					childItem = group
+				} else if groupID == parent.ID() {
+					parentItem = group
+				}
+				// Stop loop if we found everything
+				if parentItem != nil && childItem != nil {
+					break
+				}
+			}
+			// Create and add link
+			link := CreateLink(parentItem, childItem)
+			scene.AddItem(link.line)
+			scene.AddItem(link.dir)
+		}
+	}
+	// Set window title
+	UpdateWindowTitle(window)
+}
+
 func UpdateWindowTitle(window *widgets.QMainWindow) {
 	abs, err := filepath.Abs(currentProject.path)
 	if err != nil {
@@ -85,54 +145,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 	openItems = make(map[int64]*widgets.QDockWidget)
 
 	// Load items from database
-	{
-		db := currentProject.Data()
-		defer db.Close()
-		items, err := db.Items()
-		if err != nil {
-			fmt.Println("error: failed to get saved items:", err)
-		} else {
-			var x, y, w, h int
-			for item, description := range items {
-				x, y = item.Pos()
-				w, h = item.Size()
-				scene.AddItem(NewGraphicsItem(
-					fmt.Sprintf("%v%v", item.ID(), description), x, y, w, h, item.ID()))
-			}
-		}
-		// Get links
-		links, err := db.Links()
-		if err != nil {
-			fmt.Println("error: failed to get saved links:", err)
-		} else {
-			for parent, child := range links {
-				// Find parent and child
-				var parentItem, childItem *widgets.QGraphicsItemGroup
-				for _, item := range view.Items() {
-					group := item.Group()
-					if group == nil {
-						continue
-					}
-					groupID := GetGroupUID(group)
-					if groupID == child.ID() {
-						childItem = group
-					} else if groupID == parent.ID() {
-						parentItem = group
-					}
-					// Stop loop if we found everything
-					if parentItem != nil && childItem != nil {
-						break
-					}
-				}
-				// Create and add link
-				link := CreateLink(parentItem, childItem)
-				scene.AddItem(link.line)
-				scene.AddItem(link.dir)
-			}
-		}
-		// Set window title
-		UpdateWindowTitle(window)
-	}
+	ReloadProject(window)
 
 	// Setup drag-and-drop
 	view.SetAcceptDrops(true)
