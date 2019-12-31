@@ -27,6 +27,41 @@ func NewProject(path string) *Project {
 	return currentProject
 }
 
+func NewCompressedProject(path string) (*Project, error) {
+	// Name of final output file
+	newPath := path[0:len(path)-1]
+	// Check if decompressed file already exists
+	_, err := os.Stat(newPath)
+	if !os.IsNotExist(err) {
+		return nil, fmt.Errorf("file with name \"%v\" already exists", newPath)
+	}
+	// Get file permissions of original file for later
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+	// Load compressed file
+	compressed, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	// Decompress it
+	decompressed, err := Decompress(compressed)
+	if err != nil {
+		return nil, err
+	}
+	// Create new decompressed copy
+	if err := ioutil.WriteFile(newPath, decompressed, fileInfo.Mode()); err != nil {
+		return nil, err
+	}
+	// Remove old project
+	if err := os.Remove(path); err != nil {
+		return nil, err
+	}
+	// Everything seems fine, load newly created project
+	return NewProject(newPath), nil
+}
+
 func (proj *Project) Data() *DataContext {
 	return NewDataContext(proj.path)
 }
