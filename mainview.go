@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
@@ -31,6 +33,15 @@ func IsItemOpen(uid int64) bool {
 
 func CloseItem(uid int64) {
 	delete(openItems, uid)
+}
+
+func UpdateWindowTitle(window *widgets.QMainWindow) {
+	abs, err := filepath.Abs(currentProject.path)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "warning: failed to get absolute path to project:", err)
+		abs = currentProject.path
+	}
+	window.SetWindowTitle(fmt.Sprintf("%v [%v] - OpenRQ", currentProject.Data().ProjectName(), abs))
 }
 
 // SnapToGrid naps the specified position to the grid
@@ -118,6 +129,8 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 				scene.AddItem(link.dir)
 			}
 		}
+		// Set window title
+		UpdateWindowTitle(window)
 	}
 
 	// Setup drag-and-drop
