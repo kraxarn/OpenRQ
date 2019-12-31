@@ -47,13 +47,40 @@ func AddToolBar(window *widgets.QMainWindow) {
 	fileTool := widgets.NewQToolButton(fileToolBar)
 	fileMenu := widgets.NewQMenu2("", fileTool)
 	// Add "new project" option
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "New...")
+	fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "New...").ConnectTriggered(func(checked bool) {
+		// TODO: Clear current project
+		fileName := widgets.QFileDialog_GetSaveFileName(window, "New Project",
+			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
+			"OpenRQ Project(*.orq)", "", 0)
+		if len(fileName) > 0 {
+			// TODO: Set as current project
+			fmt.Println("new:", fileName)
+		}
+	})
 	// Add "open project" option
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-open"), "Open...")
+	fileMenu.AddAction2(gui.QIcon_FromTheme("document-open"), "Open...").ConnectTriggered(func(checked bool) {
+		fileName := widgets.QFileDialog_GetOpenFileName(window, "Open Project",
+			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
+			"OpenRQ Project(*.orq)", "", 0)
+		if len(fileName) > 0 {
+			// TODO: Load new project
+			fmt.Println("open:", fileName)
+		}
+	})
 	// Add "save project" option
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save"), "Save")
+	// TODO: Implement save options when version support has been added
+	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save"), "Save").SetEnabled(false)
 	// Add "save project as" option
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...")
+	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...").ConnectTriggered(func(checked bool) {
+		// TODO: Set path of current project as default
+		fileName := widgets.QFileDialog_GetSaveFileName(window, "Save Project",
+			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
+			"OpenRQ Project(*.orq);;OpenRQ Compressed Project(*.orqz)", "", 0)
+		if len(fileName) > 0 {
+			// TODO: Copy project to directory
+			fmt.Println("save:", fileName)
+		}
+	})
 	// Separation for other stuff
 	fileMenu.AddSeparator()
 	// Quit option that closes everything, sets default quit shortcut
