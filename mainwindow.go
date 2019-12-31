@@ -53,8 +53,8 @@ func AddToolBar(window *widgets.QMainWindow) {
 			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
 			"OpenRQ Project(*.orq)", "", 0)
 		if len(fileName) > 0 {
-			// TODO: Set as current project
-			fmt.Println("new:", fileName)
+			NewProject(fileName)
+			ReloadProject(window)
 		}
 	})
 	// Add "open project" option
@@ -63,8 +63,8 @@ func AddToolBar(window *widgets.QMainWindow) {
 			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
 			"OpenRQ Project(*.orq)", "", 0)
 		if len(fileName) > 0 {
-			// TODO: Load new project
-			fmt.Println("open:", fileName)
+			NewProject(fileName)
+			ReloadProject(window)
 		}
 	})
 	// Add "save project" option
