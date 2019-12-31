@@ -75,7 +75,7 @@ func (proj *Project) Name() string {
 func Compress(data []byte) ([]byte, error) {
 	var buffer bytes.Buffer
 	gz := gzip.NewWriter(&buffer)
-	count, err := gz.Write(data)
+	_, err := gz.Write(data)
 	_ = gz.Close()
 	return buffer.Bytes(), err
 }
