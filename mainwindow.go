@@ -72,6 +72,12 @@ func AddToolBar(window *widgets.QMainWindow) {
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save"), "Save").SetEnabled(false)
 	// Add "save project as" option
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...").ConnectTriggered(func(checked bool) {
+		// Check if project is loaded to save
+		if currentProject == nil {
+			widgets.QMessageBox_Information(window, "No Project Loaded",
+				"No project is current loaded to save", widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+			return
+		}
 		// TODO: Set path of current project as default
 		fileName := widgets.QFileDialog_GetSaveFileName(window, "Save Project",
 			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
@@ -116,6 +122,12 @@ func AddToolBar(window *widgets.QMainWindow) {
 	// Rename project
 	editMenu.AddAction2(gui.QIcon_FromTheme("text-field"),
 		"Rename Project...").ConnectTriggered(func(checked bool) {
+		// Check if project is loaded to rename
+		if currentProject == nil {
+			widgets.QMessageBox_Information(window, "No Project Loaded",
+				"No project is current loaded to rename", widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+			return
+		}
 		db := currentProject.Data()
 		defer db.Close()
 		name := widgets.QInputDialog_GetText(window, "Rename Project", "New project name",
