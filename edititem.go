@@ -173,13 +173,8 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 	// Dock for button connections
 	dock := widgets.NewQDockWidget("Edit Item", nil, 0)
 
-	// Discard button
+	// Button container
 	buttons := widgets.NewQHBoxLayout()
-	discard := widgets.NewQPushButton2("Discard", nil)
-	discard.ConnectReleased(func() {
-		dock.Close()
-	})
-	buttons.AddWidget(discard, 1, 0)
 	// Save button
 	save := widgets.NewQPushButton2("Save", nil)
 	save.ConnectReleased(func() {
@@ -197,6 +192,12 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 		dock.Close()
 	})
 	buttons.AddWidget(save, 1, 0)
+	// Discard button
+	discard := widgets.NewQPushButton2("Discard", nil)
+	discard.ConnectReleased(func() {
+		dock.Close()
+	})
+	buttons.AddWidget(discard, 1, 0)
 	layout.AddLayout(buttons, 0)
 
 	// Put layout in a widget
