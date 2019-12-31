@@ -142,3 +142,9 @@ func (sol Solution) SetSize(w, h int) {
 	sol.SetValue("width", w)
 	sol.SetValue("height", h)
 }
+
+func (sol Solution) IsPropertyNull(columnName string) bool {
+	db := currentProject.Data()
+	defer db.Close()
+	return db.IsItemPropertyNull(sol.id, "Solutions", columnName)
+}

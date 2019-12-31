@@ -277,6 +277,16 @@ func (data *DataContext) GetItemValue(itemID int64, tableName, name string, valu
 	return nil
 }
 
+func (data *DataContext) IsItemPropertyNull(itemID int64, tableName, columnName string) bool {
+	var count int
+	row := data.Database.QueryRow(
+		fmt.Sprintf("select count(*) from %v where _rowid_ = ? and %v is null", tableName, columnName), itemID)
+	if err := row.Scan(&count); err != nil {
+		fmt.Println(err)
+	}
+	return count > 0
+}
+
 // AddItemChild creates a link between parent and child
 func (data *DataContext) AddItemChild(parent, child Item) error {
 	// Get what table name child has

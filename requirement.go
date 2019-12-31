@@ -186,3 +186,9 @@ func (req Requirement) SetSize(w, h int) {
 		"height": h,
 	})
 }
+
+func (req Requirement) IsPropertyNull(columnName string) bool {
+	db := currentProject.Data()
+	defer db.Close()
+	return db.IsItemPropertyNull(req.id, "Requirements", columnName)
+}

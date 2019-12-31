@@ -26,6 +26,8 @@ type Item interface {
 	AddChild(child Item)
 	RemoveChild(child Item)
 	Children() []Item
+
+	IsPropertyNull(columnName string) bool
 }
 
 func NewItem(id int64, itemType ItemType) Item {
