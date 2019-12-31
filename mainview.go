@@ -256,19 +256,18 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 					selectedUid := GetGroupUID(selectedItem)
 					// Try to get all links
 					link, ok := links[selectedUid]
-					if !ok {
-						return
-					}
-					// Remove all links
-					for _, l := range link {
-						// It is the item we are trying to remove
-						if l.parent == selectedUid || l.child == selectedUid {
-							// Remove from scene
-							scene.RemoveItem(l.line)
-							scene.RemoveItem(l.dir)
-							// Remove from links map
-							delete(links, l.parent)
-							delete(links, l.child)
+					if ok {
+						// Remove all links
+						for _, l := range link {
+							// It is the item we are trying to remove
+							if l.parent == selectedUid || l.child == selectedUid {
+								// Remove from scene
+								scene.RemoveItem(l.line)
+								scene.RemoveItem(l.dir)
+								// Remove from links map
+								delete(links, l.parent)
+								delete(links, l.child)
+							}
 						}
 					}
 					// Remove the group from the scene
