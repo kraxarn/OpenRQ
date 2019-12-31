@@ -202,8 +202,8 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 	// Put layout in a widget
 	widget := widgets.NewQWidget(nil, 0)
 	widget.SetLayout(layout)
-	// Set dock to the created widget and return it
 
+	// Set dock to the created widget and return it
 	dock.SetWidget(widget)
 	return dock
 }
