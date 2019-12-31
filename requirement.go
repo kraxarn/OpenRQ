@@ -43,11 +43,18 @@ func (req Requirement) Hash() [16]byte {
 
 // GetValue gets a value from the database
 func (req *Requirement) GetValue(name string, value interface{}) {
+	req.GetValues(map[string]interface{}{
+		name: value,
+	})
+}
+
+func (req *Requirement) GetValues(nameValues map[string]interface{}) {
 	db := currentProject.Data()
 	defer db.Close()
-	err := db.GetItemValue(req.ID(), "Requirements", name, value)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "database error:", err)
+	for key, value := range nameValues {
+		if err := db.GetItemValue(req.ID(), "Requirements", key, value); err != nil {
+			fmt.Fprintln(os.Stderr, "warning: failed to get property", key, ":", err)
+		}
 	}
 }
 
@@ -71,9 +78,17 @@ func (req *Requirement) GetValueInt64(name string) int64 {
 
 // SetValue sets a value to the database
 func (req *Requirement) SetValue(name string, value interface{}) {
+	req.SetValues(map[string]interface{}{
+		name: value,
+	})
+}
+
+func (req *Requirement) SetValues(nameValues map[string]interface{}) {
 	db := currentProject.Data()
 	defer db.Close()
-	db.SetItemValue(req.ID(), "Requirements", name, value)
+	for key, value := range nameValues {
+		db.SetItemValue(req.ID(), "Requirements", key, value)
+	}
 }
 
 // GetRationale gets the rationale property of the requirement
@@ -142,24 +157,32 @@ func (req Requirement) AddChild(child Item) {
 
 func (req Requirement) Pos() (int, int) {
 	var x, y int
-	req.GetValue("x", &x)
-	req.GetValue("y", &y)
+	req.GetValues(map[string]interface{}{
+		"x": &x,
+		"y": &y,
+	})
 	return x, y
 }
 
 func (req Requirement) SetPos(x, y int) {
-	req.SetValue("x", x)
-	req.SetValue("y", y)
+	req.SetValues(map[string]interface{} {
+		"x": x,
+		"y": y,
+	})
 }
 
 func (req Requirement) Size() (int, int) {
 	var width, height int
-	req.GetValue("width", &width)
-	req.GetValue("height", &height)
+	req.GetValues(map[string]interface{}{
+		"width": &width,
+		"height": &height,
+	})
 	return width, height
 }
 
 func (req Requirement) SetSize(w, h int) {
-	req.SetValue("width", w)
-	req.SetValue("height", h)
+	req.SetValues(map[string]interface{} {
+		"width": w,
+		"height": h,
+	})
 }
