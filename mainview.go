@@ -33,21 +33,6 @@ func CloseItem(uid int64) {
 	delete(openItems, uid)
 }
 
-func GetTextItem(group *widgets.QGraphicsItemGroup) *widgets.QGraphicsTextItem {
-	for _, item := range group.ChildItems() {
-		if item.Type() == 8 {
-			tp := (*widgets.QGraphicsTextItem)(item.Pointer())
-			textItem := widgets.NewQGraphicsTextItemFromPointer(item.Pointer())
-			fmt.Printf("text item: %p / %p / %p\n", textItem, tp, item.Pointer())
-			if textItem != nil {
-				return textItem
-			}
-		}
-	}
-	fmt.Println("warning: text item not found in group")
-	return nil
-}
-
 // SnapToGrid naps the specified position to the grid
 func SnapToGrid(pos *core.QPoint) *core.QPoint {
 	// 2^5=32
@@ -68,9 +53,6 @@ func CreateEditWidgetFromPos(pos core.QPoint_ITF, scene *widgets.QGraphicsScene)
 	}
 	// Open item
 	// TODO: For now, assume requirement
-	//p := group.Data(1).Pointer()
-	//t := (*widgets.QGraphicsTextItem)(unsafe.Pointer(p))
-	// *(*uint64)(unsafe.Pointer(&f))
 	editWindow := CreateEditWidget(NewItem(uid, TypeRequirement), group, scene)
 	editWindow.ConnectCloseEvent(func(event *gui.QCloseEvent) {
 		CloseItem(uid)
