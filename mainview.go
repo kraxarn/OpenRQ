@@ -69,7 +69,7 @@ func ReloadProject(window *widgets.QMainWindow) {
 	if err != nil {
 		fmt.Println("error: failed to get saved links:", err)
 	} else {
-		for parent, child := range links {
+		for _, link := range links {
 			// Find parent and child
 			var parentItem, childItem *widgets.QGraphicsItemGroup
 			for _, item := range view.Items() {
@@ -78,9 +78,9 @@ func ReloadProject(window *widgets.QMainWindow) {
 					continue
 				}
 				groupID := GetGroupUID(group)
-				if groupID == child.ID() {
+				if groupID == link.child.ID() {
 					childItem = group
-				} else if groupID == parent.ID() {
+				} else if groupID == link.parent.ID() {
 					parentItem = group
 				}
 				// Stop loop if we found everything
