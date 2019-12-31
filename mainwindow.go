@@ -77,8 +77,10 @@ func AddToolBar(window *widgets.QMainWindow) {
 			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
 			"OpenRQ Project(*.orq);;OpenRQ Compressed Project(*.orqz)", "", 0)
 		if len(fileName) > 0 {
-			// TODO: Copy project to directory
-			fmt.Println("save:", fileName)
+			if err := currentProject.CopyTo(fileName); err != nil {
+				widgets.QMessageBox_Critical(window, "Failed to Save Project",
+					err.Error(), widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+			}
 		}
 	})
 	// Separation for other stuff

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -30,4 +32,19 @@ func (proj *Project) Name() string {
 	db := proj.Data()
 	defer db.Close()
 	return db.ProjectName()
+}
+
+func (proj *Project) CopyTo(path string) error {
+	// Get file info to copy permissions
+	fileInfo, err := os.Stat(proj.path)
+	if err != nil {
+		return err
+	}
+	// Get the current project file
+	file, err := ioutil.ReadFile(proj.path)
+	if err != nil {
+		return err
+	}
+	// Copy data to location
+	return ioutil.WriteFile(path, file, fileInfo.Mode())
 }
