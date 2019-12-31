@@ -144,8 +144,11 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 	// Create open items map
 	openItems = make(map[int64]*widgets.QDockWidget)
 
-	// Load items from database
-	ReloadProject(window)
+	// Check if we have a last loaded project
+	if project := NewSettings().LastProject(); project != "" {
+		NewProject(project)
+		ReloadProject(window)
+	}
 
 	// Setup drag-and-drop
 	view.SetAcceptDrops(true)
