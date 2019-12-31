@@ -1,6 +1,10 @@
 package main
 
-import "github.com/therecipe/qt/core"
+import (
+	"os"
+
+	"github.com/therecipe/qt/core"
+)
 
 type Settings struct {
 	settings *core.QSettings
@@ -13,7 +17,12 @@ func NewSettings() *Settings {
 }
 
 func (set *Settings) LastProject() string {
-	return set.settings.Value("lastProject", core.NewQVariant()).ToString()
+	project := set.settings.Value("lastProject", core.NewQVariant()).ToString()
+	_, err := os.Stat(project)
+	if os.IsNotExist(err) {
+		return ""
+	}
+	return project
 }
 
 func (set *Settings) SetLastProject(value string) {
