@@ -302,13 +302,21 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 
 		// We released while creating a link
 		if linkStart != nil {
+			group := view.ItemAt(event.Pos()).Group()
 			// If we try to link to the empty void
-			if view.ItemAt(event.Pos()).Group() == nil {
+			if group == nil {
 				linkStart = nil
 				return
 			}
-			toPos := view.ItemAt(event.Pos()).Group().Pos()
+			toPos := group.Pos()
 			if toPos.X() == 0 && toPos.Y() == 0 {
+				return
+			}
+			// Check if child already have a parent
+			if !NewRequirement(GetGroupUID(group)).IsPropertyNull("parent") {
+				widgets.QMessageBox_Warning(window, "Invalid Link",
+					"The link you were trying to create is not valid and could not be created",
+					widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
 				return
 			}
 			// Create and add link
