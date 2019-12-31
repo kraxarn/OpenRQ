@@ -99,11 +99,11 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			fmt.Println("error: failed to get saved items:", err)
 		} else {
 			var x, y, w, h int
-			for _, item := range items {
+			for item, description := range items {
 				x, y = item.Pos()
 				w, h = item.Size()
 				scene.AddItem(NewGraphicsItem(
-					fmt.Sprintf("%v%v", item.ID(), item.Description()), x, y, w, h, item.ID()))
+					fmt.Sprintf("%v%v", item.ID(), description), x, y, w, h, item.ID()))
 			}
 		}
 		// Get links

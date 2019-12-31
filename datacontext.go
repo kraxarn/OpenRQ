@@ -194,31 +194,32 @@ func GetItemTableName(itemType ItemType) string {
 }
 
 // GetAllItems gets all requirements and solutions stored in the database
-func (data *DataContext) Items() ([]Item, error) {
+func (data *DataContext) Items() (items map[Item]string, err error) {
 	// Connect to database
 	db := currentProject.Data()
 	defer db.Close()
-	// Temporary slice
-	items := make([]Item, 0)
+	// Crate slice of items
+	items = make(map[Item]string)
 	// Get all requirements
-	rows, err := data.Database.Query("select _rowid_ from Requirements")
+	rows, err := data.Database.Query("select _rowid_, description from Requirements")
 	if err != nil {
 		return items, fmt.Errorf("failed to get requirements: %v", err)
 	}
 	var itemID int64
+	var description string
 	for rows.Next() {
-		if err = rows.Scan(&itemID); err == nil {
-			items = append(items, NewRequirement(itemID))
+		if err = rows.Scan(&itemID, &description); err == nil {
+			items[NewRequirement(itemID)] = description
 		}
 	}
 	// Get all solutions
-	rows, err = data.Database.Query("select _rowid_ from Solutions")
+	rows, err = data.Database.Query("select _rowid_, description from Solutions")
 	if err != nil {
 		return items, fmt.Errorf("failed to get solutions: %v", err)
 	}
 	for rows.Next() {
-		if err := rows.Scan(&itemID); err == nil {
-			items = append(items, NewRequirement(itemID))
+		if err := rows.Scan(&itemID, &description); err == nil {
+			items[NewSolution(itemID)] = description
 		}
 	}
 	return items, nil
