@@ -14,9 +14,6 @@ func main() {
 	// Create window and main app
 	app, window := NewMainWindow()
 
-	// Create example project
-	NewProject("project.orq")
-
 	// Add menu bar
 	CreateLayout(window)
 	AddToolBar(window)
