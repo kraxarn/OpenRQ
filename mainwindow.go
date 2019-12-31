@@ -84,6 +84,17 @@ func AddToolBar(window *widgets.QMainWindow) {
 	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-polygon-star"), "Solution")
 	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-line"), "Link")
 	editMenu.AddMenu(editInsertMenu)
+	// Rename project
+	editMenu.AddAction2(gui.QIcon_FromTheme("edit-rename"), "Rename Project...").ConnectTriggered(func(checked bool) {
+		db := currentProject.Data()
+		defer db.Close()
+		name := widgets.QInputDialog_GetText(window, "Rename Project", "New project name",
+			widgets.QLineEdit__Normal, db.ProjectName(), nil, 0, 0)
+		if len(name) > 0 {
+			db.SetProjectName(name)
+			UpdateWindowTitle(window)
+		}
+	})
 	// Add to main toolbar
 	editBar.SetMenu(editMenu)
 	fileToolBar.AddWidget(editBar)
