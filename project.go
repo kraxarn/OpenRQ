@@ -25,3 +25,9 @@ func NewProject(path string) *Project {
 func (proj *Project) Data() *DataContext {
 	return NewDataContext(proj.path)
 }
+
+func (proj *Project) Name() string {
+	db := proj.Data()
+	defer db.Close()
+	return db.ProjectName()
+}

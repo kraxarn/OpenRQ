@@ -77,6 +77,21 @@ func (data *DataContext) Create(projectName string) error {
 	return err
 }
 
+func (data *DataContext) ProjectName() string {
+	var name string
+	row := data.Database.QueryRow("select name from Info")
+	if err := row.Scan(&name); err != nil {
+		fmt.Fprintln(os.Stderr, "warning: failed to get project name:", err)
+	}
+	return name
+}
+
+func (data *DataContext) SetProjectName(name string) {
+	if _, err := data.Database.Exec("update Info set name = ?", name); err != nil {
+		fmt.Fprintln(os.Stderr, "warning: failed to set project name:", err)
+	}
+}
+
 func (data *DataContext) AddEmptyRequirement() (int64, error) {
 	return data.AddRequirement("", "", "")
 }
