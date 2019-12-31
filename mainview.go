@@ -37,6 +37,8 @@ func CloseItem(uid int64) {
 }
 
 func ReloadProject(window *widgets.QMainWindow) {
+	// Make sure view is enabled
+	view.SetEnabled(true)
 	// Delete all current items
 	scene.Clear()
 	// Clear links
@@ -151,6 +153,15 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 	if project := NewSettings().LastProject(); project != "" {
 		NewProject(project)
 		ReloadProject(window)
+	} else {
+		// No recent project, show message
+		font := gui.NewQFont()
+		font.SetPointSize(18)
+		text := scene.AddText("No Project Loaded", font)
+		text.SetX(float64(view.Width() / 2) + (scene.Width() / 2.0))
+		text.SetY(float64(view.Height() / 2) + scene.Height())
+		scene.SetSceneRect2(0, 0, float64(view.Width()), float64(view.Height()))
+		view.SetEnabled(false)
 	}
 
 	// Setup drag-and-drop
