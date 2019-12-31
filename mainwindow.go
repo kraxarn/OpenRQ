@@ -62,7 +62,7 @@ func AddToolBar(window *widgets.QMainWindow) {
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-open"), "Open...").ConnectTriggered(func(checked bool) {
 		fileName := widgets.QFileDialog_GetOpenFileName(window, "Open Project",
 			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
-			"OpenRQ Project(*.orq);;OpenRQ Compressed Project(*.orqz)", "", 0)
+			"OpenRQ Project(*.orq *orqz)", "", 0)
 		if len(fileName) > 0 {
 			if strings.HasSuffix(fileName, ".orqz") {
 				result := widgets.QMessageBox_Question(window, "Compressed Project",
