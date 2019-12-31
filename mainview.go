@@ -20,6 +20,7 @@ type Line struct {
 var links map[int64][]*Line
 
 var view *widgets.QGraphicsView
+var scene *widgets.QGraphicsScene
 
 var backgroundColor *gui.QColor
 
@@ -76,7 +77,7 @@ func CreateEditWidgetFromPos(pos core.QPoint_ITF, scene *widgets.QGraphicsScene)
 
 func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widgets.QGraphicsView {
 	// Create scene and view
-	scene := widgets.NewQGraphicsScene(nil)
+	scene = widgets.NewQGraphicsScene(nil)
 	view = widgets.NewQGraphicsView2(scene, nil)
 	// Get default window background color
 	backgroundColor = window.Palette().Color2(window.BackgroundRole())
