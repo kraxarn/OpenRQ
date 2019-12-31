@@ -240,16 +240,13 @@ func (data *DataContext) Items() (items map[Item]string, err error) {
 	return items, nil
 }
 
-type DataLink struct {
-	parent, child Item
-}
 
-func (data *DataContext) Links() (items []DataLink, err error) {
+func (data *DataContext) Links() (items map[Item]Item, err error) {
 	// Connect to database
 	db := currentProject.Data()
 	defer db.Close()
 	// Create map
-	items = make([]DataLink, 0)
+	items = make(map[Item]Item)
 	// Get all requirements
 	// TODO: Only child and parent as requirement
 	rows, err := db.Database.Query("select _rowid_, parent from Requirements where parent is not null")
@@ -261,10 +258,7 @@ func (data *DataContext) Links() (items []DataLink, err error) {
 	var itemID, parentID int64
 	for rows.Next() {
 		if err = rows.Scan(&itemID, &parentID); err == nil {
-			items = append(items, DataLink{ 
-				NewRequirement(parentID),
-				NewRequirement(itemID),
-			})
+			items[NewRequirement(itemID)] = NewRequirement(parentID)
 		} else {
 			return items, fmt.Errorf("failed to get requirement %v link: %v", itemID, err)
 		}
