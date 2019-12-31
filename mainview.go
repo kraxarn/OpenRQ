@@ -103,6 +103,9 @@ func UpdateWindowTitle(window *widgets.QMainWindow) {
 		abs = currentProject.path
 	}
 	window.SetWindowTitle(fmt.Sprintf("%v [%v] - OpenRQ", currentProject.Data().ProjectName(), abs))
+	// Update last used project
+	// (should probably not be done here)
+	NewSettings().SetLastProject(abs)
 }
 
 // SnapToGrid naps the specified position to the grid
