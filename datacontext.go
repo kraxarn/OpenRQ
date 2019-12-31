@@ -73,7 +73,7 @@ func (data *DataContext) Create(projectName string) error {
 		}
 	}
 	// Insert info table
-	_, err := data.Database.Query("insert into Info (name) values (?)", projectName)
+	_, err := data.Database.Exec("insert into Info (name) values (?)", projectName)
 	return err
 }
 
