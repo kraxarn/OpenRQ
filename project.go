@@ -77,7 +77,6 @@ func Compress(data []byte) ([]byte, error) {
 	gz := gzip.NewWriter(&buffer)
 	count, err := gz.Write(data)
 	_ = gz.Close()
-	fmt.Println("wrote", count, "/", len(buffer.Bytes()), "bytes")
 	return buffer.Bytes(), err
 }
 
