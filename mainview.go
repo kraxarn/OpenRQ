@@ -346,6 +346,10 @@ func CreateLink(parent, child *widgets.QGraphicsItemGroup) Line {
 	if links == nil {
 		links = make(map[int64][]*Line)
 	}
+	// Check if we're linking to self
+	if GetGroupUID(parent) == GetGroupUID(child) {
+		fmt.Println("warning: link to self")
+	}
 	// Add to database
 	db := currentProject.Data()
 	defer db.Close()
