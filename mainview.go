@@ -285,6 +285,11 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 					if err := db.RemoveItem(selectedUid); err != nil {
 						fmt.Println("warning: failed to remove item:", err)
 					}
+					// Check if item is opened in editor
+					if openItem, ok := openItems[selectedUid]; ok {
+						openItem.Close()
+						delete(openItems, selectedUid)
+					}
 				})
 			// Show menu at cursor
 			menu.Popup(view.MapToGlobal(event.Pos()), nil)
