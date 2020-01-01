@@ -308,8 +308,8 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 		// We released while creating a link
 		if linkStart != nil {
 			group := view.ItemAt(event.Pos()).Group()
-			// If we try to link to the empty void
-			if group == nil {
+			// If we try to link to the empty void or self
+			if group == nil || GetGroupUID(linkStart) == GetGroupUID(group) {
 				linkStart = nil
 				return
 			}
