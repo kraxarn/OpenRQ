@@ -6,18 +6,6 @@ import (
 	"os"
 )
 
-type Link struct {
-	name  string
-	color uint
-}
-
-// GetHash gets the md5 hash of the item
-func (link Link) Hash() [16]byte {
-	h := md5.Sum([]byte(fmt.Sprintf("%v%v", link.name, link.color)))
-	fmt.Printf("%x", h)
-	return h
-}
-
 type Solution struct {
 	Item
 	id int64
