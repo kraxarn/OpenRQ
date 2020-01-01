@@ -89,9 +89,14 @@ func ReloadProject(window *widgets.QMainWindow) {
 				}
 			}
 			// Create and add link
-			link := CreateLink(parentItem, childItem)
-			scene.AddItem(link.line)
-			scene.AddItem(link.dir)
+			if parentItem == nil || childItem == nil {
+				fmt.Printf("warning: could not find parent or child, ignoring link (%v -> %v)\n",
+					parent.ID(), child.ID())
+			} else {
+				link := CreateLink(parentItem, childItem)
+				scene.AddItem(link.line)
+				scene.AddItem(link.dir)
+			}
 		}
 	}
 	// Set window title
