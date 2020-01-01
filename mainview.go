@@ -237,6 +237,18 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			// Update link
 			UpdateLinkPos(movingItem, movingItem.Pos().X(), movingItem.Pos().Y())
 		}
+		// Show hand when trying to move item
+		if !linkBtn.IsChecked() && view.ItemAt(event.Pos()).Group() != nil {
+			cursor := core.Qt__OpenHandCursor
+			// If moving, show closed hand
+			if movingItem != nil {
+				cursor = core.Qt__ClosedHandCursor
+			}
+			view.SetCursor(gui.NewQCursor2(cursor))
+		} else {
+			// If not hovering over an item, restore cursor
+			view.UnsetCursor()
+		}
 	})
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
 		if event.Button() == core.Qt__RightButton && view.ItemAt(event.Pos()).Group() != nil {
