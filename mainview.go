@@ -181,6 +181,8 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 	var movingItem *widgets.QGraphicsItemGroup
 	// Start position of link
 	var linkStart *widgets.QGraphicsItemGroup
+	// Temporary line shown when creating a new link
+	var tempLink *widgets.QGraphicsLineItem
 
 	itemSize := 64
 	view.ConnectDropEvent(func(event *gui.QDropEvent) {
@@ -222,7 +224,11 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			if linkBtn.IsChecked() {
 				// We're creating a link
 				linkStart = item.Group()
-
+				// Create temporary link indicator
+				scenePos := view.MapToScene(event.Pos())
+				tempLink = widgets.NewQGraphicsLineItem2(core.NewQLineF2(scenePos, scenePos), nil)
+				tempLink.SetPen(gui.NewQPen3(gui.NewQColor3(0, 255, 0, 128)))
+				scene.AddItem(tempLink)
 			} else {
 				// We're moving an item
 				movingItem = item.Group()
@@ -236,6 +242,12 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			movingItem.SetPos(view.MapToScene(SnapToGrid(event.Pos())))
 			// Update link
 			UpdateLinkPos(movingItem, movingItem.Pos().X(), movingItem.Pos().Y())
+		}
+		// Update temporary link
+		if tempLink != nil {
+			tempLine := tempLink.Line()
+			tempLine.SetP2(view.MapToScene(event.Pos()))
+			tempLink.SetLine(tempLine)
 		}
 		// Show hand when trying to move item
 		if !linkBtn.IsChecked() && view.ItemAt(event.Pos()).Group() != nil {
@@ -321,7 +333,11 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			movingItem.SetOpacity(1.0)
 			movingItem = nil
 		}
-
+		// When releasing, we always want to destroy temp link
+		if tempLink != nil {
+			scene.RemoveItem(tempLink)
+			tempLink = nil
+		}
 		// We released while creating a link
 		if linkStart != nil {
 			group := view.ItemAt(event.Pos()).Group()
