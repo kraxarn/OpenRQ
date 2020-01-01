@@ -10,14 +10,14 @@ import (
 	"github.com/therecipe/qt/widgets"
 )
 
-type Line struct {
+type Link struct {
 	parent int64
 	child  int64
 	line   *widgets.QGraphicsLineItem
 	dir    *widgets.QGraphicsPolygonItem
 }
 
-var links map[int64][]*Line
+var links map[int64][]*Link
 
 var view *widgets.QGraphicsView
 var scene *widgets.QGraphicsScene
@@ -42,7 +42,7 @@ func ReloadProject(window *widgets.QMainWindow) {
 	// Delete all current items
 	scene.Clear()
 	// Clear links
-	links = make(map[int64][]*Line)
+	links = make(map[int64][]*Link)
 	// Close all open items
 	for id := range openItems {
 		openItems[id].Close()
@@ -374,10 +374,10 @@ func GetGroupUID(group *widgets.QGraphicsItemGroup) int64 {
 	return group.Data(0).ToLongLong(nil)
 }
 
-func CreateLink(parent, child *widgets.QGraphicsItemGroup) Line {
+func CreateLink(parent, child *widgets.QGraphicsItemGroup) Link {
 	// Check if map needs to be created
 	if links == nil {
-		links = make(map[int64][]*Line)
+		links = make(map[int64][]*Link)
 	}
 	// Check if we're linking to self
 	if GetGroupUID(parent) == GetGroupUID(child) {
@@ -406,7 +406,7 @@ func CreateLink(parent, child *widgets.QGraphicsItemGroup) Line {
 	// Create line data
 	parentID := GetGroupUID(parent)
 	childID := GetGroupUID(child)
-	lineData := Line{
+	lineData := Link{
 		parentID, childID, line,
 		CreateTriangle(line.Line().Center(), line.Line().Angle()),
 	}
