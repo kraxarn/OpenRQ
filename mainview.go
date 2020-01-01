@@ -325,7 +325,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 				return
 			}
 			// Create and add link
-			link := CreateLink(linkStart, view.ItemAt(event.Pos()).Group())
+			link := CreateLink(linkStart, group)
 			scene.AddItem(link.line)
 			scene.AddItem(link.dir)
 			linkStart = nil
