@@ -36,9 +36,8 @@ func (sol Solution) Description() string {
 	return sol.GetValueString("description")
 }
 
-// AddChild adds child to solution
-func (sol Solution) AddChild(child Item) {
-
+func (sol Solution) SetDescription(value string) {
+	sol.SetValue("description", value)
 }
 
 func (sol Solution) Pos() (int, int) {
