@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
@@ -61,7 +62,8 @@ func ReloadProject(window *widgets.QMainWindow) {
 			x, y = item.Pos()
 			w, h = item.Size()
 			scene.AddItem(NewGraphicsItem(
-				fmt.Sprintf("%v%v", item.ID(), description), x, y, w, h, item))
+				fmt.Sprintf("%v%v%v", strings.ToLower(GetItemTableName(GetItemType(item))[0:3]),
+					item.ID(), description), x, y, w, h, item))
 		}
 	}
 	// Load links
