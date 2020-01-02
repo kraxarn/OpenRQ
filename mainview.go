@@ -462,7 +462,7 @@ func NewGraphicsItem(text string, x, y, width, height int, item Item) *widgets.Q
 	group.AddToGroup(shapeItem)
 	group.SetPos2(float64(x), float64(y))
 	group.SetData(0, core.NewQVariant1(item.ID()))
-	group.SetData(1, core.NewQVariant1(GetItemType(item)))
+	group.SetData(1, core.NewQVariant1(int(GetItemType(item))))
 	group.SetZValue(10)
 	return group
 }
