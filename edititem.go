@@ -224,15 +224,26 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 	// Save button
 	save := widgets.NewQPushButton2("Save", nil)
 	save.ConnectReleased(func() {
-		// Save description to database and recreate group
-		// TODO: Probably not the best solution, but it works
-		item.SetDescription(textEdits[Description].ToHtml())
+		// Check if we are changing item type
+		changingType := itemTypeWarn.IsVisible()
+		if changingType {
+			// We are changing type, we need to delete and add item again
+			// TODO: Issue #49
+		} else {
+			// We are updating a current item, no delete needed
+			// Both need description updated
+			item.SetDescription(textEdits[Description].ToHtml())
+			if isReq {
+				// Requirements also need rationale and fit criterion updated
+				req.SetRationale(textEdits[Rationale].ToHtml())
+				req.SetFitCriterion(textEdits[FitCriterion].ToHtml())
+			}
+		}
+
+		// Recreate group with new item
 		scene.AddItem(NewGraphicsItem(textEdits[Description].ToHtml(),
 			int(group.X()), int(group.Y()), 128, 64, item))
 		scene.RemoveItem(group)
-		// Save other properties
-		req.SetRationale(textEdits[Rationale].ToHtml())
-		req.SetFitCriterion(textEdits[FitCriterion].ToHtml())
 		// Close window
 		dock.Close()
 	})
