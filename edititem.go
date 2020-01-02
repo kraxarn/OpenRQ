@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
@@ -70,10 +71,6 @@ func MergeFormat(textEdit *widgets.QTextEdit, format *gui.QTextCharFormat) {
 func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGraphicsItemGroup, scene *widgets.QGraphicsScene) *widgets.QDockWidget {
 	// Main vertical layout
 	layout := widgets.NewQVBoxLayout()
-	// Item UID (for debugging)
-	layout.AddWidget(CreateGroupBox("Item UID",
-		widgets.NewQLabel2(fmt.Sprintf("%v", item.ID()), nil, 0)), 0, 0)
-
 	// Requirement/solution selection
 	itemType := GetItemType(item)
 	itemTypeGroup := widgets.NewQGroupBox2("Item Type", nil)
@@ -203,7 +200,7 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 	}
 
 	// Dock for button connections
-	dock := widgets.NewQDockWidget("Edit Item", nil, 0)
+	dock := widgets.NewQDockWidget(fmt.Sprintf("Edit Item (%v%v)", strings.ToLower(GetItemTableName(itemType)[0:1]), item.ID()), nil, 0)
 
 	// Button container
 	buttons := widgets.NewQHBoxLayout()
