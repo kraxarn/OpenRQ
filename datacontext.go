@@ -193,8 +193,11 @@ func GetItemType(item Item) ItemType {
 	switch item.(type) {
 	case Requirement:
 		return TypeRequirement
-	default:
+	case Solution:
 		return TypeSolution
+	default:
+		fmt.Println("error: failed to get item type for id", item.ID())
+		return 0
 	}
 }
 
