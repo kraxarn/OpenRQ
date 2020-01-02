@@ -6,7 +6,6 @@ import (
 	"os"
 )
 
-// Requirement with ItemProprties
 type Requirement struct {
 	Item
 	id int64
@@ -15,16 +14,10 @@ type Requirement struct {
 func NewRequirement(id int64) Requirement {
 	req := Requirement{}
 	req.id = id
-	if req.IsNull() {
-		fmt.Fprintln(os.Stderr, "warning: requirement", id, "not found")
+	if id == 0 {
+		fmt.Fprintln(os.Stderr, "warning: trying to create requirement with id 0")
 	}
 	return req
-}
-
-func (req Requirement) IsNull() bool {
-	var count int
-	req.GetValue("count(*)", &count)
-	return count <= 0
 }
 
 // GetChildren get all children of requirement

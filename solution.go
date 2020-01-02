@@ -14,16 +14,10 @@ type Solution struct {
 func NewSolution(id int64) Solution {
 	sol := Solution{}
 	sol.id = id
-	if sol.IsNull() {
-		fmt.Fprintln(os.Stderr, "warning: solution", id, "not found")
+	if id == 0 {
+		fmt.Fprintln(os.Stderr, "warning: trying to create solution with id 0")
 	}
 	return sol
-}
-
-func (sol Solution) IsNull() bool {
-	var val int
-	sol.GetValue("count(*)", &val)
-	return val <= 0
 }
 
 func (sol Solution) Hash() [16]byte {
