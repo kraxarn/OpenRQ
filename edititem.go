@@ -83,6 +83,20 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 	itemTypeLayout.AddWidget(solRadio, 1, 0)
 	itemTypeGroup.SetLayout(itemTypeLayout)
 	layout.AddWidget(itemTypeGroup, 0, 0)
+	// Label for warning about item type
+	itemTypeWarn := widgets.NewQLabel2("Changing item type may cause data loss", nil, 0)
+	palette := itemTypeWarn.Palette()
+	palette.SetColor2(itemTypeWarn.ForegroundRole(), gui.NewQColor2(core.Qt__red))
+	itemTypeWarn.SetPalette(palette)
+	itemTypeWarn.Hide()
+	layout.AddWidget(itemTypeWarn, 0, 0)
+	// Hide/show warning when changing type
+	reqRadio.ConnectReleased(func() {
+		itemTypeWarn.SetVisible(itemType == TypeSolution)
+	})
+	solRadio.ConnectReleased(func() {
+		itemTypeWarn.SetVisible(itemType == TypeRequirement)
+	})
 
 	textOptions := [3]*widgets.QToolBar{}
 	textEdits := [3]*widgets.QTextEdit{}
@@ -207,16 +221,6 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 	// Save button
 	save := widgets.NewQPushButton2("Save", nil)
 	save.ConnectReleased(func() {
-		// Check if we changed item type
-		// TODO: Don't show it if we don't have any version information
-		if (GetItemType(item) == TypeRequirement && solRadio.IsChecked()) || (GetItemType(item) == TypeSolution && reqRadio.IsChecked()) {
-			if widgets.QMessageBox_Warning(parent, "Item Type",
-				"Changing the type of an item may cause some information to be lost, are you sure you want to continue?",
-				widgets.QMessageBox__Yes | widgets.QMessageBox__No, widgets.QMessageBox__Yes) != widgets.QMessageBox__Yes {
-				return
-			}
-		}
-
 		// Save description to database and recreate group
 		// TODO: Probably not the best solution, but it works
 		item.SetDescription(textEdits[Description].ToHtml())
