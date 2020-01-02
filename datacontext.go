@@ -364,3 +364,19 @@ func (data *DataContext) ItemUID() int64 {
 	// Return newly generated value
 	return id
 }
+
+func (data *DataContext) UpdateItemParent(oldParent, newParent Item) error {
+	tables := []string{
+		GetItemTableName(TypeRequirement),
+		GetItemTableName(TypeSolution),
+	}
+	for _, table := range tables {
+		_, err := data.Database.Exec(fmt.Sprintf(
+			"update %v set parent = ?, parentType = ? where parent = ? and parentType = ?", table),
+			newParent.ID(), GetItemType(newParent), oldParent.ID(), GetItemType(oldParent))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}

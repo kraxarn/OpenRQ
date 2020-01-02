@@ -233,6 +233,7 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 			db := currentProject.Data()
 			defer db.Close()
 			// Save old properties
+			oldItem := item
 			itemUID := item.UID()
 			itemX, itemY = item.Pos()
 			itemW, itemH = item.Size()
@@ -267,6 +268,10 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 			// Also set position and size same as old
 			item.SetPos(itemX, itemY)
 			item.SetSize(itemW, itemH)
+			// Update any links
+			if err := db.UpdateItemParent(oldItem, item); err != nil {
+				fmt.Println("warning: failed to update item children:", err)
+			}
 			req, isReq = item.(Requirement)
 		}
 
