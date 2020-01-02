@@ -411,7 +411,6 @@ func CreateLink(parent, child *widgets.QGraphicsItemGroup) Link {
 		toPos.X()+64, toPos.Y()+32,
 		nil,
 	)
-	fmt.Printf("created link %v/%v\t-> %v/%v\n", parentItem.ID(), GetItemType(parentItem), childItem.ID(), GetItemType(childItem))
 	// Set the color of it
 	line.SetPen(gui.NewQPen3(gui.NewQColor3(0, 255, 0, 255)))
 	// Create line data
