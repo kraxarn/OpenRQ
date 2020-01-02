@@ -114,13 +114,15 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 		textGroups[3].Show()
 	})
 
-	// TODO: Assume requirement for now
-	req, _ := item.(Requirement)
 	// Get default values
-	textValues := []string{
+	req, isReq := item.(Requirement)
+	textValues := [3]string{
 		req.Description(),
-		req.Rationale(),
-		req.FitCriterion(),
+	}
+	// Also set rationale and fit criterion if requirement
+	if isReq {
+		textValues[1] = req.Rationale()
+		textValues[2] = req.FitCriterion()
 	}
 
 	for i := 0; i < len(textOptions); i++ {
