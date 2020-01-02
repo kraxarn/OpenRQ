@@ -228,18 +228,48 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 		changingType := itemTypeWarn.IsVisible()
 		if changingType {
 			// We are changing type, we need to delete and add item again
-			// TODO: Issue #49
-		} else {
-			// We are updating a current item, no delete needed
-			// Both need description updated
-			item.SetDescription(textEdits[Description].ToHtml())
-			if isReq {
-				// Requirements also need rationale and fit criterion updated
-				req.SetRationale(textEdits[Rationale].ToHtml())
-				req.SetFitCriterion(textEdits[FitCriterion].ToHtml())
+			db := currentProject.Data()
+			defer db.Close()
+			// Save old UID
+			itemUID := item.UID()
+			// Delete old item
+			if err := db.RemoveItem(item.ID()); err != nil {
+				fmt.Println("error: failed to delete old item:", err)
+				return
 			}
+			// Add new as set item type
+			if reqRadio.IsChecked() {
+				// Add new requirement with set values
+				newID, err := db.AddEmptyRequirement()
+				if err != nil {
+					fmt.Println("error: failed to create new requirement:", err)
+					return
+				}
+				// Create new and set UID, rest is same as updating item
+				item = NewRequirement(newID)
+			} else {
+				// Add new requirement with set values
+				newID, err := db.AddEmptySolution()
+				if err != nil {
+					fmt.Println("error: failed to create new solution:", err)
+					return
+				}
+				// Create new and set UID, rest is same as updating item
+				item = NewSolution(newID)
+			}
+			// Set UID and update and update requirement cast
+			// (rest is the same as updating an item)
+			item.SetUID(itemUID)
+			req, isReq = item.(Requirement)
 		}
 
+		// Both need description updated
+		item.SetDescription(textEdits[Description].ToHtml())
+		// Requirements also need rationale and fit criterion updated
+		if isReq {
+			req.SetRationale(textEdits[Rationale].ToHtml())
+			req.SetFitCriterion(textEdits[FitCriterion].ToHtml())
+		}
 		// Recreate group with new item
 		scene.AddItem(NewGraphicsItem(textEdits[Description].ToHtml(),
 			int(group.X()), int(group.Y()), 128, 64, item))
