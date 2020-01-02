@@ -200,7 +200,8 @@ func AddToolBar(window *widgets.QMainWindow) {
 		gui.QIcon_FromTheme("download"), "Check for updates").ConnectTriggered(func(checked bool) {
 			// Check if version was compiled with version information
 			if len(versionCommitHash) <= 0 {
-				widgets.QMessageBox_About(window, "Updater", "This version was compiled without version information, updater is not available")
+				widgets.QMessageBox_About(window, "Updater",
+					"This version was compiled without version information,\nupdater is not available")
 				return
 			}
 			// Actually check for updates
