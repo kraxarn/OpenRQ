@@ -396,9 +396,6 @@ func CreateLink(parent, child *widgets.QGraphicsItemGroup) Link {
 	// Check if we're linking to self
 	parentItem := GetGroupItem(parent)
 	childItem := GetGroupItem(child)
-	if parentItem.ID() == childItem.ID() && GetItemType(parentItem) == GetItemType(childItem) {
-		fmt.Println("warning: link to self")
-	}
 	// Add to database
 	db := currentProject.Data()
 	defer db.Close()
