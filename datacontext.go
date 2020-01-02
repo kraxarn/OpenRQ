@@ -328,8 +328,8 @@ func (data *DataContext) AddItemChild(parent, child Item) error {
 func (data *DataContext) RemoveChildrenLinks(parent Item) error {
 	// Execute update
 	_, err := data.Database.Exec(
-		fmt.Sprintf("update %v set parent = null, parentType = null where parent = ?",
-			GetItemTableName(GetItemType(parent))), parent.ID())
+		fmt.Sprintf("update %v set parent = null, parentType = null where parent = ? and parentType = ?",
+			GetItemTableName(GetItemType(parent))), parent.ID(), GetItemType(parent))
 	return err
 }
 
