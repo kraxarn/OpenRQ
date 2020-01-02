@@ -223,6 +223,8 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 	buttons := widgets.NewQHBoxLayout()
 	// Save button
 	save := widgets.NewQPushButton2("Save", nil)
+	// Temporary values
+	var itemX, itemY, itemW, itemH int
 	save.ConnectReleased(func() {
 		// Check if we are changing item type
 		changingType := itemTypeWarn.IsVisible()
@@ -230,8 +232,10 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 			// We are changing type, we need to delete and add item again
 			db := currentProject.Data()
 			defer db.Close()
-			// Save old UID
+			// Save old properties
 			itemUID := item.UID()
+			itemX, itemY = item.Pos()
+			itemW, itemH = item.Size()
 			// Delete old item
 			if err := db.RemoveItem(item); err != nil {
 				fmt.Println("error: failed to delete old item:", err)
@@ -260,10 +264,13 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 			// Set UID and update and update requirement cast
 			// (rest is the same as updating an item)
 			item.SetUID(itemUID)
+			// Also set position and size same as old
+			item.SetPos(itemX, itemY)
+			item.SetSize(itemW, itemH)
 			req, isReq = item.(Requirement)
 		}
 
-		// Both need description updated
+		// Properties both items need
 		item.SetDescription(textEdits[Description].ToHtml())
 		// Requirements also need rationale and fit criterion updated
 		if isReq {
