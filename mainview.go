@@ -61,9 +61,7 @@ func ReloadProject(window *widgets.QMainWindow) {
 		for item, description := range items {
 			x, y = item.Pos()
 			w, h = item.Size()
-			scene.AddItem(NewGraphicsItem(
-				fmt.Sprintf("%v%v%v", strings.ToLower(GetItemTableName(GetItemType(item))[0:3]),
-					item.ID(), description), x, y, w, h, item))
+			scene.AddItem(NewGraphicsItem(description, x, y, w, h, item))
 		}
 	}
 	// Load links
@@ -210,8 +208,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 		req.SetPos(gridPos.Y(), gridPos.Y())
 		req.SetSize(itemSize*2, itemSize)
 		// Add item to view
-		scene.AddItem(NewGraphicsItem(
-			fmt.Sprintf("%v", uid), gridPos.X(), gridPos.Y(), itemSize*2, itemSize, req))
+		scene.AddItem(NewGraphicsItem(req.Description(), gridPos.X(), gridPos.Y(), itemSize*2, itemSize, req))
 		if len(openItems) <= 0 {
 			openItems[uid], _ = CreateEditWidgetFromPos(window, event.Pos(), scene)
 			window.AddDockWidget(core.Qt__RightDockWidgetArea, openItems[uid])
@@ -456,7 +453,8 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 func NewGraphicsItem(text string, x, y, width, height int, item Item) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem(nil)
-	textItem.SetHtml(text)
+	textItem.SetHtml(fmt.Sprintf("%v%v%v",
+		strings.ToLower(GetItemTableName(GetItemType(item))[0:3]), item.ID(), text))
 	textItem.SetZValue(15)
 	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, float64(width), float64(height), nil)
 	shapeItem.SetBrush(gui.NewQBrush3(backgroundColor, 1))

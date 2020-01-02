@@ -225,8 +225,7 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 		// Save description to database and recreate group
 		// TODO: Probably not the best solution, but it works
 		item.SetDescription(textEdits[Description].ToHtml())
-		scene.AddItem(NewGraphicsItem(
-			fmt.Sprintf("%v%v", item.ID(), textEdits[Description].ToHtml()),
+		scene.AddItem(NewGraphicsItem(textEdits[Description].ToHtml(),
 			int(group.X()), int(group.Y()), 128, 64, item))
 		scene.RemoveItem(group)
 		// Save other properties
