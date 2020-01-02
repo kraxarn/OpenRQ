@@ -117,7 +117,7 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 	// Get default values
 	req, isReq := item.(Requirement)
 	textValues := [3]string{
-		req.Description(),
+		item.Description(),
 	}
 	// Also set rationale and fit criterion if requirement
 	if isReq {
