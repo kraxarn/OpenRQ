@@ -61,7 +61,7 @@ func (sol *Solution) SetValue(name string, value interface{}) {
 
 // GetId gets the row ID in the database
 func (sol Solution) ID() int64 {
-	return sol.GetValueInt64("id")
+	return sol.id
 }
 
 // GetUid gets the row Uid in the database
