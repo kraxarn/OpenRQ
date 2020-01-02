@@ -239,6 +239,7 @@ func (data *DataContext) Items() (items map[Item]string, err error) {
 			items[NewRequirement(itemID)] = description
 		}
 	}
+	return items, nil
 	// Get all solutions
 	rows, err = data.Database.Query("select _rowid_, description from Solutions")
 	if err != nil {
