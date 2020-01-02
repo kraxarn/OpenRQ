@@ -214,7 +214,8 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 	}
 
 	// Dock for button connections
-	dock := widgets.NewQDockWidget(fmt.Sprintf("Edit Item (%v%v)", strings.ToLower(GetItemTableName(itemType)[0:1]), item.ID()), nil, 0)
+	dock := widgets.NewQDockWidget(fmt.Sprintf("Edit Item (%v%v)",
+		strings.ToLower(GetItemTableName(itemType)[0:1]), item.ID()), nil, 0)
 
 	// Button container
 	buttons := widgets.NewQHBoxLayout()
