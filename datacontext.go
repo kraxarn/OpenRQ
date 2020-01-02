@@ -15,8 +15,8 @@ import (
 type ItemType int8
 
 const (
-	TypeSolution    ItemType = 0
 	TypeRequirement ItemType = 1
+	TypeSolution    ItemType = 2
 )
 
 // DataContext holding the connection to the database
