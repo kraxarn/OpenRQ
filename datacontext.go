@@ -245,7 +245,7 @@ func (data *DataContext) Items() (items map[Item]string, err error) {
 		return items, fmt.Errorf("failed to get solutions: %v", err)
 	}
 	for rows.Next() {
-		if err := rows.Scan(&itemID, &description); err == nil {
+		if err = rows.Scan(&itemID, &description); err == nil {
 			items[NewSolution(itemID)] = description
 		}
 	}
