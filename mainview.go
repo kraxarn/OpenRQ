@@ -78,12 +78,13 @@ func ReloadProject(window *widgets.QMainWindow) {
 					continue
 				}
 				groupID := group.Data(0).ToLongLong(nil)
-				if groupID == 0 {
+				groupType := ItemType(group.Data(1).ToInt(nil))
+				if groupID == 0 || groupType == 0 {
 					continue
 				}
-				if groupID == child.ID() {
+				if groupID == child.ID() && groupType == GetItemType(child) {
 					childItem = group
-				} else if groupID == parent.ID() {
+				} else if groupID == parent.ID() && groupType == GetItemType(parent) {
 					parentItem = group
 				}
 				// Stop loop if we found everything
