@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 )
@@ -66,7 +67,7 @@ func MergeFormat(textEdit *widgets.QTextEdit, format *gui.QTextCharFormat) {
 }
 
 // CreateEditWidget creates the main window for editing an item
-func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widgets.QGraphicsScene) *widgets.QDockWidget {
+func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGraphicsItemGroup, scene *widgets.QGraphicsScene) *widgets.QDockWidget {
 	// Main vertical layout
 	layout := widgets.NewQVBoxLayout()
 	// Item UID (for debugging)
@@ -74,16 +75,17 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 		widgets.NewQLabel2(fmt.Sprintf("%v", item.ID()), nil, 0)), 0, 0)
 
 	// Requirement/solution selection
-	itemType := widgets.NewQGroupBox2("Item Type", nil)
+	itemType := GetItemType(item)
+	itemTypeGroup := widgets.NewQGroupBox2("Item Type", nil)
 	reqRadio := widgets.NewQRadioButton2("Problem", nil)
-	reqRadio.SetChecked(GetItemType(item) == TypeRequirement)
+	reqRadio.SetChecked(itemType == TypeRequirement)
 	solRadio := widgets.NewQRadioButton2("Solution", nil)
-	solRadio.SetChecked(GetItemType(item) == TypeSolution)
+	solRadio.SetChecked(itemType == TypeSolution)
 	itemTypeLayout := widgets.NewQHBoxLayout()
 	itemTypeLayout.AddWidget(reqRadio, 1, 0)
 	itemTypeLayout.AddWidget(solRadio, 1, 0)
-	itemType.SetLayout(itemTypeLayout)
-	layout.AddWidget(itemType, 0, 0)
+	itemTypeGroup.SetLayout(itemTypeLayout)
+	layout.AddWidget(itemTypeGroup, 0, 0)
 
 	textOptions := [3]*widgets.QToolBar{}
 	textEdits := [3]*widgets.QTextEdit{}
@@ -208,6 +210,16 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 	// Save button
 	save := widgets.NewQPushButton2("Save", nil)
 	save.ConnectReleased(func() {
+		// Check if we changed item type
+		// TODO: Don't show it if we don't have any version information
+		if (GetItemType(item) == TypeRequirement && solRadio.IsChecked()) || (GetItemType(item) == TypeSolution && reqRadio.IsChecked()) {
+			if widgets.QMessageBox_Warning(parent, "Item Type",
+				"Changing the type of an item may cause some information to be lost, are you sure you want to continue?",
+				widgets.QMessageBox__Yes | widgets.QMessageBox__No, widgets.QMessageBox__Yes) != widgets.QMessageBox__Yes {
+				return
+			}
+		}
+
 		// Save description to database and recreate group
 		// TODO: Probably not the best solution, but it works
 		item.SetDescription(textEdits[Description].ToHtml())

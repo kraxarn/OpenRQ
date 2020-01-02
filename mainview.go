@@ -129,7 +129,7 @@ func SnapToGrid(pos *core.QPoint) *core.QPoint {
 		float64((scenePos.X()>>gridSize<<gridSize)-64), float64((scenePos.Y()>>gridSize<<gridSize)-32)))
 }
 
-func CreateEditWidgetFromPos(pos core.QPoint_ITF, scene *widgets.QGraphicsScene) (*widgets.QDockWidget, bool) {
+func CreateEditWidgetFromPos(parent widgets.QWidget_ITF, pos core.QPoint_ITF, scene *widgets.QGraphicsScene) (*widgets.QDockWidget, bool) {
 	// Get UID
 	group := view.ItemAt(pos).Group()
 	item := GetGroupItem(group)
@@ -139,7 +139,7 @@ func CreateEditWidgetFromPos(pos core.QPoint_ITF, scene *widgets.QGraphicsScene)
 		return nil, false
 	}
 	// Open item
-	editWindow := CreateEditWidget(item, group, scene)
+	editWindow := CreateEditWidget(parent, item, group, scene)
 	editWindow.ConnectCloseEvent(func(event *gui.QCloseEvent) {
 		CloseItem(item.ID())
 	})
@@ -213,7 +213,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 		scene.AddItem(NewGraphicsItem(
 			fmt.Sprintf("%v", uid), gridPos.X(), gridPos.Y(), itemSize*2, itemSize, req))
 		if len(openItems) <= 0 {
-			openItems[uid], _ = CreateEditWidgetFromPos(event.Pos(), scene)
+			openItems[uid], _ = CreateEditWidgetFromPos(window, event.Pos(), scene)
 			window.AddDockWidget(core.Qt__RightDockWidgetArea, openItems[uid])
 		}
 	})
@@ -274,7 +274,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			// Edit option
 			menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit").
 				ConnectTriggered(func(checked bool) {
-					if editWidget, ok := CreateEditWidgetFromPos(pos, scene); ok {
+					if editWidget, ok := CreateEditWidgetFromPos(window, pos, scene); ok {
 						window.AddDockWidget(core.Qt__RightDockWidgetArea, editWidget)
 					}
 				})
