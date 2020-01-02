@@ -126,8 +126,13 @@ func (data *DataContext) AddSolution(description string) (int64, error) {
 		solUID, description); err != nil {
 		return 0, err
 	}
+	var id int64
+	if err := data.Database.QueryRow(
+		"select _rowid_ from Solutions where uid = ?", solUID).Scan(&id); err != nil {
+		return 0, err
+	}
 	// Try to version it and return the result of it
-	return solUID, data.AddItemVersion(solUID, TypeSolution)
+	return id, data.AddItemVersion(solUID, TypeSolution)
 }
 
 // AddItemVersion versions an item
@@ -242,7 +247,6 @@ func (data *DataContext) Items() (items map[Item]string, err error) {
 	}
 	return items, nil
 }
-
 
 func (data *DataContext) Links() (items map[Item]Item, err error) {
 	// Connect to database
