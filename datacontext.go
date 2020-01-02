@@ -259,22 +259,37 @@ func (data *DataContext) Links() (items map[Item]Item, err error) {
 	defer db.Close()
 	// Create map
 	items = make(map[Item]Item)
-	// Get all requirements
-	// TODO: Only child and parent as requirement
-	rows, err := db.Database.Query("select _rowid_, parent from Requirements where parent is not null")
+	// Get parents for requirements
+	rows, err := db.Database.Query("select _rowid_, parent, parentType from Requirements where parent is not null")
 	if err != nil {
 		return items, fmt.Errorf("failed to get requirement links: %v", err)
 	}
 	defer rows.Close()
 	// Get requirement links
 	var itemID, parentID int64
+	var parentType int8
 	for rows.Next() {
-		if err = rows.Scan(&itemID, &parentID); err == nil {
-			items[NewRequirement(itemID)] = NewRequirement(parentID)
+		if err = rows.Scan(&itemID, &parentID, &parentType); err == nil {
+			// We know child is requirement, but parent can be something else
+			items[NewRequirement(itemID)] = NewItem(parentID, ItemType(parentType))
 		} else {
 			return items, fmt.Errorf("failed to get requirement %v link: %v", itemID, err)
 		}
 	}
+	// Get parents for solutions
+	rows, err = db.Database.Query("select _rowid_, parent, parentType from Solutions where parent is not null")
+	if err != nil {
+		return items, fmt.Errorf("failed to get solution links: %v", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		if err = rows.Scan(&itemID, &parentID, &parentType); err == nil {
+			items[NewSolution(itemID)] = NewItem(parentID, ItemType(parentType))
+		} else {
+			return items, fmt.Errorf("failed to get solution %v link: %v", itemID, err)
+		}
+	}
+	// Return final item splice
 	return items, nil
 }
 
