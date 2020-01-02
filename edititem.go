@@ -233,7 +233,7 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 			// Save old UID
 			itemUID := item.UID()
 			// Delete old item
-			if err := db.RemoveItem(item.ID()); err != nil {
+			if err := db.RemoveItem(item); err != nil {
 				fmt.Println("error: failed to delete old item:", err)
 				return
 			}

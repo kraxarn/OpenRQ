@@ -306,7 +306,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 					if err := db.RemoveChildrenLinks(item); err != nil {
 						fmt.Println("warning: failed to remove children links:", err)
 					}
-					if err := db.RemoveItem(item.ID()); err != nil {
+					if err := db.RemoveItem(item); err != nil {
 						fmt.Println("warning: failed to remove item:", err)
 					}
 					// Check if item is opened in editor
