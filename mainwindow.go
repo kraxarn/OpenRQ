@@ -156,6 +156,10 @@ func AddToolBar(window *widgets.QMainWindow) {
 			UpdateWindowTitle(window)
 		}
 	})
+	editMenu.AddAction2(gui.QIcon_FromTheme("reload"),
+		"Reload Project").ConnectTriggered(func(checked bool) {
+		ReloadProject(window)
+	})
 	// Add to main toolbar
 	editBar.SetMenu(editMenu)
 	fileToolBar.AddWidget(editBar)
