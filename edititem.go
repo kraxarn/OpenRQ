@@ -87,6 +87,18 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 
 	textOptions := [3]*widgets.QToolBar{}
 	textEdits := [3]*widgets.QTextEdit{}
+	textGroups := [4]*widgets.QGroupBox{}
+
+	// Hide/show when clicking requirement/solution
+	reqRadio.ConnectReleased(func() {
+		textGroups[1].Show()
+		textGroups[2].Show()
+	})
+	solRadio.ConnectReleased(func() {
+		textGroups[1].Hide()
+		textGroups[2].Hide()
+	})
+
 	// TODO: Assume requirement for now
 	req, _ := item.(Requirement)
 	// Get default values
@@ -167,7 +179,14 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 			actions[FormatStrikeThrough].SetChecked(font.StrikeOut())
 		})
 		// Add text edit in group box to main layout
-		layout.AddWidget(CreateGroupBox(titles[i], textOptions[i], textEdits[i]), 1, 0)
+		textGroups[i] = CreateGroupBox(titles[i], textOptions[i], textEdits[i])
+		layout.AddWidget(textGroups[i], 1, 0)
+	}
+	// Hide stuff
+	if itemType == TypeRequirement {
+	} else {
+		textGroups[1].Hide()
+		textGroups[2].Hide()
 	}
 
 	// Dock for button connections
