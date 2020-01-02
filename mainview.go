@@ -93,8 +93,8 @@ func ReloadProject(window *widgets.QMainWindow) {
 			}
 			// Create and add link
 			if parentItem == nil || childItem == nil {
-				fmt.Printf("warning: could not find parent or child, ignoring link (%3v(%v) -> %3v(%v))\n",
-					parent.ID(), GetItemType(parent), child.ID(), GetItemType(child))
+				fmt.Printf("warning: could not find parent or child, ignoring link (%3v(%v)%v -> %3v(%v)%v)\n",
+					parent.ID(), GetItemType(parent), parentItem != nil, child.ID(), GetItemType(child), childItem != nil)
 			} else {
 				link := CreateLink(parentItem, childItem)
 				scene.AddItem(link.line)
