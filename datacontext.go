@@ -135,6 +135,10 @@ func (data *DataContext) AddSolution(description string) (int64, error) {
 	return id, data.AddItemVersion(solUID, TypeSolution)
 }
 
+func (data *DataContext) AddEmptySolution() (int64, error) {
+	return data.AddSolution("")
+}
+
 // AddItemVersion versions an item
 func (data *DataContext) AddItemVersion(itemUID int64, itemType ItemType) error {
 	// Find item ID
