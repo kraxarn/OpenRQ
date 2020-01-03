@@ -46,13 +46,43 @@ func ValidateLinks() (items []Item) {
 
 // Validates roots to check if they have a one-to-one relation
 func ValidateRoots() (items []Item) {
+	// Final returned items
 	items = make([]Item, 0)
+	// Items we have already added
+	added := map[Item]int{}
+	// Loop through all items in view
 	for _, item := range view.Items() {
+		// Get group and make sure it's valid
 		group := item.Group()
 		if group == nil || group.Type() == 0 {
 			continue
 		}
-		// TODO
+		// Get item
+		groupItem := GetGroupItem(group)
+		// Ignore if already added
+		if ContainsItem(added, groupItem) {
+			continue
+		}
+		// Get children count and if it has a parent (not a root)
+		children := 0
+		hasParent := false
+		for _, link := range links[groupItem] {
+			if link.parent == groupItem {
+				children++
+			} else if link.child == groupItem {
+				hasParent = true
+				break
+			}
+		}
+		// If it had a parent, it's not a root
+		if hasParent {
+			continue
+		}
+		// Otherwise, add if it had more than one child
+		if children > 1 {
+			items = append(items, groupItem)
+			added[groupItem] = 0
+		}
 	}
 	return items
 }
@@ -142,6 +172,14 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 				items.AddItem(fmt.Sprintf("%v %v\n(links to same type)", GetItemName(item), item.ID()))
 			}
 			results.Item(int(SameType)).SetIcon(gui.QIcon_FromTheme(string(GetValidationResult(len(valLinks)))))
+		}
+		// Run root validation
+		if enabled[OneRoot] {
+			valRoots := ValidateRoots()
+			for _, item := range valRoots {
+				items.AddItem(fmt.Sprintf("%v %v\n(one-to-one root)", GetItemName(item), item.ID()))
+			}
+			results.Item(int(OneRoot)).SetIcon(gui.QIcon_FromTheme(string(GetValidationResult(len(valRoots)))))
 		}
 		// Enable them again
 		runBtn.SetText("Run now")
