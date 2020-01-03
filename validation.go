@@ -165,6 +165,8 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 		items.SetEnabled(false)
 		// Empty list of affected items
 		items.Clear()
+		// Start validation timer
+		start := time.Now()
 		// Run link validation
 		if enabled[SameType] {
 			valLinks := ValidateLinks()
@@ -187,7 +189,7 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 		results.SetEnabled(true)
 		items.SetEnabled(true)
 		// Set last validation time
-		title.SetTitle(fmt.Sprintf("Last validation: %v", time.Now().Format("15:04")))
+		title.SetTitle(fmt.Sprintf("Last validation: %v (%v ms)", time.Now().Format("15:04"), time.Now().Sub(start).Milliseconds()))
 	})
 	layout.AddWidget(runBtn, 0, 0)
 
