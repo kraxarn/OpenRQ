@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
@@ -47,13 +48,66 @@ func AddToolBar(window *widgets.QMainWindow) {
 	fileTool := widgets.NewQToolButton(fileToolBar)
 	fileMenu := widgets.NewQMenu2("", fileTool)
 	// Add "new project" option
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "New...")
+	fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "New...").ConnectTriggered(func(checked bool) {
+		// TODO: Clear current project
+		fileName := widgets.QFileDialog_GetSaveFileName(window, "New Project",
+			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
+			"OpenRQ Project(*.orq)", "", 0)
+		if len(fileName) > 0 {
+			NewProject(fileName)
+			ReloadProject(window)
+		}
+	})
 	// Add "open project" option
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-open"), "Open...")
+	fileMenu.AddAction2(gui.QIcon_FromTheme("document-open"), "Open...").ConnectTriggered(func(checked bool) {
+		fileName := widgets.QFileDialog_GetOpenFileName(window, "Open Project",
+			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
+			"OpenRQ Project(*.orq *orqz)", "", 0)
+		if len(fileName) > 0 {
+			if strings.HasSuffix(fileName, ".orqz") {
+				result := widgets.QMessageBox_Question(window, "Compressed Project",
+					"The project you are trying to load is compressed. " +
+							"In order to load the project, it first needs to be decompressed. " +
+							"This will replace the compressed project with a decompressed project.\n" +
+							"Are you sure you want to continue?",
+							widgets.QMessageBox__Yes | widgets.QMessageBox__No, widgets.QMessageBox__Yes)
+				if result == widgets.QMessageBox__No {
+					return
+				}
+				// Load compressed project
+				if _, err := NewCompressedProject(fileName); err != nil {
+					widgets.QMessageBox_Critical(window, "Failed to Load Project", err.Error(),
+						widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
+				}
+			} else {
+				// If not compressed, just load normal project
+				NewProject(fileName)
+			}
+			ReloadProject(window)
+		}
+	})
 	// Add "save project" option
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save"), "Save")
+	// TODO: Implement save options when version support has been added
+	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save"), "Save").SetEnabled(false)
 	// Add "save project as" option
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...")
+	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...").ConnectTriggered(func(checked bool) {
+		// Check if project is loaded to save
+		if currentProject == nil {
+			widgets.QMessageBox_Information(window, "No Project Loaded",
+				"No project is current loaded to save", widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+			return
+		}
+		// TODO: Set path of current project as default
+		fileName := widgets.QFileDialog_GetSaveFileName(window, "Save Project",
+			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
+			"OpenRQ Project(*.orq);;OpenRQ Compressed Project(*.orqz)", "", 0)
+		if len(fileName) > 0 {
+			if err := currentProject.CopyTo(fileName); err != nil {
+				widgets.QMessageBox_Critical(window, "Failed to Save Project",
+					err.Error(), widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+			}
+		}
+	})
 	// Separation for other stuff
 	fileMenu.AddSeparator()
 	// Quit option that closes everything, sets default quit shortcut
@@ -84,6 +138,28 @@ func AddToolBar(window *widgets.QMainWindow) {
 	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-polygon-star"), "Solution")
 	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-line"), "Link")
 	editMenu.AddMenu(editInsertMenu)
+	// Rename project
+	editMenu.AddAction2(gui.QIcon_FromTheme("text-field"),
+		"Rename Project...").ConnectTriggered(func(checked bool) {
+		// Check if project is loaded to rename
+		if currentProject == nil {
+			widgets.QMessageBox_Information(window, "No Project Loaded",
+				"No project is current loaded to rename", widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+			return
+		}
+		db := currentProject.Data()
+		defer db.Close()
+		name := widgets.QInputDialog_GetText(window, "Rename Project", "New project name",
+			widgets.QLineEdit__Normal, db.ProjectName(), nil, 0, 0)
+		if len(name) > 0 {
+			db.SetProjectName(name)
+			UpdateWindowTitle(window)
+		}
+	})
+	editMenu.AddAction2(gui.QIcon_FromTheme("reload"),
+		"Reload Project").ConnectTriggered(func(checked bool) {
+		ReloadProject(window)
+	})
 	// Add to main toolbar
 	editBar.SetMenu(editMenu)
 	fileToolBar.AddWidget(editBar)
@@ -115,12 +191,17 @@ func AddToolBar(window *widgets.QMainWindow) {
 	aboutMenu.AddAction2(gui.QIcon_FromTheme("qt"), "About Qt").ConnectTriggered(func(checked bool) {
 		widgets.QMessageBox_AboutQt(window, "About Qt")
 	})
+	aboutMenu.AddAction2(gui.QIcon_FromTheme("license"), "Licenses").ConnectTriggered(func(checked bool) {
+		gui.QDesktopServices_OpenUrl(
+			core.NewQUrl3("https://github.com/kraxarn/OpenRQ/blob/golang/third_party.md", 0))
+	})
 	aboutMenu.AddSeparator()
 	aboutMenu.AddAction2(
 		gui.QIcon_FromTheme("download"), "Check for updates").ConnectTriggered(func(checked bool) {
 			// Check if version was compiled with version information
 			if len(versionCommitHash) <= 0 {
-				widgets.QMessageBox_About(window, "Updater", "This version was compiled without version information, updater is not available")
+				widgets.QMessageBox_About(window, "Updater",
+					"This version was compiled without version information,\nupdater is not available")
 				return
 			}
 			// Actually check for updates
@@ -215,21 +296,6 @@ func CreateLayout(window *widgets.QMainWindow) {
 	window.AddDockWidget(core.Qt__LeftDockWidgetArea, dockItemShape)
 }
 
-// CreateValidationEngineLayout creates the validation engine window
-func CreateValidationEngineLayout() *widgets.QWidget {
-	// Main vertical box
-	layout := widgets.NewQVBoxLayout()
-	// Temporary label until we have validation engine added
-	layout.AddWidget(widgets.NewQLabel2("Nothing to validate", nil, core.Qt__Widget), 0, core.Qt__AlignTop)
-
-	// Convert layout to widget and return it
-	widget := widgets.NewQWidget(nil, core.Qt__Widget)
-	widget.SetLayout(layout)
-	widget.SetMaximumWidth(250)
-	widget.SetMinimumWidth(150)
-	return widget
-}
-
 func CreateVBoxWidget(children ...widgets.QWidget_ITF) *widgets.QWidget {
 	layout := widgets.NewQVBoxLayout()
 	for _, child := range children {
@@ -253,10 +319,12 @@ func CreateItemTypeCreator(linkBtn *widgets.QToolButton) *widgets.QToolBar {
 	// Requirement/solution selection
 	moveBtn := widgets.NewQToolButton(nil)
 	moveBtn.SetIcon(gui.QIcon_FromTheme("object-move-symbolic"))
+	moveBtn.SetText("Move")
 	moveBtn.SetCheckable(true)
 	moveBtn.SetChecked(true)
 	layout.AddWidget(moveBtn)
 	linkBtn.SetIcon(gui.QIcon_FromTheme("draw-line"))
+	linkBtn.SetText("Draw line")
 	linkBtn.SetCheckable(true)
 	layout.AddWidget(linkBtn)
 
@@ -278,7 +346,6 @@ func CreateItemTypeCreator(linkBtn *widgets.QToolButton) *widgets.QToolBar {
 	return layout
 }
 
-//CreateItemShapeCreator
 func CreateItemShapeCreator() *widgets.QWidget {
 	layout := widgets.NewQVBoxLayout()
 	shapeList := widgets.NewQListWidget(nil)

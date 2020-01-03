@@ -6,6 +6,13 @@ var tableData = map[string][]string{
 		"name text",
 		"created integer default current_timestamp",
 	},
+	"Projects": {
+		"uid integer",
+		"name text",
+		"created integer default current_timestamp",
+		"width integer",
+		"height integer",
+	},
 	"Solutions": {
 		"uid integer",
 		"parent integer",
@@ -22,20 +29,6 @@ var tableData = map[string][]string{
 		"height integer default 64",
 		"foreign key(parent) references Requirements(id)",
 		"foreign key(label) references Labels(id)",
-	},
-	"Projects": {
-		"uid integer",
-		"name text",
-		"created integer default current_timestamp",
-		"width integer",
-		"height integer",
-	},
-	"ItemVersions": {
-		"version integer",
-		"item integer",
-		"itemV integer default 1",
-		"type integer",
-		"foreign key (version) references Projects(id)",
 	},
 	"Requirements": {
 		"uid integer",
@@ -54,6 +47,13 @@ var tableData = map[string][]string{
 		"height integer default 64",
 		"foreign key(parent) references Solutions(id)",
 		"foreign key(label) references Labels(id)",
+	},
+	"ItemVersions": {
+		"version integer",
+		"item integer",
+		"itemV integer default 1",
+		"type integer",
+		"foreign key (version) references Projects(id)",
 	},
 	"LabelItems": {
 		"label integer",

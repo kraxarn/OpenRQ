@@ -2,50 +2,121 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 )
 
-type Line struct {
-	parent int64
-	child  int64
+type Link struct {
+	parent Item
+	child  Item
 	line   *widgets.QGraphicsLineItem
 	dir    *widgets.QGraphicsPolygonItem
 }
 
-var links map[int64][]*Line
+var links map[Item][]*Link
 
 var view *widgets.QGraphicsView
+var scene *widgets.QGraphicsScene
 
 var backgroundColor *gui.QColor
 
 // Items opened in an edit window
-var openItems map[int64]*widgets.QDockWidget
+var openItems map[Item]*widgets.QDockWidget
 
-func IsItemOpen(uid int64) bool {
-	_, ok := openItems[uid]
+func IsItemOpen(item Item) bool {
+	_, ok := openItems[item]
 	return ok
 }
 
-func CloseItem(uid int64) {
-	delete(openItems, uid)
+func CloseItem(item Item) {
+	delete(openItems, item)
 }
 
-func GetTextItem(group *widgets.QGraphicsItemGroup) *widgets.QGraphicsTextItem {
-	for _, item := range group.ChildItems() {
-		if item.Type() == 8 {
-			tp := (*widgets.QGraphicsTextItem)(item.Pointer())
-			textItem := widgets.NewQGraphicsTextItemFromPointer(item.Pointer())
-			fmt.Printf("text item: %p / %p / %p\n", textItem, tp, item.Pointer())
-			if textItem != nil {
-				return textItem
+func ReloadProject(window *widgets.QMainWindow) {
+	// Make sure view is enabled
+	view.SetEnabled(true)
+	// Delete all current items
+	scene.Clear()
+	// Clear links
+	links = make(map[Item][]*Link)
+	// Close all open items
+	for id := range openItems {
+		openItems[id].Close()
+		CloseItem(id)
+	}
+	// Connect to database to get new items
+	db := currentProject.Data()
+	defer db.Close()
+	// Load items
+	items, err := db.Items()
+	if err != nil {
+		fmt.Println("error: failed to get saved items:", err)
+	} else {
+		var x, y, w, h int
+		for item, description := range items {
+			x, y = item.Pos()
+			w, h = item.Size()
+			scene.AddItem(NewGraphicsItem(description, x, y, w, h, item))
+		}
+	}
+	// Load links
+	links, err := db.Links()
+	if err != nil {
+		fmt.Println("error: failed to get saved links:", err)
+	} else {
+		for child, parent := range links {
+			// Find parent and child
+			var parentItem, childItem *widgets.QGraphicsItemGroup
+			for _, item := range view.Items() {
+				group := item.Group()
+				if group == nil {
+					continue
+				}
+				groupID := group.Data(0).ToLongLong(nil)
+				groupType := ItemType(group.Data(1).ToInt(nil))
+				if groupID == 0 || groupType == 0 {
+					continue
+				}
+				if groupID == child.ID() && groupType == GetItemType(child) {
+					childItem = group
+				} else if groupID == parent.ID() && groupType == GetItemType(parent) {
+					parentItem = group
+				}
+				// Stop loop if we found everything
+				if parentItem != nil && childItem != nil {
+					break
+				}
+			}
+			// Create and add link
+			if parentItem == nil || childItem == nil {
+				fmt.Printf("warning: could not find parent or child, ignoring link (%3v(%v)%v -> %3v(%v)%v)\n",
+					parent.ID(), GetItemType(parent), parentItem != nil, child.ID(), GetItemType(child), childItem != nil)
+			} else {
+				link := CreateLink(parentItem, childItem)
+				scene.AddItem(link.line)
+				scene.AddItem(link.dir)
 			}
 		}
 	}
-	fmt.Println("warning: text item not found in group")
-	return nil
+	// Set window title
+	UpdateWindowTitle(window)
+}
+
+func UpdateWindowTitle(window *widgets.QMainWindow) {
+	abs, err := filepath.Abs(currentProject.path)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "warning: failed to get absolute path to project:", err)
+		abs = currentProject.path
+	}
+	window.SetWindowTitle(fmt.Sprintf("%v [%v] - OpenRQ", currentProject.Data().ProjectName(), abs))
+	// Update last used project
+	// (should probably not be done here)
+	NewSettings().SetLastProject(abs)
 }
 
 // SnapToGrid naps the specified position to the grid
@@ -57,85 +128,48 @@ func SnapToGrid(pos *core.QPoint) *core.QPoint {
 		float64((scenePos.X()>>gridSize<<gridSize)-64), float64((scenePos.Y()>>gridSize<<gridSize)-32)))
 }
 
-func CreateEditWidgetFromPos(pos core.QPoint_ITF, scene *widgets.QGraphicsScene) (*widgets.QDockWidget, bool) {
+func CreateEditWidgetFromPos(parent widgets.QWidget_ITF, pos core.QPoint_ITF, scene *widgets.QGraphicsScene) (*widgets.QDockWidget, bool) {
 	// Get UID
 	group := view.ItemAt(pos).Group()
-	uid := GetGroupUID(group)
+	item := GetGroupItem(group)
 	// Check if already opened
-	if IsItemOpen(uid) {
+	if IsItemOpen(item) {
 		// We probably want to put it in focus here or something
 		return nil, false
 	}
 	// Open item
-	// TODO: For now, assume requirement
-	//p := group.Data(1).Pointer()
-	//t := (*widgets.QGraphicsTextItem)(unsafe.Pointer(p))
-	// *(*uint64)(unsafe.Pointer(&f))
-	editWindow := CreateEditWidget(NewItem(uid, TypeRequirement), group, scene)
+	editWindow := CreateEditWidget(parent, item, group, scene)
 	editWindow.ConnectCloseEvent(func(event *gui.QCloseEvent) {
-		CloseItem(uid)
+		CloseItem(item)
 	})
 	// Set item as being opened
-	openItems[uid] = editWindow
+	openItems[item] = editWindow
 	// Return new window
 	return editWindow, true
 }
 
 func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widgets.QGraphicsView {
 	// Create scene and view
-	scene := widgets.NewQGraphicsScene(nil)
+	scene = widgets.NewQGraphicsScene(nil)
 	view = widgets.NewQGraphicsView2(scene, nil)
 	// Get default window background color
 	backgroundColor = window.Palette().Color2(window.BackgroundRole())
 	// Create open items map
-	openItems = make(map[int64]*widgets.QDockWidget)
+	openItems = make(map[Item]*widgets.QDockWidget)
 
-	// Load items from database
-	{
-		db := currentProject.Data()
-		defer db.Close()
-		items, err := db.Items()
-		if err != nil {
-			fmt.Println("error: failed to get saved items:", err)
-		} else {
-			var x, y, w, h int
-			for _, item := range items {
-				x, y = item.Pos()
-				w, h = item.Size()
-				scene.AddItem(NewGraphicsItem(
-					fmt.Sprintf("%v%v", item.ID(), item.Description()), x, y, w, h, item.ID()))
-			}
-		}
-		// Get links
-		links, err := db.Links()
-		if err != nil {
-			fmt.Println("error: failed to get saved links:", err)
-		} else {
-			for parent, child := range links {
-				// Find parent and child
-				var parentItem, childItem *widgets.QGraphicsItemGroup
-				for _, item := range view.Items() {
-					group := item.Group()
-					if group == nil {
-						continue
-					}
-					groupID := GetGroupUID(group)
-					if groupID == child.ID() {
-						childItem = group
-					} else if groupID == parent.ID() {
-						parentItem = group
-					}
-					// Stop loop if we found everything
-					if parentItem != nil && childItem != nil {
-						break
-					}
-				}
-				// Create and add link
-				link := CreateLink(parentItem, childItem)
-				scene.AddItem(link.line)
-				scene.AddItem(link.dir)
-			}
-		}
+	// Check if we have a last loaded project
+	if project := NewSettings().LastProject(); project != "" {
+		NewProject(project)
+		ReloadProject(window)
+	} else {
+		// No recent project, show message
+		font := gui.NewQFont()
+		font.SetPointSize(18)
+		text := scene.AddText("No Project Loaded", font)
+		text.SetX(float64(view.Width() / 2) + (scene.Width() / 2.0))
+		text.SetY(float64(view.Height() / 2) + scene.Height())
+		scene.SetSceneRect2(0, 0, float64(view.Width()), float64(view.Height()))
+		view.SetEnabled(false)
 	}
 
 	// Setup drag-and-drop
@@ -150,6 +184,8 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 	var movingItem *widgets.QGraphicsItemGroup
 	// Start position of link
 	var linkStart *widgets.QGraphicsItemGroup
+	// Temporary line shown when creating a new link
+	var tempLink *widgets.QGraphicsLineItem
 
 	itemSize := 64
 	view.ConnectDropEvent(func(event *gui.QDropEvent) {
@@ -168,16 +204,16 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 		}
 		// Snap to grid
 		gridPos := SnapToGrid(pos.ToPoint())
-		// Set size and position, TODO: Temporary, not needed later
+		// Set size and position
+		// All items are requirements by default
 		req := NewRequirement(uid)
 		req.SetPos(gridPos.Y(), gridPos.Y())
 		req.SetSize(itemSize*2, itemSize)
 		// Add item to view
-		scene.AddItem(NewGraphicsItem(
-			fmt.Sprintf("%x", uid), gridPos.X(), gridPos.Y(), itemSize*2, itemSize, uid))
+		scene.AddItem(NewGraphicsItem(req.Description(), gridPos.X(), gridPos.Y(), itemSize*2, itemSize, req))
 		if len(openItems) <= 0 {
-			openItems[uid], _ = CreateEditWidgetFromPos(gridPos, scene)
-			window.AddDockWidget(core.Qt__RightDockWidgetArea, openItems[uid])
+			openItems[req], _ = CreateEditWidgetFromPos(window, event.Pos(), scene)
+			window.AddDockWidget(core.Qt__RightDockWidgetArea, openItems[req])
 		}
 	})
 
@@ -191,7 +227,11 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			if linkBtn.IsChecked() {
 				// We're creating a link
 				linkStart = item.Group()
-
+				// Create temporary link indicator
+				scenePos := view.MapToScene(event.Pos())
+				tempLink = widgets.NewQGraphicsLineItem2(core.NewQLineF2(scenePos, scenePos), nil)
+				tempLink.SetPen(gui.NewQPen3(gui.NewQColor3(0, 255, 0, 128)))
+				scene.AddItem(tempLink)
 			} else {
 				// We're moving an item
 				movingItem = item.Group()
@@ -206,6 +246,24 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			// Update link
 			UpdateLinkPos(movingItem, movingItem.Pos().X(), movingItem.Pos().Y())
 		}
+		// Update temporary link
+		if tempLink != nil {
+			tempLine := tempLink.Line()
+			tempLine.SetP2(view.MapToScene(event.Pos()))
+			tempLink.SetLine(tempLine)
+		}
+		// Show hand when trying to move item
+		if !linkBtn.IsChecked() && view.ItemAt(event.Pos()).Group() != nil {
+			cursor := core.Qt__OpenHandCursor
+			// If moving, show closed hand
+			if movingItem != nil {
+				cursor = core.Qt__ClosedHandCursor
+			}
+			view.SetCursor(gui.NewQCursor2(cursor))
+		} else {
+			// If not hovering over an item, restore cursor
+			view.UnsetCursor()
+		}
 	})
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
 		if event.Button() == core.Qt__RightButton && view.ItemAt(event.Pos()).Group() != nil {
@@ -215,7 +273,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			// Edit option
 			menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit").
 				ConnectTriggered(func(checked bool) {
-					if editWidget, ok := CreateEditWidgetFromPos(pos, scene); ok {
+					if editWidget, ok := CreateEditWidgetFromPos(window, pos, scene); ok {
 						window.AddDockWidget(core.Qt__RightDockWidgetArea, editWidget)
 					}
 				})
@@ -226,34 +284,37 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 					db := currentProject.Data()
 					defer db.Close()
 					// Get the clicked item
-					selectedItem := view.ItemAt(pos).Group()
-					selectedUid := GetGroupUID(selectedItem)
+					group := view.ItemAt(pos).Group()
+					item := GetGroupItem(group)
 					// Try to get all links
-					link, ok := links[selectedUid]
-					if !ok {
-						return
-					}
-					// Remove all links
-					for _, l := range link {
-						// It is the item we are trying to remove
-						if l.parent == selectedUid || l.child == selectedUid {
-							// Remove from scene
-							scene.RemoveItem(l.line)
-							scene.RemoveItem(l.dir)
-							// Remove from links map
-							delete(links, l.parent)
-							delete(links, l.child)
+					link, ok := links[item]
+					if ok {
+						// Remove all links
+						for _, l := range link {
+							// It is the item we are trying to remove
+							if l.parent.ID() == item.ID() || l.child.ID() == item.ID() {
+								// Remove from scene
+								scene.RemoveItem(l.line)
+								scene.RemoveItem(l.dir)
+								// Remove from links map
+								delete(links, l.parent)
+								delete(links, l.child)
+							}
 						}
 					}
 					// Remove the group from the scene
-					scene.RemoveItem(selectedItem)
+					scene.RemoveItem(group)
 					// Remove the links and the item itself from the database
-					newItem := NewItem(selectedUid, TypeRequirement)
-					if err := db.RemoveChildrenLinks(newItem); err != nil {
+					if err := db.RemoveChildrenLinks(item); err != nil {
 						fmt.Println("warning: failed to remove children links:", err)
 					}
-					if err := db.RemoveItem(selectedUid); err != nil {
+					if err := db.RemoveItem(item); err != nil {
 						fmt.Println("warning: failed to remove item:", err)
+					}
+					// Check if item is opened in editor
+					if openItem, ok := openItems[item]; ok {
+						openItem.Close()
+						delete(openItems, item)
 					}
 				})
 			// Show menu at cursor
@@ -268,26 +329,40 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			// Error handling is already taken care of in UpdateLinkPos
 			UpdateLinkPos(movingItem, pos.X(), pos.Y())
 			// Update position in database
-			// TODO: Assuming Requirement
-			NewItem(GetGroupUID(movingItem), TypeRequirement).SetPos(int(pos.X()), int(pos.Y()))
+			GetGroupItem(movingItem).SetPos(int(pos.X()), int(pos.Y()))
 			// Reset opacity and remove as moving
 			movingItem.SetOpacity(1.0)
 			movingItem = nil
 		}
-
+		// When releasing, we always want to destroy temp link
+		if tempLink != nil {
+			scene.RemoveItem(tempLink)
+			tempLink = nil
+		}
 		// We released while creating a link
 		if linkStart != nil {
-			// If we try to link to the empty void
-			if view.ItemAt(event.Pos()).Group() == nil {
+			linkStartItem := GetGroupItem(linkStart)
+			group := view.ItemAt(event.Pos()).Group()
+			groupItem := GetGroupItem(group)
+			// If we try to link to the empty void or self
+			if group == nil || linkStartItem == nil || (linkStartItem.ID() == groupItem.ID() &&
+				GetItemType(linkStartItem) == GetItemType(groupItem)) {
 				linkStart = nil
 				return
 			}
-			toPos := view.ItemAt(event.Pos()).Group().Pos()
+			toPos := group.Pos()
 			if toPos.X() == 0 && toPos.Y() == 0 {
 				return
 			}
+			// Check if child already have a parent
+			if !GetGroupItem(group).IsPropertyNull("parent") {
+				widgets.QMessageBox_Warning(window, "Invalid Link",
+					"The link you were trying to create is not valid and could not be created",
+					widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
+				return
+			}
 			// Create and add link
-			link := CreateLink(linkStart, view.ItemAt(event.Pos()).Group())
+			link := CreateLink(linkStart, group)
 			scene.AddItem(link.line)
 			scene.AddItem(link.dir)
 			linkStart = nil
@@ -296,27 +371,38 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 	return view
 }
 
-func GetGroupUID(group *widgets.QGraphicsItemGroup) int64 {
+func GetGroupItem(group *widgets.QGraphicsItemGroup) Item {
+	// Check if group is nil
 	if group == nil {
-		fmt.Println("warning: no group to get uid from")
+		fmt.Println("error: no group to create item from")
+		return nil
 	}
-	return group.Data(0).ToLongLong(nil)
+	// Get ID and type
+	itemID := group.Data(0).ToLongLong(nil)
+	itemType := ItemType(group.Data(1).ToInt(nil))
+	// If either is zero, something is wrong
+	if itemID == 0 || itemType == 0 {
+		fmt.Println("error: could not create item from id", itemID, "type", itemType)
+		return nil
+	}
+	// Create a new type and return it
+	return NewItem(itemID, itemType)
 }
 
-func CreateLink(parent, child *widgets.QGraphicsItemGroup) Line {
+func CreateLink(parent, child *widgets.QGraphicsItemGroup) Link {
 	// Check if map needs to be created
 	if links == nil {
-		links = make(map[int64][]*Line)
+		links = make(map[Item][]*Link)
 	}
+	// Check if we're linking to self
+	parentItem := GetGroupItem(parent)
+	childItem := GetGroupItem(child)
 	// Add to database
 	db := currentProject.Data()
 	defer db.Close()
-	// TODO: Assuming requirement
-	if err := db.AddItemChild(
-		NewItem(GetGroupUID(parent), TypeRequirement), NewItem(GetGroupUID(child), TypeRequirement)); err != nil {
+	if err := db.AddItemChild(parentItem, childItem); err != nil {
 		fmt.Println("error: failed to add link to database:", err)
 	}
-
 	// Get from (parent) and to (child)
 	fromPos := parent.Pos()
 	toPos := child.Pos()
@@ -329,21 +415,19 @@ func CreateLink(parent, child *widgets.QGraphicsItemGroup) Line {
 	// Set the color of it
 	line.SetPen(gui.NewQPen3(gui.NewQColor3(0, 255, 0, 255)))
 	// Create line data
-	parentID := GetGroupUID(parent)
-	childID := GetGroupUID(child)
-	lineData := Line{
-		parentID, childID, line,
+	lineData := Link{
+		parentItem, childItem, line,
 		CreateTriangle(line.Line().Center(), line.Line().Angle()),
 	}
-	links[parentID] = append(links[parentID], &lineData)
-	links[childID] = append(links[childID], &lineData)
+	links[parentItem] = append(links[parentItem], &lineData)
+	links[childItem] = append(links[childItem], &lineData)
 	// Return the graphics line to add to scene
 	return lineData
 }
 
 func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 	// Get link
-	itemID := GetGroupUID(item)
+	itemID := GetGroupItem(item)
 	link, ok := links[itemID]
 	// Error checking
 	if !ok {
@@ -367,17 +451,29 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 	}
 }
 
-func NewGraphicsItem(text string, x, y, width, height int, uid int64) *widgets.QGraphicsItemGroup {
+func NewGraphicsItem(text string, x, y, width, height int, item Item) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem(nil)
-	textItem.SetHtml(text)
+	textItem.SetHtml(fmt.Sprintf("%v%v%v",
+		strings.ToLower(GetItemTableName(GetItemType(item))[0:3]), item.ID(), text))
 	textItem.SetZValue(15)
 	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, float64(width), float64(height), nil)
 	shapeItem.SetBrush(gui.NewQBrush3(backgroundColor, 1))
+	// Default purple color for requirements
+	var penColor uint = 10233776
+	// Blue color for solutions
+	if GetItemType(item) == TypeSolution {
+		penColor = 2201331
+	}
+	// Set opacity of border color
+	color := gui.NewQColor4(penColor)
+	color.SetAlpha(200)
+	shapeItem.SetPen(gui.NewQPen3(color))
 	group.AddToGroup(textItem)
 	group.AddToGroup(shapeItem)
 	group.SetPos2(float64(x), float64(y))
-	group.SetData(0, core.NewQVariant1(uid))
+	group.SetData(0, core.NewQVariant1(item.ID()))
+	group.SetData(1, core.NewQVariant1(int(GetItemType(item))))
 	group.SetZValue(10)
 	return group
 }

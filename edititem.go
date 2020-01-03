@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 )
@@ -66,27 +68,62 @@ func MergeFormat(textEdit *widgets.QTextEdit, format *gui.QTextCharFormat) {
 }
 
 // CreateEditWidget creates the main window for editing an item
-func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widgets.QGraphicsScene) *widgets.QDockWidget {
+func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGraphicsItemGroup, scene *widgets.QGraphicsScene) *widgets.QDockWidget {
 	// Main vertical layout
 	layout := widgets.NewQVBoxLayout()
-	// Item UID (for debugging)
-	layout.AddWidget(CreateGroupBox("Item UID",
-		widgets.NewQLabel2(fmt.Sprintf("%v", item.ID()), nil, 0)), 0, 0)
-
 	// Requirement/solution selection
-	itemType := widgets.NewQGroupBox2("Item Type", nil)
+	itemType := GetItemType(item)
+	itemTypeGroup := widgets.NewQGroupBox2("Item Type", nil)
 	reqRadio := widgets.NewQRadioButton2("Problem", nil)
-	reqRadio.SetChecked(GetItemType(item) == TypeRequirement)
+	reqRadio.SetChecked(itemType == TypeRequirement)
 	solRadio := widgets.NewQRadioButton2("Solution", nil)
-	solRadio.SetChecked(GetItemType(item) == TypeSolution)
+	solRadio.SetChecked(itemType == TypeSolution)
 	itemTypeLayout := widgets.NewQHBoxLayout()
 	itemTypeLayout.AddWidget(reqRadio, 1, 0)
 	itemTypeLayout.AddWidget(solRadio, 1, 0)
-	itemType.SetLayout(itemTypeLayout)
-	layout.AddWidget(itemType, 0, 0)
+	itemTypeGroup.SetLayout(itemTypeLayout)
+	layout.AddWidget(itemTypeGroup, 0, 0)
+	// Label for warning about item type
+	itemTypeWarn := widgets.NewQLabel2("Changing item type may cause data loss", nil, 0)
+	palette := itemTypeWarn.Palette()
+	palette.SetColor2(itemTypeWarn.ForegroundRole(), gui.NewQColor2(core.Qt__red))
+	itemTypeWarn.SetPalette(palette)
+	itemTypeWarn.Hide()
+	layout.AddWidget(itemTypeWarn, 0, 0)
+	// Hide/show warning when changing type
+	reqRadio.ConnectReleased(func() {
+		itemTypeWarn.SetVisible(itemType == TypeSolution)
+	})
+	solRadio.ConnectReleased(func() {
+		itemTypeWarn.SetVisible(itemType == TypeRequirement)
+	})
 
 	textOptions := [3]*widgets.QToolBar{}
 	textEdits := [3]*widgets.QTextEdit{}
+	textGroups := [4]*widgets.QGroupBox{}
+
+	// Hide/show when clicking requirement/solution
+	reqRadio.ConnectReleased(func() {
+		textGroups[1].Show()
+		textGroups[2].Show()
+		textGroups[3].Hide()
+	})
+	solRadio.ConnectReleased(func() {
+		textGroups[1].Hide()
+		textGroups[2].Hide()
+		textGroups[3].Show()
+	})
+
+	// Get default values
+	req, isReq := item.(Requirement)
+	textValues := [3]string{
+		item.Description(),
+	}
+	// Also set rationale and fit criterion if requirement
+	if isReq {
+		textValues[1] = req.Rationale()
+		textValues[2] = req.FitCriterion()
+	}
 
 	for i := 0; i < len(textOptions); i++ {
 		t := CreateTextOptions()
@@ -142,6 +179,7 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 	}
 	for i := 0; i < len(titles); i++ {
 		textEdits[i] = widgets.NewQTextEdit(nil)
+		textEdits[i].SetHtml(textValues[i])
 		// Local copy of i
 		i2 := i
 		// Show/hide font options on selection
@@ -158,39 +196,113 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 			actions[FormatStrikeThrough].SetChecked(font.StrikeOut())
 		})
 		// Add text edit in group box to main layout
-		layout.AddWidget(CreateGroupBox(titles[i], textOptions[i], textEdits[i]), 1, 0)
+		textGroups[i] = CreateGroupBox(titles[i], textOptions[i], textEdits[i])
+		layout.AddWidget(textGroups[i], 1, 0)
+	}
+
+	// Add image selection for solution
+	// TODO: Temporary placeholder text
+	noImagesText := widgets.NewQLabel2("No attachments", nil, core.Qt__Widget)
+	noImagesText.SetEnabled(false)
+	textGroups[3] = CreateGroupBox("Attachments", noImagesText)
+	layout.AddWidget(textGroups[3], 0, 0)
+
+	// Hide stuff
+	if itemType == TypeRequirement {
+		textGroups[3].Hide()
+	} else {
+		textGroups[1].Hide()
+		textGroups[2].Hide()
 	}
 
 	// Dock for button connections
-	dock := widgets.NewQDockWidget("Edit Item", nil, 0)
+	dock := widgets.NewQDockWidget(fmt.Sprintf("Edit Item (%v%v)",
+		strings.ToLower(GetItemTableName(itemType)[0:1]), item.ID()), nil, 0)
 
-	// Discard button
+	// Button container
 	buttons := widgets.NewQHBoxLayout()
+	// Save button
+	save := widgets.NewQPushButton2("Save", nil)
+	// Temporary values
+	var itemX, itemY, itemW, itemH int
+	save.ConnectReleased(func() {
+		// Check if we are changing item type
+		changingType := itemTypeWarn.IsVisible()
+		if changingType {
+			// We are changing type, we need to delete and add item again
+			db := currentProject.Data()
+			defer db.Close()
+			// Save old properties
+			oldItem := item
+			itemUID := item.UID()
+			itemX, itemY = item.Pos()
+			itemW, itemH = item.Size()
+			// Delete old item
+			if err := db.RemoveItem(item); err != nil {
+				fmt.Println("error: failed to delete old item:", err)
+				return
+			}
+			// Add new as set item type
+			if reqRadio.IsChecked() {
+				// Add new requirement with set values
+				newID, err := db.AddEmptyRequirement()
+				if err != nil {
+					fmt.Println("error: failed to create new requirement:", err)
+					return
+				}
+				// Create new and set UID, rest is same as updating item
+				item = NewRequirement(newID)
+			} else {
+				// Add new requirement with set values
+				newID, err := db.AddEmptySolution()
+				if err != nil {
+					fmt.Println("error: failed to create new solution:", err)
+					return
+				}
+				// Create new and set UID, rest is same as updating item
+				item = NewSolution(newID)
+			}
+			// Set UID and update and update requirement cast
+			// (rest is the same as updating an item)
+			item.SetUID(itemUID)
+			// Also set position and size same as old
+			item.SetPos(itemX, itemY)
+			item.SetSize(itemW, itemH)
+			// Update any links
+			if err := db.UpdateItemParent(oldItem, item); err != nil {
+				fmt.Println("warning: failed to update item children:", err)
+			}
+			req, isReq = item.(Requirement)
+		}
+
+		// Properties both items need
+		item.SetDescription(textEdits[Description].ToHtml())
+		// Requirements also need rationale and fit criterion updated
+		if isReq {
+			req.SetRationale(textEdits[Rationale].ToHtml())
+			req.SetFitCriterion(textEdits[FitCriterion].ToHtml())
+		}
+		// Recreate group with new item
+		scene.AddItem(NewGraphicsItem(textEdits[Description].ToHtml(),
+			int(group.X()), int(group.Y()), 128, 64, item))
+		scene.RemoveItem(group)
+		// Close window
+		dock.Close()
+	})
+	buttons.AddWidget(save, 1, 0)
+	// Discard button
 	discard := widgets.NewQPushButton2("Discard", nil)
 	discard.ConnectReleased(func() {
 		dock.Close()
 	})
 	buttons.AddWidget(discard, 1, 0)
-	// Save button
-	save := widgets.NewQPushButton2("Save", nil)
-	save.ConnectReleased(func() {
-		item.SetDescription(textEdits[Description].ToHtml())
-		scene.AddItem(NewGraphicsItem(
-			fmt.Sprintf("%v%v", item.ID(), textEdits[Description].ToHtml()),
-			int(group.X()), int(group.Y()), 128, 64, item.ID()))
-		scene.RemoveItem(group)
-
-		// save changes...
-		dock.Close()
-	})
-	buttons.AddWidget(save, 1, 0)
 	layout.AddLayout(buttons, 0)
 
 	// Put layout in a widget
 	widget := widgets.NewQWidget(nil, 0)
 	widget.SetLayout(layout)
-	// Set dock to the created widget and return it
 
+	// Set dock to the created widget and return it
 	dock.SetWidget(widget)
 	return dock
 }
