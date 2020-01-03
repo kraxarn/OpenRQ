@@ -139,7 +139,7 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 		if enabled[SameType] {
 			valLinks := ValidateLinks()
 			for _, item := range valLinks {
-				items.AddItem(fmt.Sprintf("%v %v", GetItemName(item), item.ID()))
+				items.AddItem(fmt.Sprintf("%v %v\n(links to same type)", GetItemName(item), item.ID()))
 			}
 			results.Item(int(SameType)).SetIcon(gui.QIcon_FromTheme(string(GetValidationResult(len(valLinks)))))
 		}
