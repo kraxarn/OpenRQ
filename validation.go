@@ -193,19 +193,12 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 	})
 	layout.AddWidget(runBtn, 0, 0)
 
-	/*
-	 * List icons:
-	 * ok:		emblem-checked
-	 * fail:	emblem-error
-	 * off:		emblem-pause
-	 * none:	emblem-question
-	 */
-
+	// Create initial results
 	for i, e := range enabled {
 		results.AddItem2(CreateValidationResult(ValidationOption(i), GetDefaultValidationResult(e)))
 	}
 	layout.AddWidget(title, 1, 0)
-
+	// Show menu when clicking on result item
 	results.ConnectItemPressed(func(item *widgets.QListWidgetItem) {
 		i := results.Row(item)
 		menu := widgets.NewQMenu(nil)
@@ -218,7 +211,7 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 		})
 		menu.Popup(gui.QCursor_Pos(), nil)
 	})
-
+	// Create list to show affected items
 	itemGroup := CreateGroupBox("Affected Items", items)
 	layout.AddWidget(itemGroup, 1, 0)
 
