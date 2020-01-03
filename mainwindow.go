@@ -296,21 +296,6 @@ func CreateLayout(window *widgets.QMainWindow) {
 	window.AddDockWidget(core.Qt__LeftDockWidgetArea, dockItemShape)
 }
 
-// CreateValidationEngineLayout creates the validation engine window
-func CreateValidationEngineLayout() *widgets.QWidget {
-	// Main vertical box
-	layout := widgets.NewQVBoxLayout()
-	// Temporary label until we have validation engine added
-	layout.AddWidget(widgets.NewQLabel2("Nothing to validate", nil, core.Qt__Widget), 0, core.Qt__AlignTop)
-
-	// Convert layout to widget and return it
-	widget := widgets.NewQWidget(nil, core.Qt__Widget)
-	widget.SetLayout(layout)
-	widget.SetMaximumWidth(250)
-	widget.SetMinimumWidth(150)
-	return widget
-}
-
 func CreateVBoxWidget(children ...widgets.QWidget_ITF) *widgets.QWidget {
 	layout := widgets.NewQVBoxLayout()
 	for _, child := range children {
