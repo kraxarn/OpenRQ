@@ -459,6 +459,16 @@ func NewGraphicsItem(text string, x, y, width, height int, item Item) *widgets.Q
 	textItem.SetZValue(15)
 	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, float64(width), float64(height), nil)
 	shapeItem.SetBrush(gui.NewQBrush3(backgroundColor, 1))
+	// Default purple color for requirements
+	var penColor uint = 10233776
+	// Blue color for solutions
+	if GetItemType(item) == TypeSolution {
+		penColor = 2201331
+	}
+	// Set opacity of border color
+	color := gui.NewQColor4(penColor)
+	color.SetAlpha(200)
+	shapeItem.SetPen(gui.NewQPen3(color))
 	group.AddToGroup(textItem)
 	group.AddToGroup(shapeItem)
 	group.SetPos2(float64(x), float64(y))
