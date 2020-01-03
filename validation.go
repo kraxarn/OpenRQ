@@ -219,8 +219,6 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 		menu.Popup(gui.QCursor_Pos(), nil)
 	})
 
-	noItems := widgets.NewQListWidgetItem2("No items to show", nil, 0)
-	noItems.SetFlags(0)
 	itemGroup := CreateGroupBox("Affected Items", items)
 	layout.AddWidget(itemGroup, 1, 0)
 
