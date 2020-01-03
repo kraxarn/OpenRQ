@@ -89,8 +89,25 @@ func ValidateRoots() (items []Item) {
 
 // Validates tree to check if there are any links to each other
 func ValidateLoops() (items []Item) {
-	// TODO
-	return nil
+	// Final returned splice
+	items = make([]Item, 0)
+	// Items we have already added
+	added := map[Item]int{}
+	// Loop through all links
+	for _, link := range links {
+		// Loop through all links related to that item
+		for _, l1 := range link {
+			// Loop through all links again checking for opposite links
+			for _, l2 := range link {
+				// They are linked to each other
+				if l1.parent == l2.child && l1.child == l2.parent && !ContainsItem(added, l1.child) {
+					items = append(items, l1.child)
+					added[l1.child] = 0
+				}
+			}
+		}
+	}
+	return items
 }
 
 type ValidationOption int8
@@ -182,6 +199,14 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 				items.AddItem(fmt.Sprintf("%v %v\n(one-to-one root)", GetItemName(item), item.ID()))
 			}
 			results.Item(int(OneRoot)).SetIcon(gui.QIcon_FromTheme(string(GetValidationResult(len(valRoots)))))
+		}
+		// Run loop validation
+		if enabled[LinkLoop] {
+			valLoops := ValidateLoops()
+			for _, item := range valLoops {
+				items.AddItem(fmt.Sprintf("%v %v\n(linking loop)", GetItemName(item), item.ID()))
+			}
+			results.Item(int(LinkLoop)).SetIcon(gui.QIcon_FromTheme(string(GetValidationResult(len(valLoops)))))
 		}
 		// Enable them again
 		runBtn.SetText("Run now")
