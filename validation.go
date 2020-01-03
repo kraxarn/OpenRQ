@@ -1,17 +1,39 @@
 package main
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 )
+
+func ContainsItem(splice []Item, target Item) bool {
+	for _, item := range splice {
+		if item == target {
+			return true
+		}
+	}
+	return false
+}
+
+func GetItemName(item Item) string {
+	switch GetItemType(item) {
+	case TypeRequirement:
+		return "Problem"
+	case TypeSolution:
+		return "Solution"
+	}
+	return ""
+}
 
 // Validates link to check that links are not the same type
 func ValidateLinks() (items []Item) {
 	items = make([]Item, 0)
 	for _, link := range links {
 		for _, l := range link {
-			if GetItemType(l.parent) == GetItemType(l.child) {
+			if GetItemType(l.parent) == GetItemType(l.child) && !ContainsItem(items, l.child) {
 				items = append(items, l.child)
 			}
 		}
@@ -78,19 +100,53 @@ func GetDefaultValidationResult(enabled bool) ValidationResult {
 	return ValidateDisabled
 }
 
+func GetValidationResult(itemCount int) ValidationResult {
+	if itemCount > 0 {
+		return ValidateFail
+	}
+	return ValidateOK
+}
+
 // CreateValidationEngineLayout creates the validation engine window
 func CreateValidationEngineLayout() *widgets.QWidget {
+	// Enable all validations by default
+	// (this should maybe be loaded/saved from database)
 	enabled := []bool{
 		true, true, true,
 	}
 	// Main vertical box
 	layout := widgets.NewQVBoxLayout()
+	// List of validation results
+	results := widgets.NewQListWidget(nil)
+	// List of affected items
+	items := widgets.NewQListWidget(nil)
+	// Main container for validation results
+	title := CreateGroupBox("Last validation: never", results)
 	// Option to validate
 	runBtn := widgets.NewQPushButton2("Run now", nil)
 	runBtn.ConnectReleased(func() {
+		// Update text and disable all options
 		runBtn.SetText("Running...")
 		runBtn.SetEnabled(false)
-		// ...
+		results.SetEnabled(false)
+		items.SetEnabled(false)
+		// Empty list of affected items
+		items.Clear()
+		// Run link validation
+		if enabled[SameType] {
+			valLinks := ValidateLinks()
+			for _, item := range valLinks {
+				items.AddItem(fmt.Sprintf("%v %v", GetItemName(item), item.ID()))
+			}
+			results.Item(int(SameType)).SetIcon(gui.QIcon_FromTheme(string(GetValidationResult(len(valLinks)))))
+		}
+		// Enable them again
+		runBtn.SetText("Run now")
+		runBtn.SetEnabled(true)
+		results.SetEnabled(true)
+		items.SetEnabled(true)
+		// Set last validation time
+		title.SetTitle(fmt.Sprintf("Last validation: %v", time.Now().Format("15:04")))
 	})
 	layout.AddWidget(runBtn, 0, 0)
 
@@ -102,11 +158,10 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 	 * none:	emblem-question
 	 */
 
-	results := widgets.NewQListWidget(nil)
 	for i, e := range enabled {
 		results.AddItem2(CreateValidationResult(ValidationOption(i), GetDefaultValidationResult(e)))
 	}
-	layout.AddWidget(CreateGroupBox("Last validation: never", results), 1, 0)
+	layout.AddWidget(title, 1, 0)
 
 	results.ConnectItemPressed(func(item *widgets.QListWidgetItem) {
 		i := results.Row(item)
@@ -121,7 +176,6 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 		menu.Popup(gui.QCursor_Pos(), nil)
 	})
 
-	items := widgets.NewQListWidget(nil)
 	noItems := widgets.NewQListWidgetItem2("No items to show", nil, 0)
 	noItems.SetFlags(0)
 	itemGroup := CreateGroupBox("Affected Items", items)
