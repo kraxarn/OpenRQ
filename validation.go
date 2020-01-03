@@ -222,7 +222,7 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 	for i, e := range enabled {
 		results.AddItem2(CreateValidationResult(ValidationOption(i), GetDefaultValidationResult(e)))
 	}
-	layout.AddWidget(title, 1, 0)
+	layout.AddWidget(title, 0, 0)
 	// Show menu when clicking on result item
 	results.ConnectItemPressed(func(item *widgets.QListWidgetItem) {
 		i := results.Row(item)
