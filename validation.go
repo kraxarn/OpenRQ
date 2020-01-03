@@ -26,10 +26,15 @@ func GetItemName(item Item) string {
 
 // Validates link to check that links are not the same type
 func ValidateLinks() (items []Item) {
+	// Final returned splice
 	items = make([]Item, 0)
+	// Items we have already added
 	added := map[Item]int{}
+	// Loop through all links
 	for _, link := range links {
+		// Loop through all links related to that item
 		for _, l := range link {
+			// Check if child has same item type and not already added
 			if GetItemType(l.parent) == GetItemType(l.child) && !ContainsItem(added, l.child) {
 				items = append(items, l.child)
 				added[l.child] = 0
