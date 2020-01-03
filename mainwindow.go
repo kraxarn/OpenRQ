@@ -334,10 +334,12 @@ func CreateItemTypeCreator(linkBtn *widgets.QToolButton) *widgets.QToolBar {
 	// Requirement/solution selection
 	moveBtn := widgets.NewQToolButton(nil)
 	moveBtn.SetIcon(gui.QIcon_FromTheme("object-move-symbolic"))
+	moveBtn.SetText("Move")
 	moveBtn.SetCheckable(true)
 	moveBtn.SetChecked(true)
 	layout.AddWidget(moveBtn)
 	linkBtn.SetIcon(gui.QIcon_FromTheme("draw-line"))
+	linkBtn.SetText("Draw line")
 	linkBtn.SetCheckable(true)
 	layout.AddWidget(linkBtn)
 
