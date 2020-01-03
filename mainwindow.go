@@ -359,7 +359,6 @@ func CreateItemTypeCreator(linkBtn *widgets.QToolButton) *widgets.QToolBar {
 	return layout
 }
 
-//CreateItemShapeCreator
 func CreateItemShapeCreator() *widgets.QWidget {
 	layout := widgets.NewQVBoxLayout()
 	shapeList := widgets.NewQListWidget(nil)
