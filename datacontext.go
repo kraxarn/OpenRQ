@@ -380,3 +380,32 @@ func (data *DataContext) UpdateItemParent(oldParent, newParent Item) error {
 	}
 	return nil
 }
+
+func (data *DataContext) GetRoots() ([]Item, error) {
+	items := make([]Item, 0)
+	// Get requirements
+	rows, err := data.Database.Query("select _rowid_ from Requirements where parent is not null")
+	if err != nil {
+		return nil, err
+	}
+	var rowID int64
+	for rows.Next() {
+		if err := rows.Scan(&rowID); err != nil {
+			return nil, err
+		}
+		items = append(items, NewRequirement(rowID))
+	}
+	// Get solutions
+	rows, err = data.Database.Query("select _rowid_ from Solutions where parent is not null")
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		if err := rows.Scan(&rowID); err != nil {
+			return nil, err
+		}
+		items = append(items, NewSolution(rowID))
+	}
+	// Return final result
+	return items, nil
+}
