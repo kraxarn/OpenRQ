@@ -9,13 +9,9 @@ import (
 	"github.com/therecipe/qt/widgets"
 )
 
-func ContainsItem(splice []Item, target Item) bool {
-	for _, item := range splice {
-		if item == target {
-			return true
-		}
-	}
-	return false
+func ContainsItem(items map[Item]int, target Item) bool {
+	_, ok := items[target]
+	return ok
 }
 
 func GetItemName(item Item) string {
@@ -31,10 +27,12 @@ func GetItemName(item Item) string {
 // Validates link to check that links are not the same type
 func ValidateLinks() (items []Item) {
 	items = make([]Item, 0)
+	added := map[Item]int{}
 	for _, link := range links {
 		for _, l := range link {
-			if GetItemType(l.parent) == GetItemType(l.child) && !ContainsItem(items, l.child) {
+			if GetItemType(l.parent) == GetItemType(l.child) && !ContainsItem(added, l.child) {
 				items = append(items, l.child)
+				added[l.child] = 0
 			}
 		}
 	}
