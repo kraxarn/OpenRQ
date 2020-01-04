@@ -293,10 +293,12 @@ func CreateItemTypeCreator(linkBtn *widgets.QToolButton) *widgets.QToolBar {
 	moveBtn.SetText("Move")
 	moveBtn.SetCheckable(true)
 	moveBtn.SetChecked(true)
+	moveBtn.SetToolTip("Move an already created item")
 	layout.AddWidget(moveBtn)
 	linkBtn.SetIcon(gui.QIcon_FromTheme("draw-line"))
 	linkBtn.SetText("Draw line")
 	linkBtn.SetCheckable(true)
+	linkBtn.SetToolTip("Create a new link between already created items")
 	layout.AddWidget(linkBtn)
 
 	moveBtn.ConnectHitButton(func(pos *core.QPoint) bool {
