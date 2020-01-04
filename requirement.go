@@ -98,10 +98,17 @@ func (req Requirement) Parent() Item {
 }
 
 func (req Requirement) SetParent(parent Item) {
-	req.SetValues(map[string]interface{}{
-		"parent": parent.ID(),
-		"parentType": GetItemType(parent),
-	})
+	if parent == nil {
+		req.SetValues(map[string]interface{}{
+			"parent":     nil,
+			"parentType": nil,
+		})
+	} else {
+		req.SetValues(map[string]interface{}{
+			"parent":     parent.ID(),
+			"parentType": GetItemType(parent),
+		})
+	}
 }
 
 func (req Requirement) Hash() [16]byte {
