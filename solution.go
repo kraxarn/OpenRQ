@@ -71,6 +71,21 @@ func (sol Solution) SetSize(w, h int) {
 		"height": h,
 	})
 }
+
+func (sol Solution) Parent() Item {
+	// Check if item has parent
+	if sol.IsPropertyNull("parent") {
+		return nil
+	}
+	// If parent is not null, assume parent type isn't null either
+	return NewItem(sol.GetValueInt64("parent"), ItemType(sol.GetValueInt("parentType")))
+}
+
+func (sol Solution) SetParent(parent Item) {
+	sol.SetValues(map[string]interface{}{
+		"parent": parent.ID(),
+		"parentType": GetItemType(parent),
+	})
 }
 
 func (sol Solution) Hash() [16]byte {
