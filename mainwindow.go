@@ -41,7 +41,10 @@ func AddMenuBar(window *widgets.QMainWindow) {
 
 	// File options
 	fileMenu := widgets.NewQMenu2("File", nil)
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "New...").ConnectTriggered(func(checked bool) {
+	// New
+	fileNew := fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "New...")
+	fileNew.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__New))
+	fileNew.ConnectTriggered(func(checked bool) {
 		fileName := widgets.QFileDialog_GetSaveFileName(window, "New Project",
 			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
 			"OpenRQ Project(*.orq)", "", 0)
@@ -50,7 +53,10 @@ func AddMenuBar(window *widgets.QMainWindow) {
 			ReloadProject(window)
 		}
 	})
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-open"), "Open...").ConnectTriggered(func(checked bool) {
+	// Open
+	fileOpen := fileMenu.AddAction2(gui.QIcon_FromTheme("document-open"), "Open...")
+	fileOpen.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__Open))
+	fileOpen.ConnectTriggered(func(checked bool) {
 		fileName := widgets.QFileDialog_GetOpenFileName(window, "Open Project",
 			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
 			"OpenRQ Project(*.orq *orqz)", "", 0)
@@ -77,7 +83,10 @@ func AddMenuBar(window *widgets.QMainWindow) {
 			ReloadProject(window)
 		}
 	})
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...").ConnectTriggered(func(checked bool) {
+	// Save as
+	fileSaveAs := fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...")
+	fileSaveAs.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__SaveAs))
+	fileSaveAs.ConnectTriggered(func(checked bool) {
 		// Check if project is loaded to save
 		if currentProject == nil {
 			widgets.QMessageBox_Information(window, "No Project Loaded",
@@ -95,6 +104,7 @@ func AddMenuBar(window *widgets.QMainWindow) {
 			}
 		}
 	})
+	// Quit
 	fileMenu.AddSeparator()
 	fileQuit := fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "Quit")
 	fileQuit.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__Quit))
