@@ -77,8 +77,6 @@ func AddMenuBar(window *widgets.QMainWindow) {
 			ReloadProject(window)
 		}
 	})
-	// TODO: Implement save options when version support has been added
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save"), "Save").SetEnabled(false)
 	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...").ConnectTriggered(func(checked bool) {
 		// Check if project is loaded to save
 		if currentProject == nil {
