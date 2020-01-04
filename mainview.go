@@ -262,7 +262,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			tempLink.SetLine(tempLine)
 		}
 		// Show hand when trying to move item
-		if !linkBtn.IsChecked() && view.ItemAt(event.Pos()).Group() != nil {
+		if !linkBtn.IsChecked() && view.ItemAt(event.Pos()).Group() != nil && view.ItemAt(event.Pos()).Group().Type() != 0 {
 			cursor := core.Qt__OpenHandCursor
 			// If moving, show closed hand
 			if movingItem != nil {
