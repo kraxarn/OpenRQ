@@ -269,7 +269,7 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 			item.SetPos(itemX, itemY)
 			item.SetSize(itemW, itemH)
 			// Update any links
-			if err := db.UpdateItemParent(oldItem, item); err != nil {
+			if err := db.UpdateItemChildren(oldItem, item); err != nil {
 				fmt.Println("warning: failed to update item children:", err)
 			}
 			req, isReq = item.(Requirement)

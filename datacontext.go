@@ -365,7 +365,7 @@ func (data *DataContext) ItemUID() int64 {
 	return id
 }
 
-func (data *DataContext) UpdateItemParent(oldParent, newParent Item) error {
+func (data *DataContext) UpdateItemChildren(oldParent, newParent Item) error {
 	tables := []string{
 		GetItemTableName(TypeRequirement),
 		GetItemTableName(TypeSolution),
