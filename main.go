@@ -16,7 +16,7 @@ func main() {
 
 	// Add menu bar
 	CreateLayout(window)
-	AddToolBar(window)
+	AddMenuBar(window)
 
 	// Show the main window
 	window.Show()
