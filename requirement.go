@@ -88,6 +88,29 @@ func (req Requirement) SetSize(w, h int) {
 	})
 }
 
+func (req Requirement) Parent() Item {
+	// Check if item has parent
+	if req.IsPropertyNull("parent") {
+		return nil
+	}
+	// If parent is not null, assume parent type isn't null either
+	return NewItem(req.GetValueInt64("parent"), ItemType(req.GetValueInt("parentType")))
+}
+
+func (req Requirement) SetParent(parent Item) {
+	if parent == nil {
+		req.SetValues(map[string]interface{}{
+			"parent":     nil,
+			"parentType": nil,
+		})
+	} else {
+		req.SetValues(map[string]interface{}{
+			"parent":     parent.ID(),
+			"parentType": GetItemType(parent),
+		})
+	}
+}
+
 func (req Requirement) Hash() [16]byte {
 	return md5.Sum([]byte(fmt.Sprintf("%v", req)))
 }

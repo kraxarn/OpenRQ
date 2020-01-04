@@ -42,26 +42,50 @@ func (sol Solution) SetDescription(value string) {
 
 func (sol Solution) Pos() (int, int) {
 	var x, y int
-	sol.GetValue("x", &x)
-	sol.GetValue("y", &y)
+	sol.GetValues(map[string]interface{}{
+		"x": &x,
+		"y": &y,
+	})
 	return x, y
 }
 
 func (sol Solution) SetPos(x, y int) {
-	sol.SetValue("x", x)
-	sol.SetValue("y", y)
+	sol.SetValues(map[string]interface{} {
+		"x": x,
+		"y": y,
+	})
 }
 
 func (sol Solution) Size() (int, int) {
 	var width, height int
-	sol.GetValue("width", &width)
-	sol.GetValue("height", &height)
+	sol.GetValues(map[string]interface{}{
+		"width": &width,
+		"height": &height,
+	})
 	return width, height
 }
 
 func (sol Solution) SetSize(w, h int) {
-	sol.SetValue("width", w)
-	sol.SetValue("height", h)
+	sol.SetValues(map[string]interface{} {
+		"width": w,
+		"height": h,
+	})
+}
+
+func (sol Solution) Parent() Item {
+	// Check if item has parent
+	if sol.IsPropertyNull("parent") {
+		return nil
+	}
+	// If parent is not null, assume parent type isn't null either
+	return NewItem(sol.GetValueInt64("parent"), ItemType(sol.GetValueInt("parentType")))
+}
+
+func (sol Solution) SetParent(parent Item) {
+	sol.SetValues(map[string]interface{}{
+		"parent": parent.ID(),
+		"parentType": GetItemType(parent),
+	})
 }
 
 func (sol Solution) Hash() [16]byte {
@@ -69,11 +93,18 @@ func (sol Solution) Hash() [16]byte {
 }
 
 func (sol *Solution) GetValue(name string, value interface{}) {
+	sol.GetValues(map[string]interface{}{
+		name: value,
+	})
+}
+
+func (sol *Solution) GetValues(nameValues map[string]interface{}) {
 	db := currentProject.Data()
 	defer db.Close()
-	err := db.GetItemValue(sol.ID(), "Solutions", name, value)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "database error:", err)
+	for key, value := range nameValues {
+		if err := db.GetItemValue(sol.ID(), "Solutions", key, value); err != nil {
+			fmt.Fprintln(os.Stderr, "warning: failed to get property", key, ":", err)
+		}
 	}
 }
 
@@ -95,11 +126,18 @@ func (sol *Solution) GetValueInt64(name string) int64 {
 	return val
 }
 
-// SetValue sets a value to the database
 func (sol *Solution) SetValue(name string, value interface{}) {
+	sol.SetValues(map[string]interface{}{
+		name: value,
+	})
+}
+
+func (sol *Solution) SetValues(nameValues map[string]interface{}) {
 	db := currentProject.Data()
 	defer db.Close()
-	db.SetItemValue(sol.ID(), "Solutions", name, value)
+	for key, value := range nameValues {
+		db.SetItemValue(sol.ID(), "Solutions", key, value)
+	}
 }
 
 func (sol Solution) IsPropertyNull(columnName string) bool {

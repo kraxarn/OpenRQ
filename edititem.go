@@ -237,6 +237,10 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 			itemUID := item.UID()
 			itemX, itemY = item.Pos()
 			itemW, itemH = item.Size()
+			itemParent := item.Parent()
+			// Get links and delete the old ones
+			itemLinks := links[item]
+			delete(links, item)
 			// Delete old item
 			if err := db.RemoveItem(item); err != nil {
 				fmt.Println("error: failed to delete old item:", err)
@@ -269,9 +273,23 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 			item.SetPos(itemX, itemY)
 			item.SetSize(itemW, itemH)
 			// Update any links
-			if err := db.UpdateItemParent(oldItem, item); err != nil {
+			if err := db.UpdateItemChildren(oldItem, item); err != nil {
 				fmt.Println("warning: failed to update item children:", err)
 			}
+			// Update parent
+			if itemParent != nil {
+				item.SetParent(itemParent)
+			}
+			// Update links
+			for _, link := range itemLinks {
+				if link.parent == oldItem {
+					link.parent = item
+				} else if link.child == oldItem {
+					link.child = item
+				}
+			}
+			links[item] = itemLinks
+			// Update requirement values
 			req, isReq = item.(Requirement)
 		}
 

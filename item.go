@@ -29,6 +29,9 @@ type Item interface {
 	RemoveChild(child Item)
 	Children() []Item
 
+	Parent() Item
+	SetParent(parent Item)
+
 	IsPropertyNull(columnName string) bool
 }
 

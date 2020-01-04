@@ -35,21 +35,16 @@ func NewMainWindow() (*widgets.QApplication, *widgets.QMainWindow) {
 // Temporary global pointer to the validation engine window for the hide/show button
 var dockValidation *widgets.QDockWidget
 
-// AddToolBar adds a tool bar to the specified window
-func AddToolBar(window *widgets.QMainWindow) {
-	// Create tool bar
-	fileToolBar := window.AddToolBar3("")
-	// Show both icons and text (default is icons only)
-	fileToolBar.SetToolButtonStyle(core.Qt__ToolButtonTextBesideIcon)
-	// Hide area for dragging it around
-	fileToolBar.SetMovable(false)
+func AddMenuBar(window *widgets.QMainWindow) {
+	// Main menu bar
+	menuBar := window.MenuBar()
 
-	// Add file menu
-	fileTool := widgets.NewQToolButton(fileToolBar)
-	fileMenu := widgets.NewQMenu2("", fileTool)
-	// Add "new project" option
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "New...").ConnectTriggered(func(checked bool) {
-		// TODO: Clear current project
+	// File options
+	fileMenu := widgets.NewQMenu2("File", nil)
+	// New
+	fileNew := fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "New...")
+	fileNew.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__New))
+	fileNew.ConnectTriggered(func(checked bool) {
 		fileName := widgets.QFileDialog_GetSaveFileName(window, "New Project",
 			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
 			"OpenRQ Project(*.orq)", "", 0)
@@ -58,8 +53,10 @@ func AddToolBar(window *widgets.QMainWindow) {
 			ReloadProject(window)
 		}
 	})
-	// Add "open project" option
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-open"), "Open...").ConnectTriggered(func(checked bool) {
+	// Open
+	fileOpen := fileMenu.AddAction2(gui.QIcon_FromTheme("document-open"), "Open...")
+	fileOpen.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__Open))
+	fileOpen.ConnectTriggered(func(checked bool) {
 		fileName := widgets.QFileDialog_GetOpenFileName(window, "Open Project",
 			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
 			"OpenRQ Project(*.orq *orqz)", "", 0)
@@ -67,10 +64,10 @@ func AddToolBar(window *widgets.QMainWindow) {
 			if strings.HasSuffix(fileName, ".orqz") {
 				result := widgets.QMessageBox_Question(window, "Compressed Project",
 					"The project you are trying to load is compressed. " +
-							"In order to load the project, it first needs to be decompressed. " +
-							"This will replace the compressed project with a decompressed project.\n" +
-							"Are you sure you want to continue?",
-							widgets.QMessageBox__Yes | widgets.QMessageBox__No, widgets.QMessageBox__Yes)
+						"In order to load the project, it first needs to be decompressed. " +
+						"This will replace the compressed project with a decompressed project.\n" +
+						"Are you sure you want to continue?",
+					widgets.QMessageBox__Yes | widgets.QMessageBox__No, widgets.QMessageBox__Yes)
 				if result == widgets.QMessageBox__No {
 					return
 				}
@@ -86,11 +83,10 @@ func AddToolBar(window *widgets.QMainWindow) {
 			ReloadProject(window)
 		}
 	})
-	// Add "save project" option
-	// TODO: Implement save options when version support has been added
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save"), "Save").SetEnabled(false)
-	// Add "save project as" option
-	fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...").ConnectTriggered(func(checked bool) {
+	// Save as
+	fileSaveAs := fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...")
+	fileSaveAs.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__SaveAs))
+	fileSaveAs.ConnectTriggered(func(checked bool) {
 		// Check if project is loaded to save
 		if currentProject == nil {
 			widgets.QMessageBox_Information(window, "No Project Loaded",
@@ -108,37 +104,25 @@ func AddToolBar(window *widgets.QMainWindow) {
 			}
 		}
 	})
-	// Separation for other stuff
+	// Quit
 	fileMenu.AddSeparator()
-	// Quit option that closes everything, sets default quit shortcut
-	fileQuit := fileMenu.AddAction2(gui.QIcon_FromTheme("application-exit"), "Quit")
+	fileQuit := fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "Quit")
 	fileQuit.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__Quit))
 	fileQuit.ConnectTriggered(func(checked bool) {
 		window.Close()
 	})
-	// Create the actual menu and attack it to the main tool bar
-	fileTool.SetText("File")
-	fileTool.SetIcon(gui.QIcon_FromTheme("document-properties"))
-	fileTool.SetMenu(fileMenu)
-	fileTool.SetToolButtonStyle(core.Qt__ToolButtonTextBesideIcon)
-	fileTool.SetPopupMode(widgets.QToolButton__InstantPopup)
-	fileToolBar.AddWidget(fileTool)
+	menuBar.AddMenu(fileMenu)
 
 	// Edit menu
-	editBar := widgets.NewQToolButton(fileToolBar)
-	editBar.SetIcon(gui.QIcon_FromTheme("edit"))
-	editBar.SetToolButtonStyle(core.Qt__ToolButtonTextBesideIcon)
-	editBar.SetPopupMode(widgets.QToolButton__InstantPopup)
-	editBar.SetText("Edit")
-	editMenu := widgets.NewQMenu2("", editBar)
+	editMenu := widgets.NewQMenu2("Edit", nil)
 	// Insert menu
-	editInsertMenu := widgets.NewQMenu2("Insert", editBar)
+	editInsertMenu := widgets.NewQMenu2("Insert", nil)
 	editInsertMenu.SetIcon(gui.QIcon_FromTheme("add"))
 	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-polygon"), "Problem")
 	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-polygon-star"), "Solution")
 	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-line"), "Link")
 	editMenu.AddMenu(editInsertMenu)
-	// Rename project
+	// Other options
 	editMenu.AddAction2(gui.QIcon_FromTheme("text-field"),
 		"Rename Project...").ConnectTriggered(func(checked bool) {
 		// Check if project is loaded to rename
@@ -161,17 +145,23 @@ func AddToolBar(window *widgets.QMainWindow) {
 		ReloadProject(window)
 	})
 	// Add to main toolbar
-	editBar.SetMenu(editMenu)
-	fileToolBar.AddWidget(editBar)
+	menuBar.AddMenu(editMenu)
 
-	// Add about button
-	aboutBar := widgets.NewQToolButton(fileToolBar)
-	aboutBar.SetIcon(gui.QIcon_FromTheme("help"))
-	aboutBar.SetToolButtonStyle(core.Qt__ToolButtonTextBesideIcon)
-	aboutBar.SetPopupMode(widgets.QToolButton__InstantPopup)
-	aboutBar.SetText("Help")
-	// Add menu options
-	aboutMenu := widgets.NewQMenu2("", aboutBar)
+	// View
+	viewMenu := widgets.NewQMenu2("View", nil)
+	validate := viewMenu.AddAction("Validation Engine")
+	validate.SetCheckable(true)
+	validate.ConnectTriggered(func(checked bool) {
+		if checked {
+			dockValidation.Show()
+		} else {
+			dockValidation.Hide()
+		}
+	})
+	menuBar.AddMenu(viewMenu)
+
+	// About
+	aboutMenu := widgets.NewQMenu2("About", nil)
 	aboutMenu.AddAction2(
 		gui.QIcon_FromTheme("help-about"), "About OpenRQ").ConnectTriggered(func(checked bool) {
 			// Add app version information
@@ -241,26 +231,7 @@ func AddToolBar(window *widgets.QMainWindow) {
 			window, "Memory Info", fmt.Sprintf("Freed %.2f kb of memory", float64(mem.TotalAlloc-memBefore)/1000.0),
 			widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
 	})
-	aboutBar.SetMenu(aboutMenu)
-	// Add menu to main toolbar
-	fileToolBar.AddWidget(aboutBar)
-
-	// Add a spacer to show the button to the far right
-	spacer := widgets.NewQWidget(nil, 0)
-	spacer.SetSizePolicy2(widgets.QSizePolicy__Expanding, widgets.QSizePolicy__Expanding)
-	fileToolBar.AddWidget(spacer)
-	// Add validation engine toggle button
-	validate := fileToolBar.AddAction("Validation Engine")
-	validate.SetCheckable(true)
-	validate.SetIcon(gui.QIcon_FromTheme("system-search"))
-	// Open validation engine widget when toggling
-	validate.ConnectTriggered(func(checked bool) {
-		if checked {
-			dockValidation.Show()
-		} else {
-			dockValidation.Hide()
-		}
-	})
+	menuBar.AddMenu(aboutMenu)
 }
 
 // CreateLayout creates the main layout widgets
@@ -322,10 +293,12 @@ func CreateItemTypeCreator(linkBtn *widgets.QToolButton) *widgets.QToolBar {
 	moveBtn.SetText("Move")
 	moveBtn.SetCheckable(true)
 	moveBtn.SetChecked(true)
+	moveBtn.SetToolTip("Move an already created item")
 	layout.AddWidget(moveBtn)
 	linkBtn.SetIcon(gui.QIcon_FromTheme("draw-line"))
 	linkBtn.SetText("Draw line")
 	linkBtn.SetCheckable(true)
+	linkBtn.SetToolTip("Create a new link between already created items")
 	layout.AddWidget(linkBtn)
 
 	moveBtn.ConnectHitButton(func(pos *core.QPoint) bool {

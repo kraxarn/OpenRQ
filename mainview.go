@@ -18,6 +18,15 @@ type Link struct {
 	dir    *widgets.QGraphicsPolygonItem
 }
 
+func (link Link) SetChildItem(child Item) {
+	childItemID := core.NewQVariant1(child.ID())
+	childItemType := core.NewQVariant1(int(GetItemType(child)))
+	link.line.SetData(0, childItemID)
+	link.line.SetData(1, childItemType)
+	link.dir.SetData(0, childItemID)
+	link.dir.SetData(1, childItemType)
+}
+
 var links map[Item][]*Link
 
 var view *widgets.QGraphicsView
@@ -253,7 +262,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			tempLink.SetLine(tempLine)
 		}
 		// Show hand when trying to move item
-		if !linkBtn.IsChecked() && view.ItemAt(event.Pos()).Group() != nil {
+		if !linkBtn.IsChecked() && view.ItemAt(event.Pos()).Group() != nil && view.ItemAt(event.Pos()).Group().Type() != 0 {
 			cursor := core.Qt__OpenHandCursor
 			// If moving, show closed hand
 			if movingItem != nil {
@@ -267,9 +276,36 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 	})
 	view.ConnectMouseReleaseEvent(func(event *gui.QMouseEvent) {
 		if event.Button() == core.Qt__RightButton && view.ItemAt(event.Pos()).Group() != nil {
-			// When right clicking item, show edit/delete options
 			pos := event.Pos()
 			menu := widgets.NewQMenu(nil)
+			// Check if clicking on link
+			item := view.ItemAt(pos)
+			group := item.Group()
+			// If type is 0, it's probably a link
+			if group.Type() == 0 {
+				// We hopefully clicked a link
+				menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete").ConnectTriggered(func(checked bool) {
+					childItem := NewItem(item.Data(0).ToLongLong(nil), ItemType(item.Data(1).ToInt(nil)))
+					// Remove in front end
+					for _, itemLinks := range links {
+						for _, link := range itemLinks {
+							if link.child == childItem {
+								// Remove from database
+								childItem.SetParent(nil)
+								// Remove from graphics scene
+								scene.RemoveItem(link.line)
+								scene.RemoveItem(link.dir)
+								// Remove in links map
+								delete(links, link.child)
+								// We only remove from one child
+								return
+							}
+						}
+					}
+				})
+				menu.Popup(view.MapToGlobal(pos), nil)
+				return
+			}
 			// Edit option
 			menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit").
 				ConnectTriggered(func(checked bool) {
@@ -419,6 +455,9 @@ func CreateLink(parent, child *widgets.QGraphicsItemGroup) Link {
 		parentItem, childItem, line,
 		CreateTriangle(line.Line().Center(), line.Line().Angle()),
 	}
+	// Set data in line and triangle
+	lineData.SetChildItem(childItem)
+	// Save in links map
 	links[parentItem] = append(links[parentItem], &lineData)
 	links[childItem] = append(links[childItem], &lineData)
 	// Return the graphics line to add to scene
