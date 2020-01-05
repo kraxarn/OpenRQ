@@ -296,7 +296,18 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 								scene.RemoveItem(link.dir)
 								// Remove in links map
 								delete(links, link.child)
-								// We only remove from one child
+								// Remove from parent
+								for i, childLink := range links[link.parent] {
+									if childLink.child == childItem {
+										last := len(links[link.parent])-1
+										// Replace entry to delete with last
+										links[link.parent][i] = links[link.parent][last]
+										// Cut away last element
+										links[link.parent] = links[link.parent][:last]
+										break
+									}
+								}
+								// Assume deleting one link
 								return
 							}
 						}
