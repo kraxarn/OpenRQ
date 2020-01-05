@@ -82,10 +82,17 @@ func (sol Solution) Parent() Item {
 }
 
 func (sol Solution) SetParent(parent Item) {
-	sol.SetValues(map[string]interface{}{
-		"parent": parent.ID(),
-		"parentType": GetItemType(parent),
-	})
+	if parent == nil {
+		sol.SetValues(map[string]interface{}{
+			"parent":     nil,
+			"parentType": nil,
+		})
+	} else {
+		sol.SetValues(map[string]interface{}{
+			"parent":     parent.ID(),
+			"parentType": GetItemType(parent),
+		})
+	}
 }
 
 func (sol Solution) Hash() [16]byte {
