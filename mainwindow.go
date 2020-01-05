@@ -140,9 +140,17 @@ func AddMenuBar(window *widgets.QMainWindow) {
 			UpdateWindowTitle(window)
 		}
 	})
+	editMenu.AddSeparator()
 	editMenu.AddAction2(gui.QIcon_FromTheme("reload"),
 		"Reload Project").ConnectTriggered(func(checked bool) {
 		ReloadProject(window)
+	})
+	editMenu.AddAction2(gui.QIcon_FromTheme("view_text"),
+		"Dump tree data").ConnectTriggered(func(checked bool) {
+		fmt.Println()
+		for key, value := range Tree() {
+			fmt.Printf("%v: %v\n", key.ToString(), value)
+		}
 	})
 	// Add to main toolbar
 	menuBar.AddMenu(editMenu)
