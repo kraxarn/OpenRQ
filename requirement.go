@@ -168,3 +168,7 @@ func (req Requirement) IsPropertyNull(columnName string) bool {
 	defer db.Close()
 	return db.IsItemPropertyNull(req.id, "Requirements", columnName)
 }
+
+func (req Requirement) ToString() string {
+	return fmt.Sprintf("problem %v", req.id)
+}

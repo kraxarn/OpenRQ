@@ -152,3 +152,7 @@ func (sol Solution) IsPropertyNull(columnName string) bool {
 	defer db.Close()
 	return db.IsItemPropertyNull(sol.id, "Solutions", columnName)
 }
+
+func (sol Solution) ToString() string {
+	return fmt.Sprintf("solution %v", sol.id)
+}
