@@ -33,6 +33,7 @@ type Item interface {
 	SetParent(parent Item)
 
 	IsPropertyNull(columnName string) bool
+	ToString() string
 }
 
 func NewItem(id int64, itemType ItemType) Item {

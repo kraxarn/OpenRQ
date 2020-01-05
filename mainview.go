@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
@@ -297,7 +296,18 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 								scene.RemoveItem(link.dir)
 								// Remove in links map
 								delete(links, link.child)
-								// We only remove from one child
+								// Remove from parent
+								for i, childLink := range links[link.parent] {
+									if childLink.child == childItem {
+										last := len(links[link.parent])-1
+										// Replace entry to delete with last
+										links[link.parent][i] = links[link.parent][last]
+										// Cut away last element
+										links[link.parent] = links[link.parent][:last]
+										break
+									}
+								}
+								// Assume deleting one link
 								return
 							}
 						}
@@ -493,8 +503,7 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 func NewGraphicsItem(text string, x, y, width, height int, item Item) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem(nil)
-	textItem.SetHtml(fmt.Sprintf("%v%v%v",
-		strings.ToLower(GetItemTableName(GetItemType(item))[0:3]), item.ID(), text))
+	textItem.SetHtml(fmt.Sprintf("%v%v", item.ToString(), text))
 	textItem.SetZValue(15)
 	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, float64(width), float64(height), nil)
 	shapeItem.SetBrush(gui.NewQBrush3(backgroundColor, 1))
@@ -534,4 +543,51 @@ func CreateTriangle(pos *core.QPointF, angle float64) *widgets.QGraphicsPolygonI
 	poly.SetTransformOriginPoint2(size>>1, size>>1)
 	poly.SetRotation((-angle) - 90)
 	return poly
+}
+
+func FillTree(root Item) map[Item]interface{} {
+	leaf := make(map[Item]interface{})
+	for _, link := range links[root] {
+		if link.parent == root {
+			leaf[link.child] = FillTree(link.child)
+		}
+	}
+	return leaf
+}
+
+func Tree() map[Item]interface{} {
+	// Final tree
+	tree := make(map[Item]interface{})
+	// Items we have already added
+	added := map[Item]int{}
+	// Loop through all items in view
+	for _, item := range view.Items() {
+		// Get group and make sure it's valid
+		group := item.Group()
+		if group == nil || group.Type() == 0 {
+			continue
+		}
+		// Get item
+		groupItem := GetGroupItem(group)
+		// Ignore if already added
+		if ContainsItem(added, groupItem) {
+			continue
+		}
+		added[groupItem] = 0
+
+		isRoot := true
+		for _, l2 := range links[groupItem] {
+			if l2.child == groupItem {
+				isRoot = false
+				break
+			}
+		}
+		if isRoot {
+			tree[groupItem] = nil
+		}
+	}
+	for key := range tree {
+		tree[key] = FillTree(key)
+	}
+	return tree
 }
