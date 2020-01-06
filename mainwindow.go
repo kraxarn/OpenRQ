@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"runtime"
 	"strings"
@@ -59,15 +61,15 @@ func AddMenuBar(window *widgets.QMainWindow) {
 	fileOpen.ConnectTriggered(func(checked bool) {
 		fileName := widgets.QFileDialog_GetOpenFileName(window, "Open Project",
 			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
-			"OpenRQ Project(*.orq *orqz)", "", 0)
+			"OpenRQ Project(*.orq *orqz);;JavaScript Object Notation(*.json)", "", 0)
 		if len(fileName) > 0 {
 			if strings.HasSuffix(fileName, ".orqz") {
 				result := widgets.QMessageBox_Question(window, "Compressed Project",
-					"The project you are trying to load is compressed. " +
-						"In order to load the project, it first needs to be decompressed. " +
-						"This will replace the compressed project with a decompressed project.\n" +
+					"The project you are trying to load is compressed. "+
+						"In order to load the project, it first needs to be decompressed. "+
+						"This will replace the compressed project with a decompressed project.\n"+
 						"Are you sure you want to continue?",
-					widgets.QMessageBox__Yes | widgets.QMessageBox__No, widgets.QMessageBox__Yes)
+					widgets.QMessageBox__Yes|widgets.QMessageBox__No, widgets.QMessageBox__Yes)
 				if result == widgets.QMessageBox__No {
 					return
 				}
@@ -166,8 +168,13 @@ func AddMenuBar(window *widgets.QMainWindow) {
 	editMenu.AddAction2(gui.QIcon_FromTheme("view_text"),
 		"Dump tree data").ConnectTriggered(func(checked bool) {
 		fmt.Println()
-		for key, value := range Tree() {
+		/*for key, value := range Tree() {
 			fmt.Printf("%v: %v\n", key.ToString(), value)
+		}*/
+		if data, err := json.MarshalIndent(Roots(), "", "\t"); err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(string(data))
 		}
 	})
 	// Add to main toolbar
