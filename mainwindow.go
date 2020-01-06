@@ -76,6 +76,11 @@ func AddMenuBar(window *widgets.QMainWindow) {
 					widgets.QMessageBox_Critical(window, "Failed to Load Project", err.Error(),
 						widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
 				}
+			} else if strings.HasSuffix(fileName, ".json") {
+				if _, err := NewJSONProject(fileName); err != nil {
+					widgets.QMessageBox_Critical(window, "Failed to Load Project", err.Error(),
+						widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
+				}
 			} else {
 				// If not compressed, just load normal project
 				NewProject(fileName)
@@ -96,8 +101,21 @@ func AddMenuBar(window *widgets.QMainWindow) {
 		// TODO: Set path of current project as default
 		fileName := widgets.QFileDialog_GetSaveFileName(window, "Save Project",
 			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
-			"OpenRQ Project(*.orq);;OpenRQ Compressed Project(*.orqz)", "", 0)
+			"OpenRQ Project(*.orq);;OpenRQ Compressed Project(*.orqz);;JavaScript Object Notation(*.json)", "", 0)
 		if len(fileName) > 0 {
+			if strings.HasSuffix(fileName, ".json") {
+				if data, err := json.MarshalIndent(map[string]interface{}{
+					"ProjectName": currentProject.Name(),
+					"Tree": Roots(),
+				}, "", "\t"); err != nil {
+					fmt.Println(err)
+				} else {
+					if err := ioutil.WriteFile(fileName, data, 0644); err != nil {
+						fmt.Println(err)
+					}
+				}
+				return
+			}
 			if err := currentProject.CopyTo(fileName); err != nil {
 				widgets.QMessageBox_Critical(window, "Failed to Save Project",
 					err.Error(), widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)

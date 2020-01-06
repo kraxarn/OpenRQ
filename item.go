@@ -1,9 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // Item that is either a solutions or a requirement
 type Item interface {
+	json.Marshaler
+
 	ID() int64
 
 	UID() int64
