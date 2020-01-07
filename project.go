@@ -149,6 +149,9 @@ func ParseJSON(parent Item, db *DataContext, tree map[string]interface{}) error 
 	if parent != nil {
 		item.SetParent(parent)
 	}
+	// Set position and size
+	pos := tree["Pos"].([]interface{})
+	item.SetPos(int(pos[0].(float64)), int(pos[1].(float64)))
 	// Do the same for children
 	data, ok := tree["Children"].([]interface{})
 	if ok {
