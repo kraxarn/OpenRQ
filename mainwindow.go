@@ -79,6 +79,16 @@ func AddMenuBar(window *widgets.QMainWindow) {
 						widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
 				}
 			} else if strings.HasSuffix(fileName, ".json") {
+				// Ask to open
+				result := widgets.QMessageBox_Question(window, "Convert Project",
+					"The project you are trying to load needs to be converted before it can be opened. " +
+						"Changes made to the converted project will not affect the original document " +
+						"unless manually saved. Are you sure you want to continue?",
+					widgets.QMessageBox__Yes|widgets.QMessageBox__No, widgets.QMessageBox__Yes)
+				if result == widgets.QMessageBox__No {
+					return
+				}
+				// Parse JSON
 				if _, err := NewJSONProject(fileName); err != nil {
 					widgets.QMessageBox_Critical(window, "Failed to Load Project", err.Error(),
 						widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
