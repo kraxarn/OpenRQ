@@ -189,7 +189,6 @@ func NewJSONProject(path string) (*Project, error) {
 	}
 	// Create new data context to transfer to
 	db := NewDataContext(newPath)
-	defer db.Close()
 	// Set project name
 	db.SetProjectName(projectName.(string))
 	// Parse each root
@@ -199,5 +198,8 @@ func NewJSONProject(path string) (*Project, error) {
 		}
 	}
 	// Everything is hopefully fine
+	if err := db.Close(); err != nil {
+		fmt.Println("failed to close temporary database from json:", err)
+	}
 	return NewProject(newPath), nil
 }
