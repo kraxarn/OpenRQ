@@ -93,13 +93,11 @@ func (data *DataContext) SetProjectName(name string) {
 }
 
 func (data *DataContext) AddEmptyRequirement() (int64, error) {
-	return data.AddRequirement("", "", "")
+	return data.AddRequirement("", "", "", data.ItemUID())
 }
 
 // AddRequirement adds a requirement to the current database
-func (data *DataContext) AddRequirement(description, rationale, fitCriterion string) (int64, error) {
-	// Generate a new random UID
-	reqUID := data.ItemUID()
+func (data *DataContext) AddRequirement(description, rationale, fitCriterion string, reqUID int64) (int64, error) {
 	// Try to add the requirement to the database
 	if _, err := data.Database.Exec(
 		"insert into Requirements (uid, description, rationale, fitCriterion) values (?, ?, ?, ?)",
@@ -117,9 +115,7 @@ func (data *DataContext) AddRequirement(description, rationale, fitCriterion str
 }
 
 // AddSolution adds a solution to the database
-func (data *DataContext) AddSolution(description string) (int64, error) {
-	// Generate a new random UID
-	solUID := data.ItemUID()
+func (data *DataContext) AddSolution(description string, solUID int64) (int64, error) {
 	// Try to add the solution to the database
 	if _, err := data.Database.Exec(
 		"insert into Solutions (uid, description) values (?, ?)",
@@ -136,7 +132,7 @@ func (data *DataContext) AddSolution(description string) (int64, error) {
 }
 
 func (data *DataContext) AddEmptySolution() (int64, error) {
-	return data.AddSolution("")
+	return data.AddSolution("", data.ItemUID())
 }
 
 // AddItemVersion versions an item

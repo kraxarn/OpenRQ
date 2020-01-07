@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"os"
 )
@@ -155,4 +156,31 @@ func (sol Solution) IsPropertyNull(columnName string) bool {
 
 func (sol Solution) ToString() string {
 	return fmt.Sprintf("solution %v", sol.id)
+}
+
+func (sol Solution) Children() []Item {
+	children := make([]Item, 0)
+	for _, link := range links[sol] {
+		if link.parent == sol {
+			children = append(children, link.child)
+		}
+	}
+	return children
+}
+
+type SolutionData struct {
+	ID string
+	Description string
+	Media []string
+	Children []Item
+}
+
+func (sol Solution) MarshalJSON() ([]byte, error) {
+	jsonData, err := json.Marshal(SolutionData{
+		ID:				fmt.Sprintf("%x", sol.UID()),
+		Description:	sol.Description(),
+		Media:			[]string{},
+		Children:		sol.Children(),
+	})
+	return jsonData, err
 }

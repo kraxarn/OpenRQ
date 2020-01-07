@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"os"
 )
@@ -171,4 +172,42 @@ func (req Requirement) IsPropertyNull(columnName string) bool {
 
 func (req Requirement) ToString() string {
 	return fmt.Sprintf("problem %v", req.id)
+}
+
+func (req Requirement) Children() []Item {
+	children := make([]Item, 0)
+	for _, link := range links[req] {
+		if link.parent == req {
+			children = append(children, link.child)
+		}
+	}
+	return children
+}
+
+type RequirementData struct {
+	ID string
+	Description, Rationale, FitCriterion string
+
+	LinkText string
+	Look string		// color border shape
+	Pos string		// x y
+	Size string		// width height
+	Children []Item
+}
+
+func (req Requirement) MarshalJSON() ([]byte, error) {
+	var description, rationale, fitCriterion string
+	req.GetValues(map[string]interface{}{
+		"description":  &description,
+		"rationale":    &rationale,
+		"fitCriterion": &fitCriterion,
+	})
+	jsonData, err := json.Marshal(RequirementData{
+		ID:				fmt.Sprintf("%x", req.UID()),
+		Description:	description,
+		Rationale:		rationale,
+		FitCriterion:	fitCriterion,
+		Children:		req.Children(),
+	})
+	return jsonData, err
 }

@@ -3,9 +3,11 @@ package main
 import (
 	"bytes"
 	"compress/gzip"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -112,4 +114,87 @@ func (proj *Project) CopyTo(path string) error {
 	}
 	// Copy data to location
 	return ioutil.WriteFile(path, file, fileInfo.Mode())
+}
+
+func JSONObjectToItem(data map[string]interface{}, db *DataContext) (Item, error) {
+	_, ok := data["Rationale"]
+	uid, err := strconv.ParseInt(data["ID"].(string), 16, 64)
+	if err != nil {
+		return nil, err
+	}
+	if ok {
+		// Has rationale, probably requirement
+		id, err := db.AddRequirement(data["Description"].(string), data["Rationale"].(string), data["FitCriterion"].(string), uid)
+		if err != nil {
+			return nil, err
+		}
+		return NewRequirement(id), nil
+	} else {
+		// Hasn't rationale, probably solution
+		id, err := db.AddSolution(data["Description"].(string), uid)
+		if err != nil {
+			return nil, err
+		}
+		return NewSolution(id), nil
+	}
+}
+
+func ParseJSON(parent Item, db *DataContext, tree map[string]interface{}) error {
+	// Add to DB
+	item, err := JSONObjectToItem(tree, db)
+	if err != nil {
+		return err
+	}
+	// Set parent if needed
+	if parent != nil {
+		item.SetParent(parent)
+	}
+	// Do the same for children
+	data, ok := tree["Children"].([]interface{})
+	if ok {
+		for _, child := range data {
+			dataMap := child.(map[string]interface{})
+			if err = ParseJSON(item, db, dataMap); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func NewJSONProject(path string) (*Project, error) {
+	// Try to read file
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	// Try to parse json
+	var jsonData map[string]interface{}
+	if err := json.Unmarshal(data, &jsonData); err != nil {
+		return nil, err
+	}
+	// Check if valid project
+	projectName, found := jsonData["ProjectName"]
+	if !found {
+		return nil, fmt.Errorf("not a valid project")
+	}
+	// Check if destination file already exists
+	newPath := path[0:len(path)-4] + "orq"
+	_, err = os.Stat(newPath)
+	if !os.IsNotExist(err) {
+		return nil, fmt.Errorf("file with name \"%v\" already exists", newPath)
+	}
+	// Create new data context to transfer to
+	db := NewDataContext(newPath)
+	defer db.Close()
+	// Set project name
+	db.SetProjectName(projectName.(string))
+	// Parse each root
+	for _, root := range jsonData["Tree"].([]interface{}) {
+		if err = ParseJSON(nil, db, root.(map[string]interface{})); err != nil {
+			return nil, err
+		}
+	}
+	// Everything is hopefully fine
+	return NewProject(newPath), nil
 }
