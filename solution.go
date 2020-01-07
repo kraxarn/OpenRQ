@@ -172,6 +172,9 @@ type SolutionData struct {
 	ID string
 	Description string
 	Media []string
+	Look []uint
+	Pos []int
+	Size []int
 	Children []Item
 }
 

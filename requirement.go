@@ -189,9 +189,9 @@ type RequirementData struct {
 	Description, Rationale, FitCriterion string
 
 	LinkText string
-	Look string		// color border shape
-	Pos string		// x y
-	Size string		// width height
+	Look []uint
+	Pos []int
+	Size []int
 	Children []Item
 }
 
