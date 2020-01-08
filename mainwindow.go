@@ -145,14 +145,6 @@ func AddMenuBar(window *widgets.QMainWindow) {
 
 	// Edit menu
 	editMenu := widgets.NewQMenu2("Edit", nil)
-	// Insert menu
-	editInsertMenu := widgets.NewQMenu2("Insert", nil)
-	editInsertMenu.SetIcon(gui.QIcon_FromTheme("add"))
-	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-polygon"), "Problem")
-	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-polygon-star"), "Solution")
-	editInsertMenu.AddAction2(gui.QIcon_FromTheme("draw-line"), "Link")
-	editMenu.AddMenu(editInsertMenu)
-	// Other options
 	editMenu.AddAction2(gui.QIcon_FromTheme("text-field"),
 		"Rename Project...").ConnectTriggered(func(checked bool) {
 		// Check if project is loaded to rename
