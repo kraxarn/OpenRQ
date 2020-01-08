@@ -136,7 +136,7 @@ func AddMenuBar(window *widgets.QMainWindow) {
 	})
 	// Quit
 	fileMenu.AddSeparator()
-	fileQuit := fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "Quit")
+	fileQuit := fileMenu.AddAction2(gui.QIcon_FromTheme("exit"), "Quit")
 	fileQuit.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__Quit))
 	fileQuit.ConnectTriggered(func(checked bool) {
 		window.Close()
