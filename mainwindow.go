@@ -44,7 +44,7 @@ func AddMenuBar(window *widgets.QMainWindow) {
 	// File options
 	fileMenu := widgets.NewQMenu2("File", nil)
 	// New
-	fileNew := fileMenu.AddAction2(gui.QIcon_FromTheme("document-new"), "New...")
+	fileNew := fileMenu.AddAction2(GetIcon("file-new"), "New...")
 	fileNew.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__New))
 	fileNew.ConnectTriggered(func(checked bool) {
 		fileName := widgets.QFileDialog_GetSaveFileName(window, "New Project",
@@ -166,18 +166,6 @@ func AddMenuBar(window *widgets.QMainWindow) {
 	editMenu.AddAction2(gui.QIcon_FromTheme("reload"),
 		"Reload Project").ConnectTriggered(func(checked bool) {
 		ReloadProject(window)
-	})
-	editMenu.AddAction2(gui.QIcon_FromTheme("view_text"),
-		"Dump tree data").ConnectTriggered(func(checked bool) {
-		fmt.Println()
-		/*for key, value := range Tree() {
-			fmt.Printf("%v: %v\n", key.ToString(), value)
-		}*/
-		if data, err := json.MarshalIndent(Roots(), "", "\t"); err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Println(string(data))
-		}
 	})
 	// Add to main toolbar
 	menuBar.AddMenu(editMenu)
