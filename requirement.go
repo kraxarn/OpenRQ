@@ -189,9 +189,9 @@ type RequirementData struct {
 	Description, Rationale, FitCriterion string
 
 	LinkText string
-	Look string		// color border shape
-	Pos string		// x y
-	Size string		// width height
+	Look []uint
+	Pos []int
+	Size []int
 	Children []Item
 }
 
@@ -202,12 +202,17 @@ func (req Requirement) MarshalJSON() ([]byte, error) {
 		"rationale":    &rationale,
 		"fitCriterion": &fitCriterion,
 	})
+	x, y := req.Pos()
+	w, h := req.Size()
 	jsonData, err := json.Marshal(RequirementData{
 		ID:				fmt.Sprintf("%x", req.UID()),
 		Description:	description,
 		Rationale:		rationale,
 		FitCriterion:	fitCriterion,
 		Children:		req.Children(),
+		Look: 			[]uint{0, 0, 0},
+		Pos:			[]int{x, y},
+		Size: 			[]int{w, h},
 	})
 	return jsonData, err
 }

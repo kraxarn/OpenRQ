@@ -149,6 +149,9 @@ func ParseJSON(parent Item, db *DataContext, tree map[string]interface{}) error 
 	if parent != nil {
 		item.SetParent(parent)
 	}
+	// Set position and size
+	pos := tree["Pos"].([]interface{})
+	item.SetPos(int(pos[0].(float64)), int(pos[1].(float64)))
 	// Do the same for children
 	data, ok := tree["Children"].([]interface{})
 	if ok {
@@ -186,7 +189,6 @@ func NewJSONProject(path string) (*Project, error) {
 	}
 	// Create new data context to transfer to
 	db := NewDataContext(newPath)
-	defer db.Close()
 	// Set project name
 	db.SetProjectName(projectName.(string))
 	// Parse each root
@@ -196,5 +198,8 @@ func NewJSONProject(path string) (*Project, error) {
 		}
 	}
 	// Everything is hopefully fine
+	if err := db.Close(); err != nil {
+		fmt.Println("failed to close temporary database from json:", err)
+	}
 	return NewProject(newPath), nil
 }

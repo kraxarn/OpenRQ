@@ -172,15 +172,23 @@ type SolutionData struct {
 	ID string
 	Description string
 	Media []string
+	Look []uint
+	Pos []int
+	Size []int
 	Children []Item
 }
 
 func (sol Solution) MarshalJSON() ([]byte, error) {
+	x, y := sol.Pos()
+	w, h := sol.Size()
 	jsonData, err := json.Marshal(SolutionData{
 		ID:				fmt.Sprintf("%x", sol.UID()),
 		Description:	sol.Description(),
 		Media:			[]string{},
 		Children:		sol.Children(),
+		Look: 			[]uint{0, 0, 0},
+		Pos:			[]int{x, y},
+		Size: 			[]int{w, h},
 	})
 	return jsonData, err
 }
