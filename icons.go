@@ -19,14 +19,37 @@ var iconData = map[string]string{
 }
 
 var iconNames = map[string]string{
-	// Menu icons
-	"file-new": "document-new",
+	// File menu
+	"file-new": 	"document-new",
+	"file-open": 	"document-open",
+	"file-save-as":	"document-save-as",
+	"file-quit": 	"exit",
+	// Edit menu
+	"edit-rename":	"text-field",
+	"edit-reload":	"reload",
+	// About menu
+	"about-app": 		"help-about",
+	"about-qt": 		"qt",
+	"about-licenses":	"licenses",
+	"about-update": 	"download",
+	"about-gc": 		"run-clean",
+	// Tools
+	"tools-move":	"object-move-symbolic",
+	"tools-link":	"draw-line",
+	// Other menus
+	"menu-edit": 	"document-edit",
+	"menu-delete":	"delete",
+	// Text formatting
+	"format-bold": 			"format-text-bold",
+	"format-italic": 		"format-text-italic",
+	"format-underline": 	"format-text-underline",
+	"format-strikethrough": "format-text-strikethrough",
 }
 
 func GetIcon(name string) *gui.QIcon {
 	// On Linux, just load icon from theme
 	if runtime.GOOS == "linux" {
-		//return gui.QIcon_FromTheme(iconNames[name])
+		return gui.QIcon_FromTheme(iconNames[name])
 	}
 	// On other platforms, decode and load image data
 	pixmap := gui.NewQPixmap()
