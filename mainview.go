@@ -521,6 +521,10 @@ func NewGraphicsItem(text string, x, y, width, height int, item Item) *widgets.Q
 		// Insert ... at end
 		cursor.InsertText("...")
 	}
+	// If no description, set text to item string
+	if len(doc.ToPlainText()) <= 0 {
+		doc.SetHtml(fmt.Sprintf("<small>(%v)</small>", item.ToString()))
+	}
 	textItem.SetHtml(doc.ToHtml(core.NewQByteArray()))
 	textItem.SetZValue(15)
 	textItem.SetTextWidth(float64(width))
