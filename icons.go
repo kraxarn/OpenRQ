@@ -48,7 +48,7 @@ var iconNames = map[string]string{
 	// About menu
 	"about-app": 		"help-about",
 	"about-qt": 		"qt",
-	"about-licenses":	"licenses",
+	"about-licenses":	"license",
 	"about-update": 	"download",
 	"about-gc": 		"run-clean",
 	// Tools
