@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
-	"golang.org/x/tools/go/ssa/interp/testdata/src/runtime"
 )
 
 var iconData = map[string]string{
@@ -65,16 +64,16 @@ var iconNames = map[string]string{
 }
 
 func GetIcon(name string) *gui.QIcon {
-	// On Linux, just load icon from theme
-	if runtime.GOOS == "linux" {
-		return gui.QIcon_FromTheme(iconNames[name])
-	}
-	// On other platforms, decode and load image data
-	pixmap := gui.NewQPixmap()
+	// Try to get icon from theme, otherwise, use bitmap fallback
+	return gui.QIcon_FromTheme2(iconNames[name], GetBitmapIcon(name))
+}
+
+func GetBitmapIcon(name string) *gui.QIcon {
+	bitmap := gui.NewQPixmap()
 	data, err := base64.StdEncoding.DecodeString(iconData[name])
 	if err != nil {
 		fmt.Printf("warning: failed to load icon %v: %v", name, err)
 	}
-	pixmap.LoadFromData(data, uint(len(data)), "webp", core.Qt__AutoColor)
-	return gui.NewQIcon2(pixmap)
+	bitmap.LoadFromData(data, uint(len(data)), "webp", core.Qt__AutoColor)
+	return gui.NewQIcon2(bitmap)
 }
