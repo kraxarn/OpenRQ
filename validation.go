@@ -110,11 +110,46 @@ func ValidateLoops() (items []Item) {
 	return items
 }
 
+func ValidateLinkErrors() (items []Item) {
+	// Final returned items
+	items = make([]Item, 0)
+	// Items we have already added
+	added := map[Item]int{}
+	// Loop through all items in view
+	for _, item := range view.Items() {
+		// Get group and make sure it's valid
+		group := item.Group()
+		if group == nil || group.Type() == 0 {
+			continue
+		}
+		// Get item
+		groupItem := GetGroupItem(group)
+		// Ignore if already added
+		if ContainsItem(added, groupItem) {
+			continue
+		}
+		// Get children count and if it has a parent (not a root)
+		parents := 0
+		for _, link := range links[groupItem] {
+			if link.child == groupItem {
+				parents++
+			}
+		}
+		// If it has more than one parent, something is wrong
+		if parents > 1 {
+			items = append(items, groupItem)
+			added[groupItem] = 0
+		}
+	}
+	return items
+}
+
 type ValidationOption int8
 const (
-	SameType ValidationOption = 0
-	OneRoot  ValidationOption = 1
-	LinkLoop ValidationOption = 2
+	SameType 	ValidationOption = 0
+	OneRoot		ValidationOption = 1
+	LinkLoop	ValidationOption = 2
+	LinkError	ValidationOption = 3
 )
 
 type ValidationResult string
@@ -137,6 +172,9 @@ func CreateValidationResult(option ValidationOption, result ValidationResult) *w
 	case LinkLoop:
 		text = "Linking loop"
 		info = "Items that link to each other in a loop"
+	case LinkError:
+		text = "Invalid links"
+		info = "Link that could not be saved to the project file"
 	}
 	item := widgets.NewQListWidgetItem3(GetIcon(string(result)), text, nil, 0)
 	item.SetToolTip(info)
@@ -162,7 +200,7 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 	// Enable all validations by default
 	// (this should maybe be loaded/saved from database)
 	enabled := []bool{
-		true, true, true,
+		true, true, true, true,
 	}
 	// Main vertical box
 	layout := widgets.NewQVBoxLayout()
@@ -207,6 +245,14 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 				items.AddItem(fmt.Sprintf("%v %v\n(linking loop)", GetItemName(item), item.ID()))
 			}
 			results.Item(int(LinkLoop)).SetIcon(GetIcon(string(GetValidationResult(len(valLoops)))))
+		}
+		// Run invalid link validation
+		if enabled[LinkError] {
+			valErrors := ValidateLinkErrors()
+			for _, item := range valErrors {
+				items.AddItem(fmt.Sprintf("%v %v\n(invalid link)", GetItemName(item), item.ID()))
+			}
+			results.Item(int(LinkError)).SetIcon(GetIcon(string(GetValidationResult(len(valErrors)))))
 		}
 		// Enable them again
 		runBtn.SetText("Run now")
