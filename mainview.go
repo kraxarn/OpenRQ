@@ -400,13 +400,6 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			if toPos.X() == 0 && toPos.Y() == 0 {
 				return
 			}
-			// Check if child already have a parent
-			if !GetGroupItem(group).IsPropertyNull("parent") {
-				widgets.QMessageBox_Warning(window, "Invalid Link",
-					"The link you were trying to create is not valid and could not be created",
-					widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
-				return
-			}
 			// Create and add link
 			link := CreateLink(linkStart, group)
 			scene.AddItem(link.line)
@@ -446,7 +439,10 @@ func CreateLink(parent, child *widgets.QGraphicsItemGroup) Link {
 	// Add to database
 	db := currentProject.Data()
 	defer db.Close()
-	if err := db.AddItemChild(parentItem, childItem); err != nil {
+	// Check if child already have a parent and add to db if it doesn't have one
+	if !GetGroupItem(child).IsPropertyNull("parent") {
+		fmt.Println("warning: child already has a parent")
+	} else if err := db.AddItemChild(parentItem, childItem); err != nil {
 		fmt.Println("error: failed to add link to database:", err)
 	}
 	// Get from (parent) and to (child)
