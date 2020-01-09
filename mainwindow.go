@@ -56,7 +56,7 @@ func AddMenuBar(window *widgets.QMainWindow) {
 		}
 	})
 	// Open
-	fileOpen := fileMenu.AddAction2(gui.QIcon_FromTheme("document-open"), "Open...")
+	fileOpen := fileMenu.AddAction2(GetIcon("file-open"), "Open...")
 	fileOpen.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__Open))
 	fileOpen.ConnectTriggered(func(checked bool) {
 		fileName := widgets.QFileDialog_GetOpenFileName(window, "Open Project",
@@ -101,7 +101,7 @@ func AddMenuBar(window *widgets.QMainWindow) {
 		}
 	})
 	// Save as
-	fileSaveAs := fileMenu.AddAction2(gui.QIcon_FromTheme("document-save-as"), "Save As...")
+	fileSaveAs := fileMenu.AddAction2(GetIcon("file-save-as"), "Save As...")
 	fileSaveAs.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__SaveAs))
 	fileSaveAs.ConnectTriggered(func(checked bool) {
 		// Check if project is loaded to save
@@ -136,7 +136,7 @@ func AddMenuBar(window *widgets.QMainWindow) {
 	})
 	// Quit
 	fileMenu.AddSeparator()
-	fileQuit := fileMenu.AddAction2(gui.QIcon_FromTheme("exit"), "Quit")
+	fileQuit := fileMenu.AddAction2(GetIcon("file-quit"), "Quit")
 	fileQuit.SetShortcut(gui.NewQKeySequence5(gui.QKeySequence__Quit))
 	fileQuit.ConnectTriggered(func(checked bool) {
 		window.Close()
@@ -145,7 +145,7 @@ func AddMenuBar(window *widgets.QMainWindow) {
 
 	// Edit menu
 	editMenu := widgets.NewQMenu2("Edit", nil)
-	editMenu.AddAction2(gui.QIcon_FromTheme("text-field"),
+	editMenu.AddAction2(GetIcon("edit-rename"),
 		"Rename Project...").ConnectTriggered(func(checked bool) {
 		// Check if project is loaded to rename
 		if currentProject == nil {
@@ -162,8 +162,7 @@ func AddMenuBar(window *widgets.QMainWindow) {
 			UpdateWindowTitle(window)
 		}
 	})
-	editMenu.AddSeparator()
-	editMenu.AddAction2(gui.QIcon_FromTheme("reload"),
+	editMenu.AddAction2(GetIcon("edit-reload"),
 		"Reload Project").ConnectTriggered(func(checked bool) {
 		ReloadProject(window)
 	})
@@ -186,7 +185,7 @@ func AddMenuBar(window *widgets.QMainWindow) {
 	// About
 	aboutMenu := widgets.NewQMenu2("About", nil)
 	aboutMenu.AddAction2(
-		gui.QIcon_FromTheme("help-about"), "About OpenRQ").ConnectTriggered(func(checked bool) {
+		GetIcon("about-app"), "About OpenRQ").ConnectTriggered(func(checked bool) {
 			// Add app version information
 			aboutMessage := "This version was compiled without version information."
 			if len(versionTagName) > 0 && len(versionCommitHash) > 0 {
@@ -201,16 +200,16 @@ func AddMenuBar(window *widgets.QMainWindow) {
 			// Show simple dialog for now
 			widgets.QMessageBox_About(window, "About OpenRQ", aboutMessage)
 		})
-	aboutMenu.AddAction2(gui.QIcon_FromTheme("qt"), "About Qt").ConnectTriggered(func(checked bool) {
+	aboutMenu.AddAction2(GetIcon("about-qt"), "About Qt").ConnectTriggered(func(checked bool) {
 		widgets.QMessageBox_AboutQt(window, "About Qt")
 	})
-	aboutMenu.AddAction2(gui.QIcon_FromTheme("license"), "Licenses").ConnectTriggered(func(checked bool) {
+	aboutMenu.AddAction2(GetIcon("about-licenses"), "Licenses").ConnectTriggered(func(checked bool) {
 		gui.QDesktopServices_OpenUrl(
 			core.NewQUrl3("https://github.com/kraxarn/OpenRQ/blob/golang/third_party.md", 0))
 	})
 	aboutMenu.AddSeparator()
 	aboutMenu.AddAction2(
-		gui.QIcon_FromTheme("download"), "Check for updates").ConnectTriggered(func(checked bool) {
+		GetIcon("about-update"), "Check for updates").ConnectTriggered(func(checked bool) {
 			// Check if version was compiled with version information
 			if len(versionCommitHash) <= 0 {
 				widgets.QMessageBox_About(window, "Updater",
@@ -240,7 +239,7 @@ func AddMenuBar(window *widgets.QMainWindow) {
 				}
 			}
 		})
-	aboutMenu.AddAction2(gui.QIcon_FromTheme("run-clean"), "Run GC").ConnectTriggered(func(checked bool) {
+	aboutMenu.AddAction2(GetIcon("about-gc"), "Run GC").ConnectTriggered(func(checked bool) {
 		// Get memory information
 		var mem runtime.MemStats
 		runtime.ReadMemStats(&mem)
@@ -312,13 +311,13 @@ func CreateItemTypeCreator(linkBtn *widgets.QToolButton) *widgets.QToolBar {
 	layout := widgets.NewQToolBar2(nil)
 	// Requirement/solution selection
 	moveBtn := widgets.NewQToolButton(nil)
-	moveBtn.SetIcon(gui.QIcon_FromTheme("object-move-symbolic"))
+	moveBtn.SetIcon(GetIcon("tools-move"))
 	moveBtn.SetText("Move")
 	moveBtn.SetCheckable(true)
 	moveBtn.SetChecked(true)
 	moveBtn.SetToolTip("Move an already created item")
 	layout.AddWidget(moveBtn)
-	linkBtn.SetIcon(gui.QIcon_FromTheme("draw-line"))
+	linkBtn.SetIcon(GetIcon("tools-link"))
 	linkBtn.SetText("Draw line")
 	linkBtn.SetCheckable(true)
 	linkBtn.SetToolTip("Create a new link between already created items")

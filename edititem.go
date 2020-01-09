@@ -44,14 +44,14 @@ func CreateTextOptions() *widgets.QToolBar {
 	toolBar := widgets.NewQToolBar2(nil)
 
 	buttons := []string{
-		"format-text-bold",
-		"format-text-italic",
-		"format-text-underline",
-		"format-text-strikethrough",
+		"format-bold",
+		"format-italic",
+		"format-underline",
+		"format-strikethrough",
 	}
 
 	for _, button := range buttons {
-		toolBar.AddAction2(gui.QIcon_FromTheme(button), button).SetCheckable(true)
+		toolBar.AddAction2(GetIcon(button), button).SetCheckable(true)
 	}
 
 	return toolBar

@@ -283,7 +283,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			// If type is 0, it's probably a link
 			if group.Type() == 0 {
 				// We hopefully clicked a link
-				menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete").ConnectTriggered(func(checked bool) {
+				menu.AddAction2(GetIcon("menu-delete"), "Delete").ConnectTriggered(func(checked bool) {
 					childItem := NewItem(item.Data(0).ToLongLong(nil), ItemType(item.Data(1).ToInt(nil)))
 					// Remove in front end
 					for _, itemLinks := range links {
@@ -317,14 +317,14 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 				return
 			}
 			// Edit option
-			menu.AddAction2(gui.QIcon_FromTheme("document-edit"), "Edit").
+			menu.AddAction2(GetIcon("menu-edit"), "Edit").
 				ConnectTriggered(func(checked bool) {
 					if editWidget, ok := CreateEditWidgetFromPos(window, pos, scene); ok {
 						window.AddDockWidget(core.Qt__RightDockWidgetArea, editWidget)
 					}
 				})
 			// Delete option
-			menu.AddAction2(gui.QIcon_FromTheme("delete"), "Delete").
+			menu.AddAction2(GetIcon("menu-delete"), "Delete").
 				ConnectTriggered(func(checked bool) {
 					// Connect to database
 					db := currentProject.Data()
