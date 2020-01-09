@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 type Link struct {
@@ -500,7 +500,28 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 func NewGraphicsItem(text string, x, y, width, height int, item Item) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem(nil)
-	textItem.SetHtml(fmt.Sprintf("%v%v", item.ToString(), text))
+	// Check if plain text is too long
+	doc := gui.NewQTextDocument(nil)
+	doc.SetHtml(text)
+	if len(doc.ToPlainText()) > 50 {
+		cursor := gui.NewQTextCursor2(doc)
+		// Move to end
+		cursor.MovePosition(gui.QTextCursor__End, gui.QTextCursor__MoveAnchor, 1)
+		// Keep removing when too long
+		for len(doc.ToPlainText()) > 50 {
+			cursor.DeletePreviousChar()
+		}
+		// Remove last word to avoid weird cropping
+		cursor.Select(gui.QTextCursor__WordUnderCursor)
+		cursor.InsertText("")
+		// Remove all trailing spaces
+		for strings.HasSuffix(doc.ToPlainText(), " ") && len(doc.ToPlainText()) > 0 {
+			cursor.DeletePreviousChar()
+		}
+		// Insert ... at end
+		cursor.InsertText("...")
+	}
+	textItem.SetHtml(doc.ToHtml(core.NewQByteArray()))
 	textItem.SetZValue(15)
 	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, float64(width), float64(height), nil)
 	shapeItem.SetBrush(gui.NewQBrush3(backgroundColor, 1))
