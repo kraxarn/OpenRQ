@@ -503,18 +503,23 @@ func NewGraphicsItem(text string, x, y, width, height int, item Item) *widgets.Q
 	// Check if plain text is too long
 	doc := gui.NewQTextDocument(nil)
 	doc.SetHtml(text)
-	if len(doc.ToPlainText()) > 50 {
+	const maxLength = 46
+	if len(doc.ToPlainText()) > maxLength {
 		cursor := gui.NewQTextCursor2(doc)
 		// Move to end
 		cursor.MovePosition(gui.QTextCursor__End, gui.QTextCursor__MoveAnchor, 1)
 		// Keep removing when too long
-		for len(doc.ToPlainText()) > 50 {
+		for len(doc.ToPlainText()) > maxLength {
 			cursor.DeletePreviousChar()
 		}
 		// Remove last word to avoid weird cropping
 		cursor.Select(gui.QTextCursor__WordUnderCursor)
-		cursor.InsertText("")
+		if len(cursor.Selection().ToPlainText()) != len(doc.ToPlainText()) {
+			cursor.InsertText("")
+		}
+		cursor.ClearSelection()
 		// Remove all trailing spaces
+		cursor.MovePosition(gui.QTextCursor__End, gui.QTextCursor__MoveAnchor, 1)
 		for strings.HasSuffix(doc.ToPlainText(), " ") && len(doc.ToPlainText()) > 0 {
 			cursor.DeletePreviousChar()
 		}
