@@ -110,19 +110,54 @@ func ValidateLoops() (items []Item) {
 	return items
 }
 
+func ValidateLinkErrors() (items []Item) {
+	// Final returned items
+	items = make([]Item, 0)
+	// Items we have already added
+	added := map[Item]int{}
+	// Loop through all items in view
+	for _, item := range view.Items() {
+		// Get group and make sure it's valid
+		group := item.Group()
+		if group == nil || group.Type() == 0 {
+			continue
+		}
+		// Get item
+		groupItem := GetGroupItem(group)
+		// Ignore if already added
+		if ContainsItem(added, groupItem) {
+			continue
+		}
+		// Get children count and if it has a parent (not a root)
+		parents := 0
+		for _, link := range links[groupItem] {
+			if link.child == groupItem {
+				parents++
+			}
+		}
+		// If it has more than one parent, something is wrong
+		if parents > 1 {
+			items = append(items, groupItem)
+			added[groupItem] = 0
+		}
+	}
+	return items
+}
+
 type ValidationOption int8
 const (
-	SameType ValidationOption = 0
-	OneRoot  ValidationOption = 1
-	LinkLoop ValidationOption = 2
+	SameType 	ValidationOption = 0
+	OneRoot		ValidationOption = 1
+	LinkLoop	ValidationOption = 2
+	LinkError	ValidationOption = 3
 )
 
 type ValidationResult string
 const (
-	ValidateOK       ValidationResult = "emblem-checked"
-	ValidateFail     ValidationResult = "emblem-error"
-	ValidateDisabled ValidationResult = "emblem-pause"
-	ValidateNone     ValidationResult = "emblem-question"
+	ValidateOK       ValidationResult = "validate-ok"
+	ValidateFail     ValidationResult = "validate-fail"
+	ValidateDisabled ValidationResult = "validate-disabled"
+	ValidateNone     ValidationResult = "validate-none"
 )
 
 func CreateValidationResult(option ValidationOption, result ValidationResult) *widgets.QListWidgetItem {
@@ -137,8 +172,11 @@ func CreateValidationResult(option ValidationOption, result ValidationResult) *w
 	case LinkLoop:
 		text = "Linking loop"
 		info = "Items that link to each other in a loop"
+	case LinkError:
+		text = "Invalid links"
+		info = "Link that could not be saved to the project file"
 	}
-	item := widgets.NewQListWidgetItem3(gui.QIcon_FromTheme(string(result)), text, nil, 0)
+	item := widgets.NewQListWidgetItem3(GetIcon(string(result)), text, nil, 0)
 	item.SetToolTip(info)
 	return item
 }
@@ -162,7 +200,7 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 	// Enable all validations by default
 	// (this should maybe be loaded/saved from database)
 	enabled := []bool{
-		true, true, true,
+		true, true, true, true,
 	}
 	// Main vertical box
 	layout := widgets.NewQVBoxLayout()
@@ -190,7 +228,7 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 			for _, item := range valLinks {
 				items.AddItem(fmt.Sprintf("%v %v\n(links to same type)", GetItemName(item), item.ID()))
 			}
-			results.Item(int(SameType)).SetIcon(gui.QIcon_FromTheme(string(GetValidationResult(len(valLinks)))))
+			results.Item(int(SameType)).SetIcon(GetIcon(string(GetValidationResult(len(valLinks)))))
 		}
 		// Run root validation
 		if enabled[OneRoot] {
@@ -198,7 +236,7 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 			for _, item := range valRoots {
 				items.AddItem(fmt.Sprintf("%v %v\n(one-to-one root)", GetItemName(item), item.ID()))
 			}
-			results.Item(int(OneRoot)).SetIcon(gui.QIcon_FromTheme(string(GetValidationResult(len(valRoots)))))
+			results.Item(int(OneRoot)).SetIcon(GetIcon(string(GetValidationResult(len(valRoots)))))
 		}
 		// Run loop validation
 		if enabled[LinkLoop] {
@@ -206,7 +244,15 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 			for _, item := range valLoops {
 				items.AddItem(fmt.Sprintf("%v %v\n(linking loop)", GetItemName(item), item.ID()))
 			}
-			results.Item(int(LinkLoop)).SetIcon(gui.QIcon_FromTheme(string(GetValidationResult(len(valLoops)))))
+			results.Item(int(LinkLoop)).SetIcon(GetIcon(string(GetValidationResult(len(valLoops)))))
+		}
+		// Run invalid link validation
+		if enabled[LinkError] {
+			valErrors := ValidateLinkErrors()
+			for _, item := range valErrors {
+				items.AddItem(fmt.Sprintf("%v %v\n(invalid link)", GetItemName(item), item.ID()))
+			}
+			results.Item(int(LinkError)).SetIcon(GetIcon(string(GetValidationResult(len(valErrors)))))
 		}
 		// Enable them again
 		runBtn.SetText("Run now")
@@ -232,7 +278,7 @@ func CreateValidationEngineLayout() *widgets.QWidget {
 		action.SetChecked(enabled[i])
 		action.ConnectTriggered(func(checked bool) {
 			enabled[i] = action.IsChecked()
-			item.SetIcon(gui.QIcon_FromTheme(string(GetDefaultValidationResult(enabled[i]))))
+			item.SetIcon(GetIcon(string(GetDefaultValidationResult(enabled[i]))))
 		})
 		menu.Popup(gui.QCursor_Pos(), nil)
 	})

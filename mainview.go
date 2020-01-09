@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 type Link struct {
@@ -400,18 +400,21 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			if toPos.X() == 0 && toPos.Y() == 0 {
 				return
 			}
-			// Check if child already have a parent
-			if !GetGroupItem(group).IsPropertyNull("parent") {
-				widgets.QMessageBox_Warning(window, "Invalid Link",
-					"The link you were trying to create is not valid and could not be created",
-					widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
-				return
-			}
 			// Create and add link
 			link := CreateLink(linkStart, group)
 			scene.AddItem(link.line)
 			scene.AddItem(link.dir)
 			linkStart = nil
+			// Add link to database
+			db := currentProject.Data()
+			// Check if child already have a parent and add to db if it doesn't have one
+			if !GetGroupItem(group).IsPropertyNull("parent") {
+				fmt.Println("warning: child already has a parent")
+			} else if err := db.AddItemChild(linkStartItem, groupItem); err != nil {
+				fmt.Println("error: failed to add link to database:", err)
+			}
+			// We're done
+			db.Close()
 		}
 	})
 	return view
@@ -443,12 +446,6 @@ func CreateLink(parent, child *widgets.QGraphicsItemGroup) Link {
 	// Check if we're linking to self
 	parentItem := GetGroupItem(parent)
 	childItem := GetGroupItem(child)
-	// Add to database
-	db := currentProject.Data()
-	defer db.Close()
-	if err := db.AddItemChild(parentItem, childItem); err != nil {
-		fmt.Println("error: failed to add link to database:", err)
-	}
 	// Get from (parent) and to (child)
 	fromPos := parent.Pos()
 	toPos := child.Pos()
@@ -503,8 +500,39 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 func NewGraphicsItem(text string, x, y, width, height int, item Item) *widgets.QGraphicsItemGroup {
 	group := widgets.NewQGraphicsItemGroup(nil)
 	textItem := widgets.NewQGraphicsTextItem(nil)
-	textItem.SetHtml(fmt.Sprintf("%v%v", item.ToString(), text))
+	// Check if plain text is too long
+	doc := gui.NewQTextDocument(nil)
+	doc.SetHtml(text)
+	const maxLength = 46
+	if len(doc.ToPlainText()) > maxLength {
+		cursor := gui.NewQTextCursor2(doc)
+		// Move to end
+		cursor.MovePosition(gui.QTextCursor__End, gui.QTextCursor__MoveAnchor, 1)
+		// Keep removing when too long
+		for len(doc.ToPlainText()) > maxLength {
+			cursor.DeletePreviousChar()
+		}
+		// Remove last word to avoid weird cropping
+		cursor.Select(gui.QTextCursor__WordUnderCursor)
+		if len(cursor.Selection().ToPlainText()) != len(doc.ToPlainText()) {
+			cursor.InsertText("")
+		}
+		cursor.ClearSelection()
+		// Remove all trailing spaces
+		cursor.MovePosition(gui.QTextCursor__End, gui.QTextCursor__MoveAnchor, 1)
+		for strings.HasSuffix(doc.ToPlainText(), " ") && len(doc.ToPlainText()) > 0 {
+			cursor.DeletePreviousChar()
+		}
+		// Insert ... at end
+		cursor.InsertText("...")
+	}
+	// If no description, set text to item string
+	if len(doc.ToPlainText()) <= 0 {
+		doc.SetHtml(fmt.Sprintf("<small>(%v)</small>", item.ToString()))
+	}
+	textItem.SetHtml(doc.ToHtml(core.NewQByteArray()))
 	textItem.SetZValue(15)
+	textItem.SetTextWidth(float64(width))
 	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, float64(width), float64(height), nil)
 	shapeItem.SetBrush(gui.NewQBrush3(backgroundColor, 1))
 	// Default purple color for requirements
@@ -543,53 +571,6 @@ func CreateTriangle(pos *core.QPointF, angle float64) *widgets.QGraphicsPolygonI
 	poly.SetTransformOriginPoint2(size>>1, size>>1)
 	poly.SetRotation((-angle) - 90)
 	return poly
-}
-
-func FillTree(root Item) map[Item]interface{} {
-	leaf := make(map[Item]interface{})
-	for _, link := range links[root] {
-		if link.parent == root {
-			leaf[link.child] = FillTree(link.child)
-		}
-	}
-	return leaf
-}
-
-func Tree() map[Item]interface{} {
-	// Final tree
-	tree := make(map[Item]interface{})
-	// Items we have already added
-	added := map[Item]int{}
-	// Loop through all items in view
-	for _, item := range view.Items() {
-		// Get group and make sure it's valid
-		group := item.Group()
-		if group == nil || group.Type() == 0 {
-			continue
-		}
-		// Get item
-		groupItem := GetGroupItem(group)
-		// Ignore if already added
-		if ContainsItem(added, groupItem) {
-			continue
-		}
-		added[groupItem] = 0
-
-		isRoot := true
-		for _, l2 := range links[groupItem] {
-			if l2.child == groupItem {
-				isRoot = false
-				break
-			}
-		}
-		if isRoot {
-			tree[groupItem] = nil
-		}
-	}
-	for key := range tree {
-		tree[key] = FillTree(key)
-	}
-	return tree
 }
 
 func Roots() []Item {
