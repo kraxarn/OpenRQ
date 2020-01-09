@@ -523,6 +523,7 @@ func NewGraphicsItem(text string, x, y, width, height int, item Item) *widgets.Q
 	}
 	textItem.SetHtml(doc.ToHtml(core.NewQByteArray()))
 	textItem.SetZValue(15)
+	textItem.SetTextWidth(float64(width))
 	shapeItem := widgets.NewQGraphicsRectItem3(0, 0, float64(width), float64(height), nil)
 	shapeItem.SetBrush(gui.NewQBrush3(backgroundColor, 1))
 	// Default purple color for requirements
