@@ -105,7 +105,7 @@ func ReloadProject(window *widgets.QMainWindow) {
 				fmt.Printf("warning: could not find parent or child, ignoring link (%3v(%v)%v -> %3v(%v)%v)\n",
 					parent.ID(), GetItemType(parent), parentItem != nil, child.ID(), GetItemType(child), childItem != nil)
 			} else {
-				link := CreateLink(parentItem, childItem, false)
+				link := CreateLink(parentItem, childItem)
 				scene.AddItem(link.line)
 				scene.AddItem(link.dir)
 			}
@@ -401,10 +401,20 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 				return
 			}
 			// Create and add link
-			link := CreateLink(linkStart, group, true)
+			link := CreateLink(linkStart, group)
 			scene.AddItem(link.line)
 			scene.AddItem(link.dir)
 			linkStart = nil
+			// Add link to database
+			db := currentProject.Data()
+			// Check if child already have a parent and add to db if it doesn't have one
+			if !GetGroupItem(group).IsPropertyNull("parent") {
+				fmt.Println("warning: child already has a parent")
+			} else if err := db.AddItemChild(linkStartItem, groupItem); err != nil {
+				fmt.Println("error: failed to add link to database:", err)
+			}
+			// We're done
+			db.Close()
 		}
 	})
 	return view
@@ -428,7 +438,7 @@ func GetGroupItem(group *widgets.QGraphicsItemGroup) Item {
 	return NewItem(itemID, itemType)
 }
 
-func CreateLink(parent, child *widgets.QGraphicsItemGroup, save bool) Link {
+func CreateLink(parent, child *widgets.QGraphicsItemGroup) Link {
 	// Check if map needs to be created
 	if links == nil {
 		links = make(map[Item][]*Link)
@@ -436,17 +446,6 @@ func CreateLink(parent, child *widgets.QGraphicsItemGroup, save bool) Link {
 	// Check if we're linking to self
 	parentItem := GetGroupItem(parent)
 	childItem := GetGroupItem(child)
-	if save {
-		// Add to database
-		db := currentProject.Data()
-		defer db.Close()
-		// Check if child already have a parent and add to db if it doesn't have one
-		if !GetGroupItem(child).IsPropertyNull("parent") {
-			fmt.Println("warning: child already has a parent")
-		} else if err := db.AddItemChild(parentItem, childItem); err != nil {
-			fmt.Println("error: failed to add link to database:", err)
-		}
-	}
 	// Get from (parent) and to (child)
 	fromPos := parent.Pos()
 	toPos := child.Pos()
