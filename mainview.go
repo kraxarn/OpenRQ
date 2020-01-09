@@ -545,53 +545,6 @@ func CreateTriangle(pos *core.QPointF, angle float64) *widgets.QGraphicsPolygonI
 	return poly
 }
 
-func FillTree(root Item) map[Item]interface{} {
-	leaf := make(map[Item]interface{})
-	for _, link := range links[root] {
-		if link.parent == root {
-			leaf[link.child] = FillTree(link.child)
-		}
-	}
-	return leaf
-}
-
-func Tree() map[Item]interface{} {
-	// Final tree
-	tree := make(map[Item]interface{})
-	// Items we have already added
-	added := map[Item]int{}
-	// Loop through all items in view
-	for _, item := range view.Items() {
-		// Get group and make sure it's valid
-		group := item.Group()
-		if group == nil || group.Type() == 0 {
-			continue
-		}
-		// Get item
-		groupItem := GetGroupItem(group)
-		// Ignore if already added
-		if ContainsItem(added, groupItem) {
-			continue
-		}
-		added[groupItem] = 0
-
-		isRoot := true
-		for _, l2 := range links[groupItem] {
-			if l2.child == groupItem {
-				isRoot = false
-				break
-			}
-		}
-		if isRoot {
-			tree[groupItem] = nil
-		}
-	}
-	for key := range tree {
-		tree[key] = FillTree(key)
-	}
-	return tree
-}
-
 func Roots() []Item {
 	// Final tree
 	roots := make([]Item, 0)
