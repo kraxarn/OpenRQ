@@ -33,6 +33,11 @@ var iconData = map[string]string{
 	"format-italic": 		"UklGRpQAAABXRUJQVlA4WAoAAAAQAAAAFwAAFwAAQUxQSEcAAAABYNzato3D/FGFaEX0IloRvYhWRBW8OXv0kv8bR8QEqKA405N5sZ18rrDJZ3Pxj15mOOT1hMnL8HG3XnZY5NM82N4DzvRqEgBWUDggJgAAANACAJ0BKhgAGAA+kUSdSqWjoqGoCACwEglpAAA9o6AA/vjPGsAA",
 	"format-underline":		"UklGRqAAAABXRUJQVlA4WAoAAAAQAAAAFwAAFwAAQUxQSFQAAAABcFTbdlO9UYgHLAYP2Oigpo2iANDAioBD7/+PI2IC5GMh3ArhP3NEWwnjsZZOr3RPfSyAQovoEswxz0IfxwNYdUx8y6b15awytXOVUfJuTj7hEwFWUDggJgAAANACAJ0BKhgAGAA+kUSdSqWjoqGoCACwEglpAAA9o6AA/vjPGsAA",
 	"format-strikethrough":	"UklGRnQAAABXRUJQVlA4WAoAAAAQAAAAFwAAFwAAQUxQSCcAAAABDzD/ERFCTSQpzHfIwAj+dSCDLgcLEf2fAJzVaYJgGc3ZnDHL9gUAVlA4ICYAAADQAgCdASoYABgAPpFEnUqlo6KhqAgAsBIJaQAAPaOgAP74zxrAAA==",
+	// Validation engine
+	"validate-ok":			"UklGRvQAAABXRUJQVlA4WAoAAAAQAAAAFwAAFwAAQUxQSKcAAAABcBzbdpt8x/JMUj/WytBHhnJyLsJhrTeDvp4JDUSEwrZtGzlJ9+4V8i9lZnHp2svCZD0M7gh0HzDiKZhcFYdwB1CFrY6zhyv0bHfuu7TEK/cY7utULGA8S55Xjrnn+ubI88DV0wJlsqB5oPU0wEySBXXUuqBszhwXjxplJWWOuZ5IG3MYep+W+T3ruf8QV3z7XhJXru99iQr2H4oP/k/bnucmkz9JAABWUDggJgAAANACAJ0BKhgAGAA+kUSdSqWjoqGoCACwEglpAAA9o6AA/vjPGsAA",
+	"validate-fail":		"UklGRsoAAABXRUJQVlA4WAoAAAAQAAAAFwAAFwAAQUxQSH0AAAABcF3bjlKFJ9MeDi1pF1qSQw/2byHJrEUDETEB8FYVVu2+t1WgBO50kKPD+WYHO/1Q2SGMCfcQWw9qJACIWaHwkB0+qnUUqNfRok3Hpm1BHcVtUKUjRwEFQHnoP8gmhcAhmCY8p5IIyE/Ciz8UgDVQgwn8v18029YU3h/eCgBWUDggJgAAANACAJ0BKhgAGAA+kUSdSqWjoqGoCACwEglpAAA9o6AA/vjPGsAA",
+	"validate-disabled":	"UklGRsoAAABXRUJQVlA4WAoAAAAQAAAAFwAAFwAAQUxQSH4AAAABcBXJthrdpWcvnFhCFyiJEw/0Txfeq1oDETEB8K8qqrvj6OpQaXjzyU6u5JOf4uzN5admwnintk2oSW9RKDpJgPMEIM4ANSZKNJjo0G5iN7ai3kSLahMFCk346DcS4lkhcPUsoDOdGNh3KkveHIA9cqMF8l9Qtvvelv4P/hVWUDggJgAAANACAJ0BKhgAGAA+kUSdSqWjoqGoCACwEglpAAA9o6AA/vjPGsAA",
+	"validate-none":		"UklGRgoBAABXRUJQVlA4WAoAAAAQAAAAFwAAFwAAQUxQSL0AAAABgFNt2/LmCW48RkC2CIgELrOKughJ6Pj3d1EdYY4AngrP8ELJQERMAP5r8i4cHI+D19vkN66mNCcXnliP7nbU6pHk6iqVOh+QZNu4IslVHgByK5K8UJJTcYXaZl3BjZgkxR1lCmtyhbTgjQgVdYWCEoih4/0Mz8pA7B1PKJ+U/TdeUNrSM7SKeKM+EKEVw8kIxK3lvRaJ8femSYFLAzDOoHe/04IZ7ShmO2oB52NrfAZ/4iboHw794DqB/woAVlA4ICYAAADQAgCdASoYABgAPpFEnUqlo6KhqAgAsBIJaQAAPaOgAP74zxrAAA==",
 }
 
 var iconNames = map[string]string{
@@ -61,6 +66,11 @@ var iconNames = map[string]string{
 	"format-italic": 		"format-text-italic",
 	"format-underline": 	"format-text-underline",
 	"format-strikethrough": "format-text-strikethrough",
+	// Validation engine
+	"validate-ok":			"emblem-checked",
+	"validate-fail":		"emblem-error",
+	"validate-disabled":	"emblem-pause",
+	"validate-none":		"emblem-question",
 }
 
 func GetIcon(name string) *gui.QIcon {
