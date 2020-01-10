@@ -294,19 +294,8 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 								// Remove from graphics scene
 								scene.RemoveItem(link.line)
 								scene.RemoveItem(link.dir)
-								// Remove in links map
-								delete(links, link.child)
-								// Remove from parent
-								for i, childLink := range links[link.parent] {
-									if childLink.child == childItem {
-										last := len(links[link.parent])-1
-										// Replace entry to delete with last
-										links[link.parent][i] = links[link.parent][last]
-										// Cut away last element
-										links[link.parent] = links[link.parent][:last]
-										break
-									}
-								}
+								// Remove from links map
+								RemoveLink(link)
 								// Assume deleting one link
 								return
 							}
@@ -343,8 +332,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 								scene.RemoveItem(l.line)
 								scene.RemoveItem(l.dir)
 								// Remove from links map
-								delete(links, l.parent)
-								delete(links, l.child)
+								RemoveLink(l)
 							}
 						}
 					}
@@ -494,6 +482,22 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 		center := l.line.Line().Center()
 		l.dir.SetPos2(center.X()-8, center.Y()-8)
 		l.dir.SetRotation((-l.line.Line().Angle()) - 90)
+	}
+}
+
+func RemoveLink(link *Link) {
+	// Remove from child
+	delete(links, link.child)
+	// Remove from parent
+	for i, childLink := range links[link.parent] {
+		if childLink.child == link.child {
+			last := len(links[link.parent])-1
+			// Replace entry to delete with last
+			links[link.parent][i] = links[link.parent][last]
+			// Cut away last element
+			links[link.parent] = links[link.parent][:last]
+			break
+		}
 	}
 }
 
