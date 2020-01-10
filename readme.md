@@ -3,8 +3,10 @@ OpenRQ is a requirement management application that (attempts to) support versio
 It runs on Linux, macOS and Windows and is written in Go with the help of Qt and qt (the Go bindings for Qt and Qt itself have the same name).
 
 # Compile and Run
-First, install [Qt](https://qt.io) and [qt](https://github.com/therecipe/qt). 
+First, install [Go](https://golang.org/), [Qt](https://qt.io) and [qt](https://github.com/therecipe/qt). 
 Any Qt version 5.12 or newer should work, just make sure to generate bindings for Qt 5.12.0. 
+If you are on Linux, install the packages through your package manager and on macOS, install the 
+packages with [Homebrew](https://brew.sh/). 
 After that, you can simply download OpenRQ with `go get` and run it with `go run`.
 
 # Repository Structure
