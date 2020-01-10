@@ -4,6 +4,7 @@ It runs on Linux, macOS and Windows and is written in Go with the help of Qt and
 
 # Compile and Run
 First, install [Qt](https://qt.io) and [qt](https://github.com/therecipe/qt). 
+Any Qt version 5.12 or newer should work, just make sure to generate bindings for Qt 5.12.0. 
 After that, you can simply download OpenRQ with `go get` and run it with `go run`.
 
 # Repository Structure
