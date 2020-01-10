@@ -98,18 +98,16 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 
 	textOptions := [3]*widgets.QToolBar{}
 	textEdits := [3]*widgets.QTextEdit{}
-	textGroups := [4]*widgets.QGroupBox{}
+	textGroups := [3]*widgets.QGroupBox{}
 
 	// Hide/show when clicking requirement/solution
 	reqRadio.ConnectReleased(func() {
 		textGroups[1].Show()
 		textGroups[2].Show()
-		textGroups[3].Hide()
 	})
 	solRadio.ConnectReleased(func() {
 		textGroups[1].Hide()
 		textGroups[2].Hide()
-		textGroups[3].Show()
 	})
 
 	// Get default values
@@ -198,17 +196,8 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 		layout.AddWidget(textGroups[i], 1, 0)
 	}
 
-	// Add image selection for solution
-	// TODO: Temporary placeholder text
-	noImagesText := widgets.NewQLabel2("No attachments", nil, core.Qt__Widget)
-	noImagesText.SetEnabled(false)
-	textGroups[3] = CreateGroupBox("Attachments", noImagesText)
-	layout.AddWidget(textGroups[3], 0, 0)
-
 	// Hide stuff
-	if itemType == TypeRequirement {
-		textGroups[3].Hide()
-	} else {
+	if itemType == TypeSolution {
 		textGroups[1].Hide()
 		textGroups[2].Hide()
 	}
