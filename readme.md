@@ -1,50 +1,34 @@
 # OpenRQ
-### Requirement management application for Windows, Linux and macOS
+OpenRQ is a requirement management application that (attempts to) support versioning, branching and hierarchies. 
+It runs on Linux, macOS and Windows and is written in Go with the help of Qt and qt (the Go bindings for Qt and Qt itself have the same name).
 
-## Rules for Comitting
-* Make sure you use the provided Visual Studio Code settings **before comitting any code**.
-* **Never** force push, your changes, and possibly others, **will be deleted**.
-* Only makes changes to the files **you have created**.
-* **Do not** push your code if it **does not compile**.
-* **Always** make sure you have pulled the latest changes **before pushing**.
-* File names should always match the name of the struct and **only one struct per file**.
-* **No third-party libraries are allowed**, with the exception of any Qt 5.12 and standard Go libraries.
+# Compile and Run
+First, install [Qt](https://qt.io) and [qt](https://github.com/therecipe/qt). 
+After that, you can simply download OpenRQ with `go get` and run it with `go run`.
 
-## Code Style
-* Structs uses pascal case (`StructName`).
-* All functions and methods use pascal case (`FunctionName`)
-* All variables use dromedary case (`variableName`).
-* File names should be the **same as the struct name**, but in **all lower case** (`structname.go`)
-* Never leave more than one lines empty.
-* `//` comment for **every method and function** (with name) as documentation.
-* Do not use lines longer than 120 columns.
-* Always use LF (\n) line endings.
+# Repository Structure
+The main source code is located in `/` as Go files. Here is what all the files contain:
+| File | Content |
+| ---- | ------- |
+| datacontext.go | Connection between Go code and the underlying project database |
+| edititem.go | Dialogs and handling of editing items |
+| icons.go | Mapping to system icons and custom bitmap icons |
+| main.go | Entry point |
+| mainview.go | The main view for drawing the tree |
+| mainwindow.go | Everything related to the window, except for the main view |
+| project.go | Handling of loading and parsing projects |
+| requirement.go | Requirement item |
+| settings.go | Application settings |
+| solution.go | Solution item |
+| tabledata.go | All tables used in the underlying project database |
+| updater.go | Update checker, and previously auto updater |
+| validation.go | Validation engine |
 
-## Directories
-* `.vscode`: VS Code settings, **do not modify**.
-* `/`: Go source files.
-
-## Branches
-There are two main branches
-* `golang`: The main development branch for most developers.
-* `stable`: Where all changes gets merged to, **do not modify or push to**.
-
-## How to Download
-Do not use `git clone ...`, use `go get -v github.com/kraxarn/OpenRQ` instead.
-
-Then, run the application using `go run github.com/kraxarn/OpenRQ`.
-
-The downloaded files are (probably) in `~/go/src/github.com/kraxarn/OpenRQ`.
-
-## How to Push
-* First, pull the latest changes:
-* `git pull`
-* Add your modified files:
-* `git add <file>`
-* Add your comment of what you have done:
-* `git commit -m "<comment>"`
-* Make sure, again, that you have the latest version:
-* `git pull`
-* Push your changes, if you get a merge conflict, you broke the rules:
-* `git push`
-* Make sure your changes were pushed to the **golang** branch.
+The other files and folders are as follows:
+| File/Folder | Content |
+| ----------- | ------- |
+| .vscode | Specific settings for Visual Studio Code, the environment used in development |
+| .gitignore | Git ignore file for project and temporary files |
+| license | GPL 3.0 license |
+| readme.md | This file |
+| third_party.md | Third-party licenses and links to source code |
