@@ -37,11 +37,6 @@ Then, run the application using `go run github.com/kraxarn/OpenRQ`.
 
 The downloaded files are (probably) in `~/go/src/github.com/kraxarn/OpenRQ`.
 
-If you want to run/build with proper version information, run this command in the directory of the source:
-```
-go run -ldflags "-X main.versionTagName=`git describe --abbrev=0 --tags` -X main.versionCommitHash=`git rev-list origin/golang -1`" .
-```
-
 ## How to Push
 * First, pull the latest changes:
 * `git pull`
