@@ -187,10 +187,7 @@ func AddMenuBar(window *widgets.QMainWindow) {
 	aboutMenu.AddAction2(
 		GetIcon("about-app"), "About OpenRQ").ConnectTriggered(func(checked bool) {
 			// Add app version information
-			aboutMessage := "This version was compiled without version information."
-			if len(versionTagName) > 0 && len(versionCommitHash) > 0 {
-				aboutMessage = fmt.Sprintf("Version\t%v\nCommit\t%v", versionTagName[1:], versionCommitHash)
-			}
+			aboutMessage := fmt.Sprintf("Version %v", versionTagName[1:])
 			// Add useless version and memory information
 			var mem runtime.MemStats
 			runtime.ReadMemStats(&mem)
@@ -210,16 +207,15 @@ func AddMenuBar(window *widgets.QMainWindow) {
 	aboutMenu.AddSeparator()
 	aboutMenu.AddAction2(
 		GetIcon("about-update"), "Check for updates").ConnectTriggered(func(checked bool) {
-			// Check if version was compiled with version information
-			if len(versionCommitHash) <= 0 {
-				widgets.QMessageBox_About(window, "Updater",
-					"This version was compiled without version information,\nupdater is not available")
-				return
-			}
 			// Actually check for updates
-			if IsLatestVersion() {
+			if isLatest, err := IsLatestVersion(); isLatest {
 				widgets.QMessageBox_Information(
 					window, "Updater", "You are running the latest version",
+					widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
+				return
+			} else if err != nil {
+				widgets.QMessageBox_Warning(
+					window, "Updater", fmt.Sprintf("Failed to check for updates: %v", err),
 					widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
 				return
 			}
@@ -228,15 +224,8 @@ func AddMenuBar(window *widgets.QMainWindow) {
 				window, "Updater",
 				"New update found, do you want to update now?",
 				widgets.QMessageBox__Yes|widgets.QMessageBox__No, widgets.QMessageBox__Yes) == widgets.QMessageBox__Yes {
-				if err := Update(); err != nil {
-					widgets.QMessageBox_Warning(
-						window, "Updater", fmt.Sprintf("Failed to update: %v", err),
-						widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
-				} else {
-					widgets.QMessageBox_Information(
-						window, "Updater", "Update successful, restart application to apply changes",
-						widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
-				}
+					gui.QDesktopServices_OpenUrl(
+						core.NewQUrl3("https://github.com/kraxarn/OpenRQ/releases", 0))
 			}
 		})
 	aboutMenu.AddAction2(GetIcon("about-gc"), "Run GC").ConnectTriggered(func(checked bool) {
