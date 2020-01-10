@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
@@ -216,9 +214,7 @@ func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widge
 	}
 
 	// Dock for button connections
-	dock := widgets.NewQDockWidget(fmt.Sprintf("Edit Item (%v%v)",
-		strings.ToLower(GetItemTableName(itemType)[0:1]), item.ID()), nil, 0)
-
+	dock := widgets.NewQDockWidget(fmt.Sprintf("Edit Item (%v)", item.ToString()), nil, 0)
 	// Button container
 	buttons := widgets.NewQHBoxLayout()
 	// Save button
