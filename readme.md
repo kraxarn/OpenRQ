@@ -8,6 +8,7 @@ After that, you can simply download OpenRQ with `go get` and run it with `go run
 
 # Repository Structure
 The main source code is located in `/` as Go files. Here is what all the files contain:
+
 | File | Content |
 | ---- | ------- |
 | datacontext.go | Connection between Go code and the underlying project database |
@@ -25,6 +26,7 @@ The main source code is located in `/` as Go files. Here is what all the files c
 | validation.go | Validation engine |
 
 The other files and folders are as follows:
+
 | File/Folder | Content |
 | ----------- | ------- |
 | .vscode | Specific settings for Visual Studio Code, the environment used in development |
