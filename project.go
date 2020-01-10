@@ -187,8 +187,9 @@ func NewJSONProject(path string) (*Project, error) {
 	if !os.IsNotExist(err) {
 		return nil, fmt.Errorf("file with name \"%v\" already exists", newPath)
 	}
-	// Create new data context to transfer to
-	db := NewDataContext(newPath)
+	// Create new empty project
+	NewProject(newPath)
+	db := currentProject.Data()
 	// Set project name
 	db.SetProjectName(projectName.(string))
 	// Parse each root
@@ -201,5 +202,5 @@ func NewJSONProject(path string) (*Project, error) {
 	if err := db.Close(); err != nil {
 		fmt.Println("failed to close temporary database from json:", err)
 	}
-	return NewProject(newPath), nil
+	return currentProject, nil
 }
