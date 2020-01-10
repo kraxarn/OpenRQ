@@ -26,17 +26,6 @@ func IsLatestVersion() bool {
 func Update() error {
 	// Download to buffer
 	resp, err := http.Get(fmt.Sprintf("https://kraxarn.com/openrq/updater/%v", runtime.GOOS))
-	if err != nil {
-		return err
 	}
 	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
-	// Get permission for current file
-	fileInfo, _ := os.Stat(os.Args[0])
-	// Try to remove running file first
-	if err := os.Remove(os.Args[0]); err != nil {
-		return err
-	}
-	// Write to current executable with same permissions
-	return ioutil.WriteFile(os.Args[0], body, fileInfo.Mode())
 }
