@@ -25,6 +25,7 @@ The main source code is located in `/` as Go files. Here is what all the files c
 | settings.go | Application settings |
 | solution.go | Solution item |
 | tabledata.go | All tables used in the underlying project database |
+| tree_test.go | Unit testing |
 | updater.go | Update checker, and previously auto updater |
 | validation.go | Validation engine |
 
@@ -32,7 +33,7 @@ The other files and folders are as follows:
 
 | File/Folder | Content |
 | ----------- | ------- |
-| .vscode | Specific settings for Visual Studio Code, the environment used in development |
+| .vscode/ | Specific settings for Visual Studio Code, the environment used in development |
 | .gitignore | Git ignore file for project and temporary files |
 | license | GPL 3.0 license |
 | readme.md | This file |
