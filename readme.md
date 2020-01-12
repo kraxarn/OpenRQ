@@ -25,9 +25,10 @@ The main source code is located in `/` as Go files. Here is what all the files c
 | settings.go | Application settings |
 | solution.go | Solution item |
 | tabledata.go | All tables used in the underlying project database |
-| tree_test.go | Unit testing |
+| tree_test.go | Unit testing for tree creation and editing |
 | updater.go | Update checker, and previously auto updater |
 | validation.go | Validation engine |
+| validation_test.go | Unit testing for validation engine |
 
 The other files and folders are as follows:
 
