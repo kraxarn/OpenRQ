@@ -3,7 +3,7 @@ package main
 import "github.com/therecipe/qt/core"
 
 // Variables set from linker flags
-var versionTagName, versionCommitHash string
+const versionTagName = "v0.5"
 
 func main() {
 	// Setup some application variables

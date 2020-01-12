@@ -136,7 +136,7 @@ func SnapToGrid(pos *core.QPoint) *core.QPoint {
 		float64((scenePos.X()>>gridSize<<gridSize)-64), float64((scenePos.Y()>>gridSize<<gridSize)-32)))
 }
 
-func CreateEditWidgetFromPos(parent widgets.QWidget_ITF, pos core.QPoint_ITF, scene *widgets.QGraphicsScene) (*widgets.QDockWidget, bool) {
+func CreateEditWidgetFromPos(pos core.QPoint_ITF, scene *widgets.QGraphicsScene) (*widgets.QDockWidget, bool) {
 	// Get UID
 	group := view.ItemAt(pos).Group()
 	item := GetGroupItem(group)
@@ -146,7 +146,7 @@ func CreateEditWidgetFromPos(parent widgets.QWidget_ITF, pos core.QPoint_ITF, sc
 		return nil, false
 	}
 	// Open item
-	editWindow := CreateEditWidget(parent, item, group, scene)
+	editWindow := CreateEditWidget(item, group, scene)
 	editWindow.ConnectCloseEvent(func(event *gui.QCloseEvent) {
 		CloseItem(item)
 	})
@@ -220,7 +220,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 		// Add item to view
 		scene.AddItem(NewGraphicsItem(req.Description(), gridPos.X(), gridPos.Y(), itemSize*2, itemSize, req))
 		if len(openItems) <= 0 {
-			openItems[req], _ = CreateEditWidgetFromPos(window, event.Pos(), scene)
+			openItems[req], _ = CreateEditWidgetFromPos(event.Pos(), scene)
 			window.AddDockWidget(core.Qt__RightDockWidgetArea, openItems[req])
 		}
 	})
@@ -294,19 +294,8 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 								// Remove from graphics scene
 								scene.RemoveItem(link.line)
 								scene.RemoveItem(link.dir)
-								// Remove in links map
-								delete(links, link.child)
-								// Remove from parent
-								for i, childLink := range links[link.parent] {
-									if childLink.child == childItem {
-										last := len(links[link.parent])-1
-										// Replace entry to delete with last
-										links[link.parent][i] = links[link.parent][last]
-										// Cut away last element
-										links[link.parent] = links[link.parent][:last]
-										break
-									}
-								}
+								// Remove from links map
+								RemoveLink(link)
 								// Assume deleting one link
 								return
 							}
@@ -319,7 +308,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 			// Edit option
 			menu.AddAction2(GetIcon("menu-edit"), "Edit").
 				ConnectTriggered(func(checked bool) {
-					if editWidget, ok := CreateEditWidgetFromPos(window, pos, scene); ok {
+					if editWidget, ok := CreateEditWidgetFromPos(pos, scene); ok {
 						window.AddDockWidget(core.Qt__RightDockWidgetArea, editWidget)
 					}
 				})
@@ -343,8 +332,7 @@ func CreateView(window *widgets.QMainWindow, linkBtn *widgets.QToolButton) *widg
 								scene.RemoveItem(l.line)
 								scene.RemoveItem(l.dir)
 								// Remove from links map
-								delete(links, l.parent)
-								delete(links, l.child)
+								RemoveLink(l)
 							}
 						}
 					}
@@ -494,6 +482,22 @@ func UpdateLinkPos(item *widgets.QGraphicsItemGroup, x, y float64) {
 		center := l.line.Line().Center()
 		l.dir.SetPos2(center.X()-8, center.Y()-8)
 		l.dir.SetRotation((-l.line.Line().Angle()) - 90)
+	}
+}
+
+func RemoveLink(link *Link) {
+	// Remove from child
+	delete(links, link.child)
+	// Remove from parent
+	for i, childLink := range links[link.parent] {
+		if childLink.child == link.child {
+			last := len(links[link.parent])-1
+			// Replace entry to delete with last
+			links[link.parent][i] = links[link.parent][last]
+			// Cut away last element
+			links[link.parent] = links[link.parent][:last]
+			break
+		}
 	}
 }
 

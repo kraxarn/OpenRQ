@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
@@ -68,7 +66,7 @@ func MergeFormat(textEdit *widgets.QTextEdit, format *gui.QTextCharFormat) {
 }
 
 // CreateEditWidget creates the main window for editing an item
-func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGraphicsItemGroup, scene *widgets.QGraphicsScene) *widgets.QDockWidget {
+func CreateEditWidget(item Item, group *widgets.QGraphicsItemGroup, scene *widgets.QGraphicsScene) *widgets.QDockWidget {
 	// Main vertical layout
 	layout := widgets.NewQVBoxLayout()
 	// Requirement/solution selection
@@ -100,18 +98,16 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 
 	textOptions := [3]*widgets.QToolBar{}
 	textEdits := [3]*widgets.QTextEdit{}
-	textGroups := [4]*widgets.QGroupBox{}
+	textGroups := [3]*widgets.QGroupBox{}
 
 	// Hide/show when clicking requirement/solution
 	reqRadio.ConnectReleased(func() {
 		textGroups[1].Show()
 		textGroups[2].Show()
-		textGroups[3].Hide()
 	})
 	solRadio.ConnectReleased(func() {
 		textGroups[1].Hide()
 		textGroups[2].Hide()
-		textGroups[3].Show()
 	})
 
 	// Get default values
@@ -200,25 +196,14 @@ func CreateEditWidget(parent widgets.QWidget_ITF, item Item, group *widgets.QGra
 		layout.AddWidget(textGroups[i], 1, 0)
 	}
 
-	// Add image selection for solution
-	// TODO: Temporary placeholder text
-	noImagesText := widgets.NewQLabel2("No attachments", nil, core.Qt__Widget)
-	noImagesText.SetEnabled(false)
-	textGroups[3] = CreateGroupBox("Attachments", noImagesText)
-	layout.AddWidget(textGroups[3], 0, 0)
-
 	// Hide stuff
-	if itemType == TypeRequirement {
-		textGroups[3].Hide()
-	} else {
+	if itemType == TypeSolution {
 		textGroups[1].Hide()
 		textGroups[2].Hide()
 	}
 
 	// Dock for button connections
-	dock := widgets.NewQDockWidget(fmt.Sprintf("Edit Item (%v%v)",
-		strings.ToLower(GetItemTableName(itemType)[0:1]), item.ID()), nil, 0)
-
+	dock := widgets.NewQDockWidget(fmt.Sprintf("Edit Item (%v)", item.ToString()), nil, 0)
 	// Button container
 	buttons := widgets.NewQHBoxLayout()
 	// Save button
