@@ -63,6 +63,7 @@ func ValidateRoots() (items []Item) {
 		if ContainsItem(added, groupItem) {
 			continue
 		}
+		added[groupItem] = 0
 		// Get children count and if it has a parent (not a root)
 		children := 0
 		hasParent := false
@@ -81,7 +82,6 @@ func ValidateRoots() (items []Item) {
 		// Otherwise, add if it had more than one child
 		if children > 1 {
 			items = append(items, groupItem)
-			added[groupItem] = 0
 		}
 	}
 	return items
