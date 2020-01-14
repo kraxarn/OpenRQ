@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -110,10 +111,10 @@ func AddMenuBar(window *widgets.QMainWindow) {
 				"No project is current loaded to save", widgets.QMessageBox__Ok, widgets.QMessageBox__NoButton)
 			return
 		}
-		// TODO: Set path of current project as default
 		fileName := widgets.QFileDialog_GetSaveFileName(window, "Save Project",
-			core.QStandardPaths_Locate(core.QStandardPaths__DocumentsLocation, "", 1),
-			"OpenRQ Project(*.orq);;OpenRQ Compressed Project(*.orqz);;JavaScript Object Notation(*.json)", "", 0)
+			filepath.Dir(currentProject.path),
+			"OpenRQ Project(*.orq);;OpenRQ Compressed Project(*.orqz);;JavaScript Object Notation(*.json)",
+			"", 0)
 		if len(fileName) > 0 {
 			if strings.HasSuffix(fileName, ".json") {
 				if data, err := json.MarshalIndent(map[string]interface{}{
