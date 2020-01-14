@@ -1,50 +1,41 @@
 # OpenRQ
-### Requirement management application for Windows, Linux and macOS
+OpenRQ is a requirement management application that (attempts to) support versioning, branching and hierarchies. 
+It runs on Linux, macOS and Windows and is written in Go with the help of Qt and qt (the Go bindings for Qt and Qt itself have the same name).
 
-## Rules for Comitting
-* Import the C++ and QML code styles **before comitting any code**.
-* **Never** force push, your changes, and possibly others, **will be deleted**.
-* Only makes changes to the files **you have created**.
-* **Do not** push your code if it **does not compile**.
-* **Always** make sure you have pulled the latest changes **before pushing**.
-* File names should always match the name of the class and **only one class per file**.
-* **No third-party libraries are allowed**, with the exception of any Qt 5.12 libraries.
-* Always make sure the files are in the **correct folders**.
-* **Always** use the Qt libraries **instead of** the C++ standard library when possible.
+# Compile and Run
+First, install [Go](https://golang.org/), [Qt](https://qt.io) and [qt](https://github.com/therecipe/qt). 
+Any Qt version 5.12 or newer should work, just make sure to generate bindings for Qt 5.12.0. 
+If you are on Linux, install the packages through your package manager and on macOS, install the 
+packages with [Homebrew](https://brew.sh/). 
+After that, you can simply download OpenRQ with `go get` and run it with `go run`.
 
-## Code Style
-* Classes uses pascal case (`ClassName`).
-* **All** variables and methods use dromedary case (`variableName`).
-* File names should be the **same as the class name**, but in **all lower case** (`classname.cpp`)
-* Brackets are **always** on a new line in C++, but **never** on a new line in QML.
-* C++ source files use the .cpp extension and C++ headers use the .h extension.
-* Always use `#pragma once` as include guard.
-* Keep everything under namespace `orq`.
-* Only use `auto` when the type is already specified elsewhere in the statement.
-* No `using namespace` allowed.
-* Use matching aliases for your QML resources.
-* Never leave more than one lines empty.
-* `///` comment for **every method** as documentation in the header file.
+# Repository Structure
+The main source code is located in `/` as Go files. Here is what all the files contain:
 
-## Directories
-* `codeStyle`: Coding styles for C++ and QML, **do not modify**.
-* `qml`: QtQuick layout files, .qml files.
-* `src`: C++ source and header files, .cpp/.h files.
+| File | Content |
+| ---- | ------- |
+| datacontext.go | Connection between Go code and the underlying project database |
+| edititem.go | Dialogs and handling of editing items |
+| icons.go | Mapping to system icons and custom bitmap icons |
+| main.go | Entry point |
+| mainview.go | The main view for drawing the tree |
+| mainwindow.go | Everything related to the window, except for the main view |
+| project.go | Handling of loading and parsing projects |
+| requirement.go | Requirement item |
+| settings.go | Application settings |
+| solution.go | Solution item |
+| tabledata.go | All tables used in the underlying project database |
+| tree_test.go | Unit testing for tree creation and editing |
+| updater.go | Update checker, and previously auto updater |
+| validation.go | Validation engine |
+| validation_test.go | Unit testing for validation engine |
 
-## Branches
-There are two main branches
-* `master`: The main development branch for most developers.
-* `stable`: Where all changes gets merged to, **do not modify or push to**.
+The other files and folders are as follows:
 
-## How to Push
-* First, pull the latest changes:
-* `git pull`
-* Add your modified files:
-* `git add <file>`
-* Add your comment of what you have done:
-* `git commit -m "<comment>"`
-* Make sure, again, that you have the latest version:
-* `git pull`
-* Push your changes, if you get a merge conflict, you broke the rules:
-* `git push`
-* Make sure your changes were pushed to the **master** branch.
+| File/Folder | Content |
+| ----------- | ------- |
+| .vscode/ | Specific settings for Visual Studio Code, the environment used in development |
+| .gitignore | Git ignore file for project and temporary files |
+| license | GPL 3.0 license |
+| readme.md | This file |
+| third_party.md | Third-party licenses and links to source code |
